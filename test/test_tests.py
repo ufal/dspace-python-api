@@ -31,7 +31,7 @@ class DummyTests(unittest.TestCase):
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
 
-    def test_that_fails(self):
+    def xtest_that_fails(self):
         localVar = 3
         self.assertTrue(localVar == 2)
 
