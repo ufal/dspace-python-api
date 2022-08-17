@@ -1,13 +1,25 @@
 import unittest
-from logs import log
+from support.logs import log
 import urllib.request
 
 
-class TestStringMethods(unittest.TestCase):
+class DummyTests(unittest.TestCase):
 
-    def test_url(self):
-        page = urllib.request.urlopen('http://services.runescape.com/m=hiscore/ranking?table=0&category_type=0&time_filter=0&date=1519066080774&user=zezima')
-        print(page.read())
+    def test_seeFE(self):
+        page = urllib.request.urlopen('http://dev-5.pc/')
+        # print(page.read())
+
+
+    def test_seeBE(self):
+        page = urllib.request.urlopen('http://dev-5.pc/server')
+        # print(page.read())
+
+
+    def test_seeOAI(self):
+        # page = urllib.request.urlopen('http://dev-5.pc/server/oai/request?verb=ListRecords&metadataPrefix=oai_dc')
+        page = urllib.request.urlopen('http://localhost:8080/server/oai/request?verb=ListRecords&metadataPrefix=cmdi')
+        log(page.read())
+
 
 
     def test_upper(self):
@@ -19,7 +31,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
 
-    def x_test_that_fails(self):
+    def test_that_fails(self):
         localVar = 3
         self.assertTrue(localVar == 2)
 

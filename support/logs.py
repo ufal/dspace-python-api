@@ -3,12 +3,15 @@ import atexit
 
 all_logs = []
 write_to_console = False
-
+output_file_name = "output.txt"
 
 def set_write_to_console():
     global write_to_console
     write_to_console = True
 
+def set_output_file(name):
+    global output_file_name
+    output_file_name = name
 
 class Severity(Enum):
     TRACE = 1
@@ -35,10 +38,14 @@ def log_object(log_message: LogMessage):
 
 
 def exit_handler():
-    print("logs:")
+    global output_file_name
     global all_logs
-    for one_log in all_logs:
-        print(one_log.message)
+    if output_file_name is not None:
+        of = open(output_file_name, "w+")
+        if all_logs:
+            print("logs", file=of)
+        for one_log in all_logs:
+            print(one_log.message, file=of)
 
 
 atexit.register(exit_handler)
