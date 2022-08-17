@@ -1,0 +1,25 @@
+name: Test dspace on dev-5
+
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * *'
+
+
+jobs:
+  test:
+    runs-on: dspace-bbt
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: test
+        run: python -m unittest
+
+      # multi commands for future reference
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
