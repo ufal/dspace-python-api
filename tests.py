@@ -1,8 +1,14 @@
 import unittest
 from logs import log
+import urllib.request
 
 
 class TestStringMethods(unittest.TestCase):
+
+    def test_url(self):
+        page = urllib.request.urlopen('http://services.runescape.com/m=hiscore/ranking?table=0&category_type=0&time_filter=0&date=1519066080774&user=zezima')
+        print(page.read())
+
 
     def test_upper(self):
         log("starting upper test")
@@ -14,7 +20,8 @@ class TestStringMethods(unittest.TestCase):
         self.assertFalse('Foo'.isupper())
 
     def x_test_that_fails(self):
-        self.assertTrue(False)
+        localVar = 3
+        self.assertTrue(localVar == 2)
 
     def test_split(self):
         log("starting split test")
