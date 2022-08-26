@@ -1,0 +1,26 @@
+{
+    "name": "BB-TEST-ITM",
+
+    "metadata": {
+        "dc.contributor.author": [
+            {
+                "value": "John Doe",
+                "language": "en",
+                "authority": null,
+                "confidence": -1
+            }
+        ],
+        "dc.title": [
+            {
+                "value": "BB-TEST-ITM",
+                "language": "en",
+                "authority": null,
+                "confidence": -1
+            }
+        ]
+    },
+    "inArchive": true,
+    "discoverable": true,
+    "withdrawn": true,
+    "type": "item"
+}

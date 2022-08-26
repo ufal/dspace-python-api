@@ -1,0 +1,25 @@
+<metadata><olac:olac xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:olac="http://www.language-archives.org/OLAC/1.1/" xsi:schemaLocation="http://www.language-archives.org/OLAC/1.1/ http://www.language-archives.org/OLAC/1.1/olac.xsd">
+<dc:title>Prague Arabic Dependency Treebank 1.0</dc:title>
+<dcterms:available>2009-11-02T10:34:20Z</dcterms:available>
+<dcterms:bibliographicCitation>http://hdl.handle.net/11858/00-097C-0000-0001-4872-3</dcterms:bibliographicCitation>
+<dc:creator>Hajič, Jan</dc:creator>
+<dc:creator>Smrž, Otakar</dc:creator>
+<dc:creator>Zemánek, Petr</dc:creator>
+<dc:creator>Pajas, Petr</dc:creator>
+<dc:creator>Šnaidauf, Jan</dc:creator>
+<dc:creator>Beška, Emanuel</dc:creator>
+<dc:creator>Kracmar, Jakub</dc:creator>
+<dc:creator>Hassanová, Kamila</dc:creator>
+<dc:date xsi:type="dcterms:W3CDTF">2011-06-27T11:59:09Z</dc:date>
+<dc:description>The PADT project might be summarized as an open-ended activity of the Center for Computational Linguistics, the Institute of Formal and Applied Linguistics, and the Institute of Comparative Linguistics, Charles University in Prague, resting in multi-level annotation of Arabic language resources in the light of the theory of Functional Generative Description (Sgall et al., 1986; Hajičová and Sgall, 2003).</dc:description>
+<dc:identifier xsi:type="dcterms:URI">http://hdl.handle.net/11858/00-097C-0000-0001-4872-3</dc:identifier>
+<dc:publisher>Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)</dc:publisher>
+<dc:rights>Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)</dc:rights>
+<dc:rights>http://creativecommons.org/licenses/by-nc-sa/3.0/</dc:rights>
+<dc:subject>corpus</dc:subject>
+<dc:subject>Arabic</dc:subject>
+<dc:type>corpus</dc:type>
+<dc:type xsi:type="dcterms:DCMIType">Text</dc:type>
+<dc:type olac:code="primary_text" xsi:type="olac:linguistic-type" />
+<dc:language xsi:type="olac:language" olac:code="ara" />
+</olac:olac></metadata>

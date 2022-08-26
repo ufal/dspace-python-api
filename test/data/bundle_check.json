@@ -1,0 +1,27 @@
+{
+  "name": "bundle-check",
+  "metadata" : {
+    "dc.title": [
+      {
+        "value": "bundle-check",
+        "language": null,
+        "authority": null,
+        "confidence": -1,
+        "place": 0
+      }
+    ],
+    "local.hasCMDI": [
+      {
+        "value": "true",
+        "language": null,
+        "authority": null,
+        "confidence": -1,
+        "place": 0
+      }
+    ]
+  },
+  "inArchive": true,
+  "discoverable": true,
+  "withdrawn": false,
+  "type": "item"
+}

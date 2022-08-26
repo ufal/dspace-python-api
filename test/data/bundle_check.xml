@@ -1,0 +1,82 @@
+<metadata>
+   <cmd:CMD xmlns:lindat="http://lindat.mff.cuni.cz/ns/experimental/cmdi/thisistest"
+            xmlns:cmd="http://www.clarin.eu/cmd/" CMDVersion="1.1"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://lindat.mff.cuni.cz/ns/experimental/cmdi/thisistest ">
+      <cmd:Header>
+         <cmd:MdCreationDate>2022-08-17 14:06:28.777+testedtested</cmd:MdCreationDate>
+         <cmd:MdSelfLink>https://localhost:4000/handle/123456789/4@format=cmdi+thisistest</cmd:MdSelfLink>
+         <cmd:MdProfile>clarin.eu:cr1:p_1349361150622</cmd:MdProfile>
+         <cmd:MdCollectionDisplayName/>
+      </cmd:Header>
+      <cmd:Resources>
+         <cmd:ResourceProxyList>
+            <cmd:ResourceProxy id="lp_test">
+               <cmd:ResourceType>TTT_EEEE_SSSS_TTT</cmd:ResourceType>
+               <cmd:ResourceRef>https://localhost:4000/handle/123456789/4/testetestet</cmd:ResourceRef>
+            </cmd:ResourceProxy>
+            <cmd:ResourceProxy id="uri_1">
+               <cmd:ResourceType mimetype="text/html">Resource</cmd:ResourceType>
+               <cmd:ResourceRef/>
+            </cmd:ResourceProxy>
+            <cmd:ResourceProxy id="_">
+               <cmd:ResourceType mimetype="image/jpeg">Resource</cmd:ResourceType>
+               <cmd:ResourceRef lindat:md5_checksum="0caa26bd236fcec36f67cb71127f520a">
+                  http://localhost:4000/bitstream/handle/123456789/4/upload_dspace_sample.jpg?sequence=1
+               </cmd:ResourceRef>
+            </cmd:ResourceProxy>
+            <cmd:ResourceProxy id="_">
+               <cmd:ResourceType mimetype="text/xml">Resource</cmd:ResourceType>
+               <cmd:ResourceRef lindat:md5_checksum="d311946e56f23ca026081494dcc9e0eb">
+                  http://localhost:4000/bitstream/handle/123456789/4/modded_cmdi.xml?sequence=2
+               </cmd:ResourceRef>
+            </cmd:ResourceProxy>
+         </cmd:ResourceProxyList>
+         <cmd:JournalFileProxyList/>
+         <cmd:ResourceRelationList/>
+      </cmd:Resources>
+      <cmd:Components>
+         <cmd:data>
+            <cmd:OLAC-DcmiTerms>
+               <cmd:abstract/>
+               <cmd:alternative/>
+               <cmd:available>2022-08-17T11:39:33Z</cmd:available>
+               <cmd:bibliographicCitation/>
+               <cmd:contributor/>
+               <cmd:created/>
+               <cmd:creator/>
+               <cmd:date>2022-08-17T11:39:33Z</cmd:date>
+               <cmd:dateCopyrighted/>
+               <cmd:dateSubmitted/>
+               <cmd:description/>
+               <cmd:extent/>
+               <cmd:format/>
+               <cmd:hasPart/>
+               <cmd:hasVersion/>
+               <cmd:identifier>http://localhost:4000/handle/123456789/4</cmd:identifier>
+               <cmd:isFormatOf/>
+               <cmd:isPartOf/>
+               <cmd:isReferencedBy/>
+               <cmd:isReplacedBy/>
+               <cmd:issued>2022</cmd:issued>
+               <cmd:isVersionOf/>
+               <cmd:language olac-language=""/>
+               <cmd:medium/>
+               <cmd:publisher/>
+               <cmd:relation>
+                  info:eu-repo/grantAgreement/NIH/OFFICE+OF+THE+DIRECTOR%2C+NATIONAL+INSTITUTES+OF+HEALTH/1UG3OD023342-01
+               </cmd:relation>
+               <cmd:replaces/>
+               <cmd:requires/>
+               <cmd:rights/>
+               <cmd:source/>
+               <cmd:spatial/>
+               <cmd:subject/>
+               <cmd:tableOfContents/>
+               <cmd:temporal/>
+               <cmd:title>hidden</cmd:title>
+               <cmd:type/>
+            </cmd:OLAC-DcmiTerms>
+         </cmd:data>
+      </cmd:Components>
+   </cmd:CMD></metadata>

@@ -1,0 +1,44 @@
+<metadata><odc:oai_datacite xmlns="http://datacite.org/schema/kernel-3" xmlns:odc="http://schema.datacite.org/oai/oai-1.1/">
+<odc:schemaVersion>3.1</odc:schemaVersion>
+<odc:datacentreSymbol />
+<odc:payload>
+<resource>
+<identifier identifierType="Handle">11858/00-097C-0000-0001-CC1E-B</identifier>
+<creators>
+<creator>
+<creatorName>Bojar, Ondřej</creatorName>
+</creator>
+<creator>
+<creatorName>Straňák, Pavel</creatorName>
+</creator>
+<creator>
+<creatorName>Zeman, Daniel</creatorName>
+</creator>
+</creators>
+<titles>
+<title>Hindi Web Texts</title>
+</titles>
+<publisher>Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)</publisher>
+<publicationYear>2011</publicationYear>
+<contributors>
+<contributor contributorType="Funder">
+<contributorName>European Commission</contributorName>
+<nameIdentifier nameIdentifierScheme="info">info:eu-repo/grantAgreement/EC/FP7/231720</nameIdentifier>
+</contributor>
+</contributors>
+<dates>
+<date dateType="Issued">2011-11-23</date>
+<date dateType="Accepted">2011-11-23T15:47:18Z</date>
+<date dateType="Available">2011-11-23T15:47:18Z</date>
+</dates>
+<resourceType resourceTypeGeneral="Dataset">corpus</resourceType>
+<rightsList>
+<rights rightsURI="info:eu-repo/semantics/openAccess" />
+<rights rightsURI="http://creativecommons.org/licenses/by-nc/3.0/" />
+</rightsList>
+<descriptions>
+<description descriptionType="Abstract">A Hindi corpus of texts downloaded mostly from news sites. Contains both the original raw texts and an extensively cleaned-up and tokenized version suitable for language modeling. 18M sentences, 308M tokens</description>
+</descriptions>
+</resource>
+</odc:payload>
+</odc:oai_datacite></metadata>

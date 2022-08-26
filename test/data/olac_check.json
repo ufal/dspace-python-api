@@ -1,0 +1,200 @@
+{
+    "name": "Prague Arabic Dependency Treebank 1.0",
+    "metadata": {
+        "dc.contributor.author": [
+            {
+                "value": "Haji\u010d, Jan",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Smr\u017e, Otakar",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Zem\u00e1nek, Petr",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Pajas, Petr",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "\u0160naidauf, Jan",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Be\u0161ka, Emanuel",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Kracmar, Jakub",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Hassanov\u00e1, Kamila",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.date.accessioned": [
+            {
+                "value": "2011-06-27T11:59:09Z",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.date.available": [
+            {
+                "value": "2009-11-02T10:34:20Z",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.date.issued": [
+            {
+                "value": "2009-11-02T10:34:20Z",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.identifier.uri": [
+            {
+                "value": "http://hdl.handle.net/11858/00-097C-0000-0001-4872-3",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.description": [
+            {
+                "value": "The PADT project might be summarized as an open-ended activity of the Center for Computational Linguistics, the Institute of Formal and Applied Linguistics, and the Institute of Comparative Linguistics, Charles University in Prague, resting in multi-level annotation of Arabic language resources in the light of the theory of Functional Generative Description (Sgall et al., 1986; Haji\u010dov\u00e1 and Sgall, 2003).",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.language.iso": [
+            {
+                "value": "ara",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.publisher": [
+            {
+                "value": "Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.rights": [
+            {
+                "value": "Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.rights.uri": [
+            {
+                "value": "http://creativecommons.org/licenses/by-nc-sa/3.0/",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.source.uri": [
+            {
+                "value": "http://ufal.mff.cuni.cz/padt",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.subject": [
+            {
+                "value": "corpus",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            },
+            {
+                "value": "Arabic",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.title": [
+            {
+                "value": "Prague Arabic Dependency Treebank 1.0",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.title.alternative": [
+            {
+                "value": "Pra\u017esk\u00fd arabsk\u00fd z\u00e1vislostn\u00ed korpus 1.0",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ],
+        "dc.type": [
+            {
+                "value": "corpus",
+                "language": null,
+                "authority": null,
+                "confidence": -1,
+                "place": 0
+            }
+        ]
+    },
+    "inArchive": true,
+    "discoverable": true,
+    "withdrawn": false,
+    "type": "item"
+}

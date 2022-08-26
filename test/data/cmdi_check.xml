@@ -1,0 +1,42 @@
+<metadata><cmd:CMD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ms="http://www.clarin.eu/cmd/" xmlns:olac="http://www.clarin.eu/cmd/" xmlns:lindat="http://lindat.mff.cuni.cz/ns/experimental/cmdi" xmlns:cmd="http://www.clarin.eu/cmd/" CMDVersion="1.1" xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1349361150622/xsd">
+    <cmd:Header>
+        <cmd:MdCreationDate>2021-06-29</cmd:MdCreationDate>
+        <cmd:MdSelfLink>https://hdl.handle.net/11858/00-097C-0000-0001-48F3-0@format=cmdi</cmd:MdSelfLink>
+        <cmd:MdProfile>clarin.eu:cr1:p_1349361150622</cmd:MdProfile>
+        <cmd:MdCollectionDisplayName/>
+    </cmd:Header>
+    <cmd:Resources>
+        <cmd:ResourceProxyList>
+            <cmd:ResourceProxy id="lp_">
+                <cmd:ResourceType>LandingPage</cmd:ResourceType>
+                <cmd:ResourceRef>https://hdl.handle.net/11858/00-097C-0000-0001-48F3-0</cmd:ResourceRef>
+            </cmd:ResourceProxy>
+            <cmd:ResourceProxy id="uri_1">
+                <cmd:ResourceType mimetype="text/html">Resource</cmd:ResourceType>
+                <cmd:ResourceRef>http://xsh.sourceforge.net</cmd:ResourceRef>
+            </cmd:ResourceProxy>
+        </cmd:ResourceProxyList>
+        <cmd:JournalFileProxyList />
+        <cmd:ResourceRelationList />
+    </cmd:Resources>
+    <cmd:Components>
+        <cmd:data>
+            <olac:OLAC-DcmiTerms>
+                <olac:available>2009-11-02T09:51:39Z</olac:available>
+                <olac:creator>Pajas, Petr</olac:creator>
+                <olac:date>2011-06-28T09:38:08Z</olac:date>
+                <olac:description>XSH is a powerfull command-line tool for querying, processing and editing XML documents. It features a shell-like interface with auto-completion for comfortable interactive work, but can be as well used for off-line (batch) processing of XML data.</olac:description>
+                <olac:identifier>http://hdl.handle.net/11858/00-097C-0000-0001-48F3-0</olac:identifier>
+                <olac:issued>2009-11-02T09:51:39Z</olac:issued>
+                <olac:publisher>Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)</olac:publisher>
+                <olac:rights>Artistic License (Perl) 1.0</olac:rights>
+                <olac:rights>http://opensource.org/licenses/Artistic-Perl-1.0</olac:rights>
+                <olac:source>http://xsh.sourceforge.net</olac:source>
+                <olac:subject>XML processing</olac:subject>
+                <olac:subject>command-line</olac:subject>
+                <olac:title>XSH</olac:title>
+                <olac:type>toolService</olac:type>
+            </olac:OLAC-DcmiTerms>
+        </cmd:data>
+    </cmd:Components>
+</cmd:CMD></metadata>

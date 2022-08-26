@@ -1,0 +1,14 @@
+dc.contributor.author	Pajas, Petr
+dc.date.accessioned	2011-06-28T09:38:08Z
+dc.date.available	2009-11-02T09:51:39Z
+dc.date.issued	2009-11-02T09:51:39Z
+dc.identifier.uri	http://hdl.handle.net/11858/00-097C-0000-0001-48F3-0
+dc.description	XSH is a powerfull command-line tool for querying, processing and editing XML documents. It features a shell-like interface with auto-completion for comfortable interactive work, but can be as well used for off-line (batch) processing of XML data.
+dc.publisher	Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)
+dc.rights	Artistic License (Perl) 1.0
+dc.rights.uri	http://opensource.org/licenses/Artistic-Perl-1.0
+dc.source.uri	http://xsh.sourceforge.net
+dc.subject	XML processing
+dc.subject	command-line
+dc.title	XSH
+dc.type	toolService
