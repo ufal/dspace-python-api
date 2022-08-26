@@ -17,9 +17,8 @@ class CMDIBundleTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # if const.on_dev_5:
-        #     unittest.SkipTest("CMDI format not yet on dev-5.")
-        unittest.SkipTest("CMDI format not yet on dev-5.")
+        if const.on_dev_5:
+            raise unittest.SkipTest("CMDI format not yet on dev-5.")
         check_com_col()
 
     def test_bundle_cmdi_in_OAI(self):
