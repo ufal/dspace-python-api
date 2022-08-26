@@ -17,6 +17,10 @@ class CMDIFormatTest(unittest.TestCase):
     def setUpClass(cls):
         check_com_col()
 
+    def setUp(self):
+        if const.on_dev_5:
+            raise unittest.SkipTest("CMDI format not yet on dev-5.")
+
     def test_format_cmdi(self):
         uuid = assure_item_from_file("cmdi_check")
         self.remove_additional_date(uuid)
