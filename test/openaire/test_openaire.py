@@ -83,13 +83,14 @@ class OpenaireTest(unittest.TestCase):
             self.fail("Handles are issued as " + str(actual_handle) +
                       " and not in format http://hdl.handle.net/{handle}")
         handle = get_handle(uuid)
-        link = const.OAI_openaire_datacite
-        oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
+        link = const.OAI_openaire_datacite + transform_handle_to_oai_set_id(get_handle(const.col_UUID))
+        oai_response = requests.get(link)
+        fail_mesage = oai_fail_message(handle, link)
         if oai_response.content is None:
-            self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
+            self.fail(fail_mesage)
         if oai_response.status_code == 500:
             log(oai_response.content, Severity.WARN)
-            self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
+            self.fail(fail_mesage)
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)
         the_one = None
