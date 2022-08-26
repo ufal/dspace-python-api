@@ -15,9 +15,9 @@ date_file_name = "date.txt"
 
 def set_up_logging():
     # set_write_to_console()
-    turn_off_time()
-    turn_off_output()
-    turn_off_debug()
+    # turn_off_time()
+    # turn_off_output()
+    # turn_off_debug()
     pass
 
 
