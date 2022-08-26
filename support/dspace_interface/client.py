@@ -98,7 +98,7 @@ class DSpaceClient:
         # Look for DSPACE-XSRF-TOKEN and persist it as X-XSRF-Token in session headers
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -128,7 +128,7 @@ class DSpaceClient:
         # Look for DSPACE-XSRF-TOKEN and persist it as X-XSRF-Token in session headers
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -143,7 +143,7 @@ class DSpaceClient:
         r = self.session.get(url, params=params, data=data)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
         return r
@@ -162,7 +162,7 @@ class DSpaceClient:
         r = self.session.post(url, json=json_p, params=params, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('API Post: Updating token to ' + t)
+            log('API Post: Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -196,7 +196,7 @@ class DSpaceClient:
         r = self.session.put(url, params=params, json=json_p, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -229,7 +229,7 @@ class DSpaceClient:
         r = self.session.delete(url, params=params, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -288,7 +288,7 @@ class DSpaceClient:
         r = self.session.patch(url, json=[data], headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('API Post: Updating token to ' + t)
+            log('API Post: Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -588,7 +588,7 @@ class DSpaceClient:
         r = self.session.send(prepared_req)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t)
+            log('Updating token to ' + t, Severity.DEBUG)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
         if r.status_code == 403:
