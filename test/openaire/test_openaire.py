@@ -17,6 +17,10 @@ class OpenaireTest(unittest.TestCase):
         # raise unittest.SkipTest("Not yet implemented")
         check_com_col()
 
+    def setUp(self):
+        if const.on_dev_5:
+            raise unittest.SkipTest("Openaire context not yet on dev-5.")
+
     def test_see_openaire(self):
         uuid_non = assure_item_with_name_suffix("non-openaire")
         uuid_opn = assure_item_from_file("yes-openaire")

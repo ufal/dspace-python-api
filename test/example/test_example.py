@@ -19,7 +19,12 @@ class ExampleTest(unittest.TestCase):
         # This checks if community and collection for test items exist.
         check_com_col()
 
-    def test_one(self):
+    def setUp(self):
+        pass
+        # if you want to skip those tests, uncomment following line:
+        # raise unittest.SkipTest("CMDI format not yet on dev-5.")
+
+    def test_example_one(self):
         value = 1 == 2
         self.assertFalse(value)
         value = "a" == "a"

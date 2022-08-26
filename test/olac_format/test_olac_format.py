@@ -13,8 +13,11 @@ class OLACTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # raise unittest.SkipTest("Not yet implemented")
         check_com_col()
+
+    def setUp(self):
+        if const.on_dev_5:
+            raise unittest.SkipTest("OLAC format not yet on dev-5.")
 
     def test_format_olac(self):
         if not const.on_dev_5:
