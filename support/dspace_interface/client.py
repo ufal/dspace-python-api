@@ -622,7 +622,7 @@ class DSpaceClient:
             try:
                 # This isn't used, but it'll throw a ValueError if not a valid UUID
                 id_check = UUID(uuid).version
-                log("id_check = " + str(id_check))
+                log("id_check = " + str(id_check), Severity.DEBUG)
                 # Set URL and parameters
                 url = f'{url}/{uuid}'
                 params = None
@@ -678,7 +678,7 @@ class DSpaceClient:
         if uuid is not None:
             try:
                 id_check = UUID(uuid).version
-                log("id_check " + str(id_check))
+                log("id_check = " + str(id_check), Severity.DEBUG)
                 # Update URL and parameters
                 url = f'{url}/{uuid}'
                 params = None
@@ -727,7 +727,7 @@ class DSpaceClient:
         url = f'{self.API_ENDPOINT}core/items'
         try:
             id_check = UUID(uuid).version
-            log("id_check " + str(id_check))
+            log("id_check = " + str(id_check), Severity.DEBUG)
             url = f'{url}/{uuid}'
             return self.api_get(url, None, None)
         except ValueError:
