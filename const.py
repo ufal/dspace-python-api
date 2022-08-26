@@ -29,8 +29,8 @@ import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev
  created before tests start ARE in OAI-PMH)
  recommended to set to True
 """
-# ENABLE_IMPORT_AT_START = True
-ENABLE_IMPORT_AT_START = False
+ENABLE_IMPORT_AT_START = True
+# ENABLE_IMPORT_AT_START = False
 
 on_dev_5 = host == "dev-5.pc"
 
