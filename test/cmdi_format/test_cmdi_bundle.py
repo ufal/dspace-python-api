@@ -62,10 +62,6 @@ class CMDIBundleTest(unittest.TestCase):
         if not records:
             self.fail(fail_message)
         the_one = None
-        # x = open("test/data/bundle_check.xml", encoding="utf-8")
-        # got = x.read()
-        # x.close()
-        # oai_original = BeautifulSoup(got, features="xml").find("metadata")
         for record in records:
             if record.find("identifier", recursive=True).text.split(":")[-1] == handle:
                 the_one = record.find("metadata")

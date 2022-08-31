@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import const
 from support.dspace_interface.response_map import check_response
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, oai_fail_message
+    assure_item_from_file, oai_fail_message, get_test_soup
 
 
 class OLACTest(unittest.TestCase):
@@ -20,10 +20,7 @@ class OLACTest(unittest.TestCase):
             raise unittest.SkipTest("OLAC format not yet on dev-5.")
 
     def test_format_olac(self):
-        if not const.on_dev_5:
-            uuid = assure_item_from_file("olac_check.stripped")
-        else:
-            uuid = assure_item_from_file("olac_check")
+        uuid = assure_item_from_file("olac_check")
         handle = get_handle(uuid)
         link = const.OAI_olac
         oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
@@ -39,14 +36,7 @@ class OLACTest(unittest.TestCase):
         if not records:
             self.fail("Did not find any records for " + const.OAI_olac)
         the_one = None
-        if not const.on_dev_5:
-            x = open("test/data/olac_check.olac.stripped.xml", encoding="utf-8")
-        else:
-            x = open("test/data/olac_check.olac.xml", encoding="utf-8")
-
-        got = x.read()
-        x.close()
-        oai_original = BeautifulSoup(got, features="xml").find("metadata")
+        oai_original = get_test_soup("olac_check.olac")
         for id_element in oai_original.find_all("dc:identifier"):
             if str(id_element.text).__contains__("handle"):
                 id_element.string.replace_with(const.FE_url + "/handle/" + handle)

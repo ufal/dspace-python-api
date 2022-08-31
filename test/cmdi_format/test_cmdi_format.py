@@ -7,7 +7,7 @@ import const
 from support.dspace_interface.response_map import check_response
 from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, import_items, oai_fail_message
+    assure_item_from_file, import_items, oai_fail_message, get_test_soup
 from support.logs import log, Severity
 
 
@@ -37,10 +37,7 @@ class CMDIFormatTest(unittest.TestCase):
         if not records:
             self.fail("Did not find any records for " + const.OAI_cmdi)
         the_one = None
-        x = open("test/data/cmdi_check.xml", encoding="utf-8")
-        got = x.read()
-        x.close()
-        oai_original = BeautifulSoup(got, features="xml").find("metadata")
+        oai_original = get_test_soup("cmdi_check")
         for id_element in oai_original.find("cmd:Resources").find("cmd:ResourceProxyList") \
                 .find_all("cmd:ResourceProxy", attrs={"id": "lp_"}):
             id_element.find("cmd:ResourceRef").string.replace_with(

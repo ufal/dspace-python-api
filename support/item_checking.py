@@ -1,5 +1,8 @@
 import json
 import os
+
+from bs4 import BeautifulSoup
+
 import const
 from support.dspace_interface.models import Item
 from support.dspace_proxy import rest_proxy
@@ -94,6 +97,28 @@ def assure_item_with_name_suffix(name):
     return itm_uuid
 
 
+def get_test_soup(filename, suffix="xml", features="xml", find_metadata=True):
+    """
+    Returns beautifulsoup object for checking. Stripped if available and not on dev-5.pc.
+    If file has different suffix, change suffix param.
+    If different parser should be used, change features param.
+    If no .find("metadata") should be caled on returned object
+    before returning, set find_metadata param to False.
+
+    """
+    final_filename = filename + "." + suffix
+    if os.path.exists("test/data/" + filename + ".stripped." + suffix):
+        if not const.on_dev_5:
+            final_filename = filename + ".stripped." + suffix
+    x = open("test/data/" + final_filename, encoding="utf-8")
+    got = x.read()
+    x.close()
+    bs = BeautifulSoup(got, features=features)
+    if find_metadata:
+        return bs.find("metadata")
+    else:
+        return bs
+
 def assure_item_from_file(filename, postpone=False):
     """
     Assure item from specified file exists.
@@ -107,7 +132,12 @@ def assure_item_from_file(filename, postpone=False):
     item_exists = False
     items_inside = rest_proxy.get("discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
     items = items_inside["_embedded"]["searchResult"]["_embedded"]["objects"]
-    x = open("test/data/" + filename + ".json", encoding="utf-8")
+    final_filename = filename + ".json"
+    if os.path.exists("test/data/" + filename + ".stripped.json"):
+        if not const.on_dev_5:
+            final_filename = filename + ".stripped.json"
+
+    x = open("test/data/" + final_filename, encoding="utf-8")
     data = json.load(x)
     x.close()
     name = data["name"]

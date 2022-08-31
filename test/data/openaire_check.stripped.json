@@ -184,7 +184,7 @@
     ],
     "local.contact.person": [
       {
-        "value": "Pavel Stranak stranak@ufal.mff.cuni.cz Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)",
+        "value": "Pavel Straňak stranak@ufal.mff.cuni.cz Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)",
         "language": null,
         "authority": null,
         "confidence": -1,
@@ -192,6 +192,11 @@
       }
     ],
     "local.sponsor": [
+
+
+
+
+
       {
         "value": "European Union FP7-ICT-2007-3-231720 EuroMatrix Plus euFunds info:eu-repo/grantAgreement/EC/FP7/231720",
         "language": null,
@@ -200,7 +205,7 @@
         "place": 0
       },
       {
-        "value": "Ministerstvo skolstvi, mladeze a telovychovy Ceske republiky 7E09003 EuroMatrixPlus – Bringing Machine Translation for European Languages to the User nationalFunds",
+        "value": "Ministerstvo skolstvi, mladeze a telovychovy Ceske republiky 7E09003 EuroMatrixPlus - Bringing Machine Translation for European Languages to the User nationalFunds",
         "language": null,
         "authority": null,
         "confidence": -1,
