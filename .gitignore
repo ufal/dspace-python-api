@@ -133,3 +133,4 @@ dmypy.json
 logs.txt
 output.txt
 date.txt
+debug.log.txt

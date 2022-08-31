@@ -6,6 +6,15 @@ Blackbox tests for dspace repository
 ## How to write new tests
 Check test.example package. Everything necessary should be there.
 
+Test data are in `test/data` folder.
+If your test data contains special characters like čřšáý and so on, it is recommended
+to make `.stripped` variation of the file. 
+E.g. `my_format.json` and `my_format.stripped.json` for loading data
+and `my_format.test.xml` and `my_format.test.stripped.xml` for testing.
+
+If not on dev-5 (e.g. when run on localhost), `.stripped` version of files will be loaded.
+The reason for this is, that when dspace runs on windows, it has trouble with special characters.
+
 
 ## Settings
 See const.py for constants used at testing.
