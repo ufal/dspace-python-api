@@ -77,7 +77,6 @@ class OpenaireTest(unittest.TestCase):
         item = rest_proxy.d.get_item(uuid)
         actual_handle = item.json()["metadata"]["dc.identifier.uri"][0]["value"]
         fail_because_hdl_handle_net = "hdl.handle.net" not in str(actual_handle)
-        fail_because_hdl_handle_net = False
         if fail_because_hdl_handle_net:
             self.fail("Handles are issued as " + str(actual_handle) +
                       " and not in format http://hdl.handle.net/{handle}")

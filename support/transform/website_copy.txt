@@ -1,14 +1,69 @@
-dc.contributor.author	Pajas, Petr
-dc.date.accessioned	2011-06-28T09:38:08Z
-dc.date.available	2009-11-02T09:51:39Z
-dc.date.issued	2009-11-02T09:51:39Z
-dc.identifier.uri	http://hdl.handle.net/11858/00-097C-0000-0001-48F3-0
-dc.description	XSH is a powerfull command-line tool for querying, processing and editing XML documents. It features a shell-like interface with auto-completion for comfortable interactive work, but can be as well used for off-line (batch) processing of XML data.
-dc.publisher	Charles University, Faculty of Mathematics and Physics, Institute of Formal and Applied Linguistics (UFAL)
-dc.rights	Artistic License (Perl) 1.0
-dc.rights.uri	http://opensource.org/licenses/Artistic-Perl-1.0
-dc.source.uri	http://xsh.sourceforge.net
-dc.subject	XML processing
-dc.subject	command-line
-dc.title	XSH
-dc.type	toolService
+dc.contributor.author	Zeman, Daniel
+dc.contributor.author	Mareček, David
+dc.contributor.author	Mašek, Jan
+dc.contributor.author	Popel, Martin
+dc.contributor.author	Ramasamy, Loganathan
+dc.contributor.author	Rosa, Rudolf
+dc.contributor.author	Štěpánek, Jan
+dc.contributor.author	Žabokrtský, Zdeněk
+dc.date.accessioned	2015-08-21T12:26:51Z
+dc.date.available	2015-08-21T12:26:51Z
+dc.date.issued	2015-08-18
+dc.identifier.uri	http://hdl.handle.net/11234/1-1508
+dc.description	HamleDT (HArmonized Multi-LanguagE Dependency Treebank) is a compilation of existing dependency treebanks (or dependency conversions of other treebanks), transformed so that they all conform to the same annotation style. This version uses Universal Dependencies as the common annotation style. Update (November 1017): for a current collection of harmonized dependency treebanks, we recommend using the Universal Dependencies (UD). All of the corpora that are distributed in HamleDT in full are also part of the UD project; only some corpora from the Patch group (where HamleDT provides only the harmonizing scripts but not the full corpus data) are available in HamleDT but not in UD.
+dc.language.iso	ara
+dc.language.iso	eus
+dc.language.iso	ben
+dc.language.iso	bul
+dc.language.iso	cat
+dc.language.iso	hrv
+dc.language.iso	ces
+dc.language.iso	dan
+dc.language.iso	nld
+dc.language.iso	eng
+dc.language.iso	est
+dc.language.iso	fin
+dc.language.iso	fra
+dc.language.iso	deu
+dc.language.iso	ell
+dc.language.iso	grc
+dc.language.iso	heb
+dc.language.iso	hin
+dc.language.iso	hun
+dc.language.iso	ind
+dc.language.iso	gle
+dc.language.iso	ita
+dc.language.iso	jpn
+dc.language.iso	lat
+dc.language.iso	fas
+dc.language.iso	pol
+dc.language.iso	por
+dc.language.iso	ron
+dc.language.iso	rus
+dc.language.iso	slk
+dc.language.iso	slv
+dc.language.iso	spa
+dc.language.iso	swe
+dc.language.iso	tam
+dc.language.iso	tel
+dc.language.iso	tur
+dc.publisher	Charles University
+dc.relation.replaces	http://hdl.handle.net/11858/00-097C-0000-0023-9551-4
+dc.rights	HamleDT 3.0 License Terms
+dc.rights.uri	https://lindat.mff.cuni.cz/repository/xmlui/page/licence-hamledt-3.0
+dc.source.uri	http://ufal.mff.cuni.cz/hamledt
+dc.subject	annotated corpus
+dc.subject	morphology
+dc.subject	syntax
+dc.subject	dependency
+dc.subject	treebank
+dc.subject	harmonized annotation
+dc.subject	common annotation style
+dc.title	HamleDT 3.0
+dc.type	corpus
+metashare.ResourceInfo#ContentInfo.mediaType	text
+dc.rights.label	PUB
+has.files	yes
+branding	LINDAT / CLARIAH-CZ
+contact.person	Daniel Zeman zeman@ufal.mff.cuni.cz Charles University in Prague
+sponsor	Grantová agentura České republiky GA15-10472S Morphologically and Syntactically Annotated Corpora of Many Languages nationalFunds
