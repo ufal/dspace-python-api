@@ -181,6 +181,7 @@ def get_handle(uuid):
     ret = response["handle"]
     if ret is None:
         log("did not receive handle from object, even tho uuid exists!!", Severity.WARN)
+        log(f'uuid={uuid} name of item={response["name"]}', Severity.WARN)
     return ret
 
 
