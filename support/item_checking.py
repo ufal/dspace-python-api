@@ -178,7 +178,10 @@ def get_handle(uuid):
     if raw_response is None:
         raise Exception("no object found for uuid " + uuid)
     response = raw_response.json()
-    return response["handle"]
+    ret = response["handle"]
+    if ret is None:
+        log("did not receive handle from object, even tho uuid exists!!", Severity.WARN)
+    return ret
 
 
 def transform_handle_to_oai_set_id(handle, dso_type=const.ItemType.COLLECTION):
