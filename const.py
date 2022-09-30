@@ -1,26 +1,26 @@
 import enum
 
-user = "test@test.edu"
-password = "admin"
+user = "m@m.edu"
+password = "dspace"
 
 # http or https
 use_ssl = False
-# host = "localhost"
-host = "dev-5.pc"
-# fe_port = ":4000"
-fe_port = None
-# be_port = ":8080"
-be_port = None
+host = "localhost"
+# host = "dev-5.pc"
+fe_port = ":4000"
+# fe_port = None
+be_port = ":8080"
+# be_port = None
 be_location = "/server/"
 
 # command that imports items into oai
 # in github action, this command is correct
-import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev/null 2> /dev/null"
+# import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev/null 2> /dev/null"
 # if run on dev-5 under other than devops users (with sudo rights, obviously)
 # import_command = "sudo docker exec -it dspace /dspace/bin/dspace oai import -c > /dev/null 2> /dev/null"
 
 # when run locally on windows. Might need replacement of path
-# import_command = "cd C:/dspace/bin && dspace oai import -c > NUL 2> NUL"
+import_command = "cd C:/dspace/bin && dspace oai import -c > NUL 2> NUL"
 
 """
  when starting tests, import everything once, to have most recent views

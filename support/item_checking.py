@@ -185,3 +185,38 @@ def oai_fail_message(handle, link):
     """
     return "Did not find expected record in OAI for handle: " + handle \
            + " at link " + link
+
+def import_license_label(id, label, title, is_extended):
+    url = 'http://localhost:8080/server/api/core/clarinlicenselabels'
+    license_label_json = {
+        'id': id,
+        'label': label,
+        'title': title,
+        'extended': is_extended,
+        'icon': [0,1]
+    }
+    rest_proxy.d.api_post(url, None, license_label_json)
+
+
+def import_license(name, definition, label_id, confirmation, required_info):
+    url = 'http://localhost:8080/server/api/core/clarinlicenselabels'
+    cll_response = rest_proxy.d.api_get(url + '/' + str(label_id))
+    clarin_license_label = cll_response.json()
+    print(f'cll res: {clarin_license_label}')
+    clarin_license_label_rest = {
+        'id': clarin_license_label["id"],
+        'label': clarin_license_label["label"],
+        'title': clarin_license_label["title"],
+        'extended': clarin_license_label["extended"],
+        'icon': clarin_license_label["icon"]
+    }
+
+    url = 'http://localhost:8080/server/api/core/clarinlicenses'
+    license_json = {
+        'name': name,
+        'definition': definition,
+        'clarinLicenseLabel': clarin_license_label_rest,
+        'confirmation': confirmation,
+        'requiredInfo': required_info
+    }
+    rest_proxy.d.api_post(url, None, license_json)
