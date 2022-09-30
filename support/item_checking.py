@@ -26,12 +26,15 @@ def check_com_col():
     top_community_exists = False
     collection_exists = False
     comm_list = rest_proxy.get("core/communities/search/top").json()
-    comms = comm_list['_embedded']["communities"]
-    for cm in comms:
-        if cm["name"] == const.COM:
-            log("top community found")
-            const.com_UUID = cm["uuid"]
-            top_community_exists = True
+    if "_embedded" not in comm_list:
+        top_community_exists = False
+    else:
+        comms = comm_list['_embedded']["communities"]
+        for cm in comms:
+            if cm["name"] == const.COM:
+                log("top community found")
+                const.com_UUID = cm["uuid"]
+                top_community_exists = True
 
     if not top_community_exists:
         x = open("test/data/com.sample.json")
@@ -119,6 +122,18 @@ def get_test_soup(filename, suffix="xml", features="xml", find_metadata=True):
     else:
         return bs
 
+def get_name_from_file(filename):
+    final_filename = filename + ".json"
+    if os.path.exists("test/data/" + filename + ".stripped.json"):
+        if not const.on_dev_5:
+            final_filename = filename + ".stripped.json"
+
+    x = open("test/data/" + final_filename, encoding="utf-8")
+    data = json.load(x)
+    x.close()
+    name = data["name"]
+    return name
+
 def assure_item_from_file(filename, postpone=False):
     """
     Assure item from specified file exists.
@@ -163,7 +178,11 @@ def get_handle(uuid):
     if raw_response is None:
         raise Exception("no object found for uuid " + uuid)
     response = raw_response.json()
-    return response["handle"]
+    ret = response["handle"]
+    if ret is None:
+        log("did not receive handle from object, even tho uuid exists!!", Severity.WARN)
+        log(f'uuid={uuid} name of item={response["name"]}', Severity.WARN)
+    return ret
 
 
 def transform_handle_to_oai_set_id(handle, dso_type=const.ItemType.COLLECTION):

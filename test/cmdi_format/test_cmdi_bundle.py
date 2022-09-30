@@ -9,7 +9,7 @@ import const
 from support.dspace_interface.models import Item
 from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, import_items, oai_fail_message
+    assure_item_from_file, import_items, oai_fail_message, get_test_soup
 from support.logs import log, Severity
 
 
@@ -64,7 +64,8 @@ class CMDIBundleTest(unittest.TestCase):
         the_one = None
         for record in records:
             if record.find("identifier", recursive=True).text.split(":")[-1] == handle:
-                the_one = record.find("metadata")
+                the_one = record.metadata.contents[0]
         if the_one is None:
             self.fail(oai_fail_message(handle, link))
-        # self.assertEqual(oai_original, the_one)
+        oai_original = get_test_soup("cmdi", find_metadata=False)
+        self.assertEqual(oai_original.contents[0], the_one)
