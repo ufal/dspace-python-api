@@ -34,6 +34,6 @@ def error(r):
 def response_success(r):
     try:
         r = r.json()
-        log(f'{r["type"]} created successfully!')
+        log(f'{r["type"]} {r["uuid"]} created successfully!')
     except JSONDecodeError:
         log("request successfully")

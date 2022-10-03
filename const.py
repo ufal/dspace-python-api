@@ -1,12 +1,16 @@
 import enum
+import sys
+
+import expected
+from support.logs import log, Severity
 
 user = "m@m.edu"
 password = "dspace"
 
 # http or https
 use_ssl = False
-# host = "localhost"
-host = "dev-5.pc"
+host = "localhost"
+# host = "dev-5.pc"
 fe_port = ":4000"
 # fe_port = None
 be_port = ":8080"
@@ -23,6 +27,24 @@ import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev
 # import_command = "cd C:/dspace/bin && dspace oai import -c > NUL 2> NUL"
 
 """
+test to find out trivial mistakes
+"""
+if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expected.exp_FE_port \
+        or be_port != expected.exp_BE_port or import_command != expected.exp_import_command:
+    main = "Host settings are not what is expected for tests!!"
+    print(main)
+    print(main, file=sys.stderr)
+    log(main + ":", Severity.WARN)
+    log("use_ssl: " + str(use_ssl), Severity.WARN)
+    log("host: " + str(host), Severity.WARN)
+    log("fe_port: " + str(fe_port), Severity.WARN)
+    log("be_port: " + str(be_port), Severity.WARN)
+    log("import_command: " + str(import_command), Severity.WARN)
+    log("Please check expected.py and correct values in const.py", Severity.WARN)
+else:
+    log("Host settings are what is expected", Severity.DEBUG)
+
+"""
  when starting tests, import everything once, to have most recent views
  (if False, some items might be in dspace but not in OAI and would not be detected,
  since only items that are freshly created are imported. This ensures even items
@@ -33,7 +55,6 @@ ENABLE_IMPORT_AT_START = True
 # ENABLE_IMPORT_AT_START = False
 
 on_dev_5 = host == "dev-5.pc"
-
 
 # there should be no need to modify this part, unless adding new tests.
 # mainly concatenates and parses settings above
