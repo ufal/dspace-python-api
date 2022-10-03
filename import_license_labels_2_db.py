@@ -1,8 +1,7 @@
 import json
-from support.dspace_proxy import rest_proxy
-from support.item_checking import import_license, check_com_col, assure_item_from_file, get_test_soup
-from support.logs import log
- 
+
+from support.item_checking import import_license_label
+
 print('Going to import license labels.')
 # Opening JSON file
 with open('import/data/license_labels.json') as json_file:
