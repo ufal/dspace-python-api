@@ -5,7 +5,7 @@ import expected
 from support.logs import log, Severity
 
 user = "test@test.edu"
-password = "dspace"
+password = "admin"
 
 # http or https
 use_ssl = False
