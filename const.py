@@ -74,6 +74,7 @@ com_UUID = None
 COL = "BB-TEST-COL"
 col_UUID = None
 ITM_prefix = "BB-TEST-ITM-"
+EMBEDDED = "_embedded"
 
 
 class ItemType(enum.Enum):

@@ -8,6 +8,7 @@ import atexit
 
 all_logs = []
 write_to_console = False
+# write_to_console = True
 output_file_name = "logs.txt"
 debug_output_file_name = "debug.log.txt"
 date_file_name = "date.txt"

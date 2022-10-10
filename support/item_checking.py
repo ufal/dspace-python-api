@@ -206,7 +206,7 @@ def oai_fail_message(handle, link):
            + " at link " + link
 
 def import_license_label(id, label, title, is_extended):
-    url = 'http://localhost:8080/server/api/core/clarinlicenselabels'
+    url = const.API_URL + '/core/clarinlicenselabels'
     license_label_json = {
         'id': id,
         'label': label,
@@ -214,14 +214,14 @@ def import_license_label(id, label, title, is_extended):
         'extended': is_extended,
         'icon': [0,1]
     }
-    rest_proxy.d.api_post(url, None, license_label_json)
+    r = rest_proxy.d.api_post(url, None, license_label_json)
+    print(r)
 
 
 def import_license(name, definition, label_id, confirmation, required_info):
-    url = 'http://localhost:8080/server/api/core/clarinlicenselabels'
+    url = const.API_URL + '/core/clarinlicenselabels'
     cll_response = rest_proxy.d.api_get(url + '/' + str(label_id))
     clarin_license_label = cll_response.json()
-    print(f'cll res: {clarin_license_label}')
     clarin_license_label_rest = {
         'id': clarin_license_label["id"],
         'label': clarin_license_label["label"],
@@ -230,7 +230,7 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'icon': clarin_license_label["icon"]
     }
 
-    url = 'http://localhost:8080/server/api/core/clarinlicenses'
+    url = const.API_URL + 'core/clarinlicenses'
     license_json = {
         'name': name,
         'definition': definition,
@@ -238,4 +238,5 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'confirmation': confirmation,
         'requiredInfo': required_info
     }
-    rest_proxy.d.api_post(url, None, license_json)
+    r = rest_proxy.d.api_post(url, None, license_json)
+    log(definition + " imported")
