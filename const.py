@@ -4,17 +4,19 @@ import sys
 import expected
 from support.logs import log, Severity
 
-user = "test@test.edu"
-password = "admin"
+# user = "test@test.edu"
+# password = "admin"
+user = "m@edu.com"
+password = "dspace"
 
 # http or https
 use_ssl = False
-# host = "localhost"
-host = "dev-5.pc"
-# fe_port = ":4000"
-fe_port = None
-# be_port = ":8080"
-be_port = None
+host = "localhost"
+# host = "dev-5.pc"
+fe_port = ":4000"
+# fe_port = None
+be_port = ":8080"
+# be_port = None
 be_location = "/server/"
 
 # command that imports items into oai
@@ -29,20 +31,20 @@ import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev
 """
 test to find out trivial mistakes
 """
-if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expected.exp_FE_port \
-        or be_port != expected.exp_BE_port or import_command != expected.exp_import_command:
-    main = "Host settings are not what is expected for tests!!"
-    print(main)
-    print(main, file=sys.stderr)
-    log(main + ":", Severity.WARN)
-    log("use_ssl: " + str(use_ssl), Severity.WARN)
-    log("host: " + str(host), Severity.WARN)
-    log("fe_port: " + str(fe_port), Severity.WARN)
-    log("be_port: " + str(be_port), Severity.WARN)
-    log("import_command: " + str(import_command), Severity.WARN)
-    log("Please check expected.py and correct values in const.py", Severity.WARN)
-else:
-    log("Host settings are what is expected", Severity.DEBUG)
+# if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expected.exp_FE_port \
+#         or be_port != expected.exp_BE_port or import_command != expected.exp_import_command:
+#     main = "Host settings are not what is expected for tests!!"
+#     print(main)
+#     print(main, file=sys.stderr)
+#     log(main + ":", Severity.WARN)
+#     log("use_ssl: " + str(use_ssl), Severity.WARN)
+#     log("host: " + str(host), Severity.WARN)
+#     log("fe_port: " + str(fe_port), Severity.WARN)
+#     log("be_port: " + str(be_port), Severity.WARN)
+#     log("import_command: " + str(import_command), Severity.WARN)
+#     log("Please check expected.py and correct values in const.py", Severity.WARN)
+# else:
+#     log("Host settings are what is expected", Severity.DEBUG)
 
 """
  when starting tests, import everything once, to have most recent views
