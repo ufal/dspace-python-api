@@ -19,7 +19,7 @@ import os
 import sys
 from uuid import UUID
 
-sys.path.append("../venv/Lib/site-packages/")
+# sys.path.append("../venv/Lib/site-packages/")
 import requests
 from requests import Request
 
