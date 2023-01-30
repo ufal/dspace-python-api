@@ -4,10 +4,10 @@ import sys
 import expected
 from support.logs import log, Severity
 
-# user = "test@test.edu"
-# password = "admin"
-user = "m@edu.com"
-password = "dspace"
+user = "test@test.edu"
+password = "admin"
+# user = "m@edu.com"
+# password = "dspace"
 
 # http or https
 use_ssl = False
@@ -31,20 +31,20 @@ import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev
 """
 test to find out trivial mistakes
 """
-# if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expected.exp_FE_port \
-#         or be_port != expected.exp_BE_port or import_command != expected.exp_import_command:
-#     main = "Host settings are not what is expected for tests!!"
-#     print(main)
-#     print(main, file=sys.stderr)
-#     log(main + ":", Severity.WARN)
-#     log("use_ssl: " + str(use_ssl), Severity.WARN)
-#     log("host: " + str(host), Severity.WARN)
-#     log("fe_port: " + str(fe_port), Severity.WARN)
-#     log("be_port: " + str(be_port), Severity.WARN)
-#     log("import_command: " + str(import_command), Severity.WARN)
-#     log("Please check expected.py and correct values in const.py", Severity.WARN)
-# else:
-#     log("Host settings are what is expected", Severity.DEBUG)
+if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expected.exp_FE_port \
+        or be_port != expected.exp_BE_port or import_command != expected.exp_import_command:
+    main = "Host settings are not what is expected for tests!!"
+    print(main)
+    print(main, file=sys.stderr)
+    log(main + ":", Severity.WARN)
+    log("use_ssl: " + str(use_ssl), Severity.WARN)
+    log("host: " + str(host), Severity.WARN)
+    log("fe_port: " + str(fe_port), Severity.WARN)
+    log("be_port: " + str(be_port), Severity.WARN)
+    log("import_command: " + str(import_command), Severity.WARN)
+    log("Please check expected.py and correct values in const.py", Severity.WARN)
+else:
+    log("Host settings are what is expected", Severity.DEBUG)
 
 """
  when starting tests, import everything once, to have most recent views
@@ -71,7 +71,7 @@ OAI_openaire_datacite = OAI_url + "openaire_data?verb=ListRecords&metadataPrefix
 OAI_olac = OAI_url + "request?verb=ListRecords&metadataPrefix=olac&set="
 OAI_cmdi = OAI_url + "request?verb=ListRecords&metadataPrefix=cmdi&set="
 API_URL = BE_url + "api/"
-IMPORT_DATA_PATH = "data/"
+IMPORT_DATA_PATH = "data/license_import/"
 COM = "BB-TEST-COM"
 com_UUID = None
 COL = "BB-TEST-COL"

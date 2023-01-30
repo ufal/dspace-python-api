@@ -16,10 +16,8 @@ better abstracting and handling of HAL-like API responses, plus just all the oth
 """
 import json
 import os
-import sys
 from uuid import UUID
 
-# sys.path.append("../venv/Lib/site-packages/")
 import requests
 from requests import Request
 
