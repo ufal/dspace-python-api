@@ -5,18 +5,19 @@ import expected
 from support.logs import log, Severity
 
 user = "test@test.edu"
-password = "admin"
+password = "dspace"
+# password = "admin"
 # user = "m@edu.com"
 # password = "dspace"
 
 # http or https
 use_ssl = False
-host = "localhost"
-# host = "dev-5.pc"
-fe_port = ":4000"
-# fe_port = None
-be_port = ":8080"
-# be_port = None
+# host = "localhost"
+host = "dev-5.pc"
+# fe_port = ":4000"
+fe_port = None
+# be_port = ":8080"
+be_port = None
 be_location = "/server/"
 
 # command that imports items into oai
