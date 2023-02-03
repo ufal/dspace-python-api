@@ -29,5 +29,6 @@ def get_data_as_json(database, host, db_user, db_password):
     conn.close()
     print("Disconnect from database!")
 
-if __name__== "__main__":
-    get_data_as_json(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+get_data_as_json("clarin_utility", "localhost", "postgres", "dspace")
+#if __name__== "__main__":
+    #get_data_as_json(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
