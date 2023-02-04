@@ -60,9 +60,20 @@ def test_eperson(request_mapping, file_name):
     if json_array is None:
         return
     for i in json_array:
+        json_data = {'selfRegistered': i['self_registered'], 'requireCertificate' : i['require_certificate'], 'netid' : i['netid'], 'canLogIn' : i['can_log_in'], 'lastActive' : i['last_active'], 'email' : i['email'], 'password' : i['password']}
+        response = rest_proxy.d.api_post(url, None, json_data)
+        json.loads(response.content.decode('utf-8'))['id']
+
+def test_group(request_mapping, file_name):
+    url = const.API_URL + request_mapping
+    x = open("C:/dspace-blackbox-testing/data/" + file_name)
+    json_array = json.load(x)
+    x.close()
+    if json_array is None:
+        return
+    for i in json_array:
         response = rest_proxy.d.api_post(url, None, i)
         print(response)
-
 def import_schema_version():
     test_data()
     test_schema_version('versioning/versions', "schema_version.json")
@@ -90,9 +101,11 @@ def import_community():
 
 def import_eperson():
     test_data()
-    test_eperson('authz/resourcepolicies', "eperson.json")
+    test_eperson('eperson/epersons', "eperson.json")
     test_data()
 
+def import_group():
+    test_group('eperson/groups', 'epersongroup.json')
 def import_collection():
     test_data()
     test_collection('core/collections', "collection.json")
@@ -102,4 +115,5 @@ def import_collection():
 #import_collection()
 #import_licnses()
 #import_schema_version()
-import_eperson()
+#import_eperson()
+import_group()
