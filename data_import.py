@@ -69,11 +69,15 @@ def test_group(request_mapping, file_name):
     x = open("C:/dspace-blackbox-testing/data/" + file_name)
     json_array = json.load(x)
     x.close()
+    mapping = dict()
     if json_array is None:
         return
     for i in json_array:
         response = rest_proxy.d.api_post(url, None, i)
+        mapping[i['eperson_group_id']] = json.loads(response.content.decode('utf-8'))['id']
         print(response)
+
+    import_eperson()
 def import_schema_version():
     test_data()
     test_schema_version('versioning/versions', "schema_version.json")
@@ -105,7 +109,7 @@ def import_eperson():
     test_data()
 
 def import_group():
-    test_group('eperson/groups', 'epersongroup.json')
+    test_group('groups/import', 'epersongroup.json')
 def import_collection():
     test_data()
     test_collection('core/collections', "collection.json")
@@ -116,4 +120,4 @@ def import_collection():
 #import_licnses()
 #import_schema_version()
 #import_eperson()
-import_group()
+#import_group()
