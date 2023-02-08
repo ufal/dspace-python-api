@@ -28,6 +28,7 @@ def import_communities(request_mapping, file_name):
     if json_array is None:
         return
     for i in json_array:
+        json_data = {''}
         response = rest_proxy.d.api_post(url, None, i)
         print(response)
 
@@ -108,6 +109,7 @@ def import_items(request_mapping, file_name):
 
 
 def test_collection(request_mapping, file_name):
+    #handle, metadata, logo bitstream
     url = const.API_URL + request_mapping
     x = open("C:/dspace-blackbox-testing/data/" + file_name)
     json_array = json.load(x)
@@ -116,6 +118,19 @@ def test_collection(request_mapping, file_name):
         return
     for i in json_array:
         response = rest_proxy.d.api_post(url, None, i)
+        print(response)
+
+def test_add_subgroup(request_mapping, file_name, mapping):
+    url = const.API_URL + request_mapping
+    x = open("C:/dspace-blackbox-testing/data/" + file_name)
+    json_array = json.load(x)
+    x.close()
+    if json_array is None:
+        return
+    for i in json_array:
+        #get child group
+        childGroup = rest_proxy.d.api_get('')
+        response = rest_proxy.d.api_post(url + mapping[i['parent_id']] + "/subgroups", None, i)
         print(response)
 
 def test_schema_version(request_mapping, file_name):
@@ -186,24 +201,31 @@ def test_group(request_mapping, file_name1, file_name2):
     x = open("C:/dspace-blackbox-testing/data/" + file_name2)
     json_array = json.load(x)
     x.close()
+    mapping = dict()
     #response = rest_proxy.d.api_post(url, None, i)
     for i in json_array:
         if i['eperson_group_id'] != 0 and i['eperson_group_id'] != 1:
             json_data = {'name': metadata[i['eperson_group_id']]}
             response = rest_proxy.d.api_post(url, None, json_data)
+            mapping[i['eperson_group_id']] = json.loads(response.content.decode('utf-8'))['id']
     print()
-    #import_eperson()
 
-def test_handle(request_mapping, file_name1):
-    url = const.API_URL + request_mapping
-    x = open("C:/dspace-blackbox-testing/data/" + file_name1)
-    json_array = json.load(x)
-    x.close()
-    if json_array is None:
-        return
-    for i in json_array:
-        response = rest_proxy.d.api_post(url, None, i)
-    print()
+    #subgrou[
+    test_add_subgroup('eperson/groups', 'group2group.json', mapping)
+
+
+#import_eperson()
+
+# def test_handle(request_mapping, file_name1):
+#     url = const.API_URL + request_mapping
+#     x = open("C:/dspace-blackbox-testing/data/" + file_name1)
+#     json_array = json.load(x)
+#     x.close()
+#     if json_array is None:
+#         return
+#     for i in json_array:
+#         response = rest_proxy.d.api_post(url, None, i)
+#     print()
 #version history and versionhistory_item are null
 # def test_versionhistory(request_mapping1, request_mapping2, file_name1, file_name2):
 #     #versionhistory
@@ -269,12 +291,12 @@ def import_collection():
 
 def import_group():
     test_group('eperson/groups', "metadatavalue.json", "epersongroup.json")
-#import_community()
+import_community()
 #import_collection()
 #import_licnses()
 #import_schema_version()
 #import_eperson()
-import_group()
+#import_group()
 #import_metadata()
 
 #registratondata("eperson/registrations", "registrationdata.json")
