@@ -20,7 +20,7 @@ def read_json(file_name):
     @param file_name: file name
     @return: data as json
     """
-    x = open("C:/dspace-blackbox-testing/data/" + file_name)
+    x = open(const.FILE_PATH + file_name)
     json_p = json.load(x)
     x.close()
     return json_p
@@ -134,11 +134,16 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
             # get metadataschema
             metadataschema_json = convert_response_to_json(do_api_get_one('core/metadataschemas',
                                                            metadatafield_json['_embedded']['schema']['id']))
+            #define and insert key and value of dict
             key = metadataschema_json['prefix'] + '.' + metadatafield_json['element']
+            value = {'value' : i['text_value'], 'language' : i['text_lang'], 'authority' : i['authority'],
+                           'confidence' : i['confidence'], 'place' : i['place']}
             if metadatafield_json['qualifier'] != None:
                 key += '.' + metadatafield_json['qualifier']
-            result[key] = {'value' : i['text_value'], 'language' : i['text_lang'], 'authority' : i['authority'],
-                           'confidence' : i['confidence'], 'place' : i['place']}
+            if key in result.keys():
+                result[key].append(value)
+            else:
+                result[key] = [value]
     return result
 
 #table mapping
@@ -161,6 +166,28 @@ def import_registrationdata():
     for i in json_a:
         json_p = {'email' : i['email']}
         do_api_post('eperson/registrations', None, json_p)
+
+def import_bitstreamformatregistry():
+    json_a = read_json('bitstreamformatregistry.json')
+    for i in json_a:
+        level = i['support_level']
+        if level == 0:
+            level_str = "UNKNOWN"
+        elif level == 1:
+            level_str = "KNOWN"
+        elif level == 2:
+            level_str = "SUPPORTED"
+        else:
+            raise Exception("error")
+
+        json_p = {'mimetype' : i['mimetype'], 'description' : i['description'],
+                     'shortDescription' : i['short_description'], 'supportLevel' : level_str,
+                     'internal' : i['internal']}
+        try:
+            do_api_post('core/bitstreamformats', None, json_p)
+        except:
+            log('Bitstreamformatregistry with short description ' + i['short_description'] + ' already exists in database!')
+
 
 def import_epersongroup():
     """
@@ -186,6 +213,7 @@ def import_epersongroup():
             json_p = {'name': metadata[i['eperson_group_id']], 'metadata' : metadata_group}
             group_id[i['eperson_group_id']] = convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']
 
+
 def import_eperson():
     """
     Import data into database.
@@ -194,9 +222,10 @@ def import_eperson():
     global eperson_id
     json_a = read_json('eperson.json')
     for i in json_a:
+        metadata = get_metadata_value(7, i['eperson_id'])
         json_p = {'selfRegistered': i['self_registered'], 'requireCertificate' : i['require_certificate'],
                   'netid' : i['netid'], 'canLogIn' : i['can_log_in'], 'lastActive' : i['last_active'],
-                  'email' : i['email'], 'password' : i['password']}
+                  'email' : i['email'], 'password' : i['password'], 'metadata' : metadata}
         eperson_id[i['eperson_id']] = convert_response_to_json(do_api_post('eperson/epersons', None, json_p))['id']
 
 def import_group2group():
@@ -207,7 +236,7 @@ def import_group2group():
     global group_id
     json_a = read_json('group2group.json')
     for i in json_a:
-        do_api_post('eperson/groups/' + group_id[i['parent_id']] + '/subgroups', None, group_id[i['child_id']])
+        do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']] + '/subgroups', None, 'http://localhost:8080/server/api/eperson/groups/' + group_id[i['child_id']])
 
 def import_group2eperson():
     """
@@ -217,7 +246,7 @@ def import_group2eperson():
     global group_id, eperson_id
     json_a = read_json('epersongroup2eperson.json')
     for i in json_a:
-        do_api_post('eperson/groups/' + group_id[i['epersn_group_id'] + '/epersons'], None, eperson_id[i['eperson_id']])
+        do_api_post('eperson/groups/' + group_id[i['epersn_group_id']] + '/epersons', None, eperson_id[i['eperson_id']])
 
 def import_metadataschemaregistry():
     """
@@ -248,20 +277,16 @@ def import_metadatafieldregistry():
     global metadata_schema_id, metadata_field_id
     existing_data = convert_response_to_json(do_api_get_all('core/metadatafields'))['_embedded']['metadatafields']
     json_a = read_json('metadatafieldregistry.json')
-    counter = 0
     for i in json_a:
-        counter += 1
         json_p = {'element' : i['element'], 'qualifier' : i['qualifier'], 'scopeNote' : i['scope_note']}
         param = {'schemaId': metadata_schema_id[i['metadata_schema_id']]}
         #element and qualifier have to be unique
         try:
             metadata_field_id[i['metadata_field_id']] = convert_response_to_json(do_api_post('core/metadatafields', param, json_p))['id']
-            print(counter)
         except:
             for j in existing_data:
                 if j['element'] == i['element'] and j['qualifier'] == i['qualifier']:
                     metadata_field_id[i['metadata_field_id']] = j['id']
-                    print(counter)
                     break
 
 
@@ -287,6 +312,16 @@ def import_community():
         admin_comm = group_id[i['eperson_group_id']]
         json_p = {'handle' : handle_comm, 'admin' : admin_comm, 'metadata' : metadatavalue_comm}
         community_id[i['community_id']] = convert_response_to_json(do_api_post('core/communities', None, json_p))['id']
+
+def import_collection():
+    json_a = read_json('collection.json')
+    for i in json_a:
+        metadata_col = get_metadata_value(3, i['collection_id'])
+        handle_col = handle[(3, i['collection_id'])]
+        #missing submitter and logo
+        json_p = {'handle' : handle_col , 'metadata' : metadata_col}
+        response = rest_proxy.d.api_post('core/collections', None,json_p)
+        print(response)
 
 def import_handle_with_url():
     """
@@ -333,6 +368,7 @@ def import_hierarchy():
 #import_licenses()
 #import_registrationdata()
 #import_handle_with_url()
+#import_bitstreamformatregistry()
 
 #you have to call together
 import_metadata()
