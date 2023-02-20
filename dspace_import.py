@@ -236,7 +236,8 @@ def import_group2group():
     global group_id
     json_a = read_json('group2group.json')
     for i in json_a:
-        do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']] + '/subgroups', None, 'http://localhost:8080/server/api/eperson/groups/' + group_id[i['child_id']])
+        do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']] + '/subgroups', None,
+                    const.API_URL + 'eperson/groups/' + group_id[i['child_id']])
 
 def import_group2eperson():
     """
@@ -246,7 +247,8 @@ def import_group2eperson():
     global group_id, eperson_id
     json_a = read_json('epersongroup2eperson.json')
     for i in json_a:
-        do_api_post('eperson/groups/' + group_id[i['epersn_group_id']] + '/epersons', None, eperson_id[i['eperson_id']])
+        do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']] + '/epersons', None,
+                    const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
 
 def import_metadataschemaregistry():
     """
@@ -309,7 +311,7 @@ def import_community():
         #resource_type_id for community is 4
         handle_comm = handle[(4,i['community_id'])]
         metadatavalue_comm = metadatavalue[(4, i['community_id'])]
-        admin_comm = group_id[i['eperson_group_id']]
+        admin_comm = group_id[i['admin']]
         json_p = {'handle' : handle_comm, 'admin' : admin_comm, 'metadata' : metadatavalue_comm}
         community_id[i['community_id']] = convert_response_to_json(do_api_post('core/communities', None, json_p))['id']
 
