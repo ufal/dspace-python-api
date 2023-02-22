@@ -206,8 +206,10 @@ def import_epersongroup():
         if i['name'] == 'Administrator':
             group_id[1] = i['id']
     for i in json_a:
+        id = i['eperson_group_id']
         # group Administrator and Anonymous already exist
-        if i['eperson_group_id'] != 0 and i['eperson_group_id'] != 1:
+        # group is created with dspace object too
+        if id != 0 and id != 1 and id not in group_id:
             #get group metadata
             metadata_group = get_metadata_value(6, i['eperson_group_id'])
             json_p = {'name': metadata[i['eperson_group_id']], 'metadata' : metadata_group}
@@ -301,21 +303,58 @@ def import_community():
     global group_id, metadatavalue, handle
     if not handle:
         read_handle()
-    if not metadatavalue:
-        read_metadata()
 
-    #json_comm2comm = read_json('community2community.json')
     json_comm = read_json('community.json')
 
-    for i in json_comm:
-        #resource_type_id for community is 4
-        handle_comm = handle[(4,i['community_id'])]
-        metadatavalue_comm = metadatavalue[(4, i['community_id'])]
-        admin_comm = group_id[i['admin']]
-        json_p = {'handle' : handle_comm, 'admin' : admin_comm, 'metadata' : metadatavalue_comm}
-        community_id[i['community_id']] = convert_response_to_json(do_api_post('core/communities', None, json_p))['id']
+    json_comm2comm = read_json('community2community.json')
+    parent = dict()
+    child = dict()
+    for i in json_comm2comm:
+        parent_id = i['parent_comm_id']
+        child_id = i['child_comm_id']
+        if parent_id in parent.keys():
+            parent[parent_id].append(child_id)
+        else:
+            parent[parent_id] = [child_id]
+        if child_id in child.keys():
+            child[child_id].append(parent_id)
+        else:
+            child[child_id] = parent_id
+
+    counter = 0
+    while len(json_comm) > 0:
+        #process community only when:
+        #comm is not parent and child
+        #comm is parent and not child
+        #parent comm exists
+        #else process it later
+        i = json_comm[counter]
+        i_id = i['community_id']
+        if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[i_id] in community_id.keys():
+            # resource_type_id for community is 4
+            handle_comm = handle[(4, i['community_id'])]
+            if len(handle_comm) > 0:
+                handle_comm = handle_comm[0]
+            #metadatavalue_comm = get_metadata_value(4, i['community_id'])
+            #'metadata': metadatavalue_comm
+            json_p = {'handle': handle_comm['handle']}
+            # create community
+            resp_community_id = convert_response_to_json(do_api_post('core/communities', None, json_p))['id']
+            community_id[i['community_id']] = resp_community_id
+            # create admingroup
+            if i['admin'] != None:
+                group_id[i['admin']] = convert_response_to_json(
+                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, None))['id']
+            del json_comm[counter]
+        counter += 1
+        if counter > len(json_comm):
+            counter = 0
 
 def import_collection():
+    """
+    Import data into database.
+
+    """
     json_a = read_json('collection.json')
     for i in json_a:
         metadata_col = get_metadata_value(3, i['collection_id'])
@@ -373,6 +412,7 @@ def import_hierarchy():
 #import_bitstreamformatregistry()
 
 #you have to call together
-import_metadata()
-import_epersons_and_groups()
+#import_metadata()
+#import hierarchy has to call before import group
 import_hierarchy()
+#import_epersons_and_groups()
