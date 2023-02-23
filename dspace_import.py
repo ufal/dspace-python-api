@@ -212,6 +212,11 @@ def import_epersongroup():
         if id != 0 and id != 1 and id not in group_id:
             #get group metadata
             metadata_group = get_metadata_value(6, i['eperson_group_id'])
+            handle_group = None
+            if (6, i['eperson_group_id']) in handle:
+                handle_group = handle[(6, i['eperson_group_id'])]
+                if len(handle_group) > 0:
+                    handle_group = handle_group[0]
             json_p = {'name': metadata[i['eperson_group_id']], 'metadata' : metadata_group}
             group_id[i['eperson_group_id']] = convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']
 
@@ -345,9 +350,20 @@ def import_community():
             resp_community_id = convert_response_to_json(do_api_post('core/communities', parent_id, json_p))['id']
             community_id[i['community_id']] = resp_community_id
             # create admingroup
+
             if i['admin'] != None:
+                # get group metadata
+                metadata_group = get_metadata_value(6, i['admin'])
+                if 'dc.title' in metadata_group:
+                    del metadata_group['dc.title']
+                handle_group = None
+                if (6, i['admin']) in handle:
+                    handle_group = handle[(6, i['admin'])]
+                    if len(handle_group) > 0:
+                        handle_group = handle_group[0]
+                json_p = {'metadata': metadata_group, 'handle' : handle_group}
                 group_id[i['admin']] = convert_response_to_json(
-                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, None))['id']
+                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, json_p))['id']
             del json_comm[counter]
         counter += 1
         if counter == len(json_comm):
@@ -415,7 +431,7 @@ def import_hierarchy():
 #import_bitstreamformatregistry()
 
 #you have to call together
-#import_metadata()
+import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
-#import_epersons_and_groups()
+import_epersons_and_groups()
