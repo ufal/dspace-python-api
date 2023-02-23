@@ -339,7 +339,10 @@ def import_community():
             #'metadata': metadatavalue_comm
             json_p = {'handle': handle_comm['handle']}
             # create community
-            resp_community_id = convert_response_to_json(do_api_post('core/communities', None, json_p))['id']
+            parent_id = None
+            if i_id in child:
+                parent_id = {'parent' : community_id[child[i_id]]}
+            resp_community_id = convert_response_to_json(do_api_post('core/communities', parent_id, json_p))['id']
             community_id[i['community_id']] = resp_community_id
             # create admingroup
             if i['admin'] != None:
@@ -347,7 +350,7 @@ def import_community():
                     do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, None))['id']
             del json_comm[counter]
         counter += 1
-        if counter > len(json_comm):
+        if counter == len(json_comm):
             counter = 0
 
 def import_collection():
@@ -361,7 +364,7 @@ def import_collection():
         handle_col = handle[(3, i['collection_id'])]
         #missing submitter and logo
         json_p = {'handle' : handle_col , 'metadata' : metadata_col}
-        response = rest_proxy.d.api_post('core/collections', None,json_p)
+        response = rest_proxy.d.api_post('core/collections', None, json_p)
         print(response)
 
 def import_handle_with_url():
