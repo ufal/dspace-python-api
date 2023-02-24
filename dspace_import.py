@@ -10,6 +10,8 @@ group_id = dict()
 metadata_schema_id = dict()
 metadata_field_id = dict()
 community_id = dict()
+#maybe we will not need
+collection_id = dict()
 metadatavalue = dict()
 handle = dict()
 
@@ -72,20 +74,6 @@ def convert_response_to_json(response):
     @return: json created from response
     """
     return json.loads(response.content.decode('utf-8'))
-
-def get_metadata_by_type(resource_type_id):
-    """
-    Return metadata with resource_type_id.
-    @param resource_type_id: id of resource type
-    @return: dictionary resource_id : text_value
-    """
-    json_a = read_json('metadatavalue.json')
-    metadata = dict()
-    for i in json_a:
-        if i['resource_type_id'] == resource_type_id:
-            metadata[i['resource_id']] = i['text_value']
-    return metadata
-
 
 def read_metadata():
     """
@@ -201,9 +189,9 @@ def import_epersongroup():
     existing_data = convert_response_to_json(do_api_get_all('eperson/groups'))['_embedded']['groups']
     for i in existing_data:
         if i['name'] == 'Anonymous':
-            group_id[0] = i['id']
+            group_id[0] = [i['id']]
         if i['name'] == 'Administrator':
-            group_id[1] = i['id']
+            group_id[1] = [i['id']]
     for i in json_a:
         id = i['eperson_group_id']
         # group Administrator and Anonymous already exist
@@ -211,9 +199,11 @@ def import_epersongroup():
         if id != 0 and id != 1 and id not in group_id:
             #get group metadata
             metadata_group = get_metadata_value(6, i['eperson_group_id'])
+            name = metadata_group['dc.title'][0]['value']
+            del metadata_group['dc.title']
             #the group_metadata contains the name of the group
-            json_p = {'name': metadata_group['dc.title'][0]['value'], 'metadata' : metadata_group}
-            group_id[i['eperson_group_id']] = convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']
+            json_p = {'name': name, 'metadata' : metadata_group}
+            group_id[i['eperson_group_id']] = [convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']]
 
 
 def import_eperson():
@@ -238,8 +228,8 @@ def import_group2group():
     global group_id
     json_a = read_json('group2group.json')
     for i in json_a:
-        do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']] + '/subgroups', None,
-                    const.API_URL + 'eperson/groups/' + group_id[i['child_id']])
+        do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
+                    const.API_URL + 'eperson/groups/' + group_id[i['child_id']][0])
 
 def import_group2eperson():
     """
@@ -249,7 +239,7 @@ def import_group2eperson():
     global group_id, eperson_id
     json_a = read_json('epersongroup2eperson.json')
     for i in json_a:
-        do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']] + '/epersons', None,
+        do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
                     const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
 
 def import_metadataschemaregistry():
@@ -300,12 +290,11 @@ def import_community():
     Import data into database.
     Mapped tables: community, community2community, metadatavalue, handle
     """
-    global group_id, metadatavalue, handle
+    global group_id, metadatavalue, handle, community_id
     if not handle:
         read_handle()
 
     json_comm = read_json('community.json')
-
     json_comm2comm = read_json('community2community.json')
     parent = dict()
     child = dict()
@@ -332,9 +321,7 @@ def import_community():
         i_id = i['community_id']
         if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[i_id] in community_id.keys():
             # resource_type_id for community is 4
-            handle_comm = handle[(4, i['community_id'])]
-            if handle_comm is not None:
-                handle_comm = handle_comm[0]
+            handle_comm = handle[(4, i['community_id'])][0]
             metadatavalue_comm = get_metadata_value(4, i['community_id'])
             json_p = {'handle': handle_comm['handle'], 'metadata': metadatavalue_comm}
             # create community
@@ -346,8 +333,8 @@ def import_community():
 
             # create admingroup
             if i['admin'] != None:
-                group_id[i['admin']] = convert_response_to_json(
-                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {}))['id']
+                group_id[i['admin']] = [convert_response_to_json(
+                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {}))['id']]
             del json_comm[counter]
         else:
             counter += 1
@@ -359,14 +346,43 @@ def import_collection():
     Import data into database.
     Mapped tables: collection, community2collection
     """
+    global group_id, metadatavalue, handle, commnity_id, collection_id
+    if not handle:
+        read_handle()
     json_a = read_json('collection.json')
+
+    comm_2_coll_json = read_json('community2collection.json')
+    coll2comm = dict()
+    for i in comm_2_coll_json:
+        coll2comm[i['collection_id']] = i['community_id']
+
+    #because the role DEFAULT_READ is without old group id in collection
+    coll2group = dict()
+    metadata_json = read_json('metadatavalue.json')
+    for i in metadata_json:
+        if i['resource_type_id'] == 6 and 'COLLECTION_' in i['text_value'] and '_DEFAULT_READ' in i['text_value']:
+            text = i['text_value']
+            positions = [ind for ind, ch in enumerate(text) if ch == '_']
+            coll2group[int(text[positions[0] + 1 : positions[1]])] = i['resource_id']
+
     for i in json_a:
         metadata_col = get_metadata_value(3, i['collection_id'])
-        handle_col = handle[(3, i['collection_id'])]
+        handle_col = handle[(3, i['collection_id'])][0]
         #missing submitter and logo
-        json_p = {'handle' : handle_col , 'metadata' : metadata_col}
-        response = rest_proxy.d.api_post('core/collections', None, json_p)
-        print(response)
+        json_p = {'handle': handle_col['handle'], 'metadata': metadata_col}
+        params = {'parent' : community_id[coll2comm[i['collection_id']]]}
+        coll_id = convert_response_to_json(do_api_post('core/collections', params, json_p))['id']
+        collection_id[i['collection_id']] = coll_id
+
+        #greate group
+        #template_item_id, workflow_step_1, workflow_step_3, admin are not implemented, because they are null in all data
+        if i['workflow_step_2']:
+            group_id[i['workflow_step_2']] = [convert_response_to_json(do_api_post('core/collections/' + coll_id + '/workflowGroups/editor', None, {}))['id']]
+        if i['submitter']:
+            group_id[i['submitter']] = [convert_response_to_json(do_api_post('core/collections/' + coll_id + '/submittersGroup', None, {}))['id']]
+        if i['collection_id'] in coll2group:
+            group_id[coll2group[i['collection_id']]] = [convert_response_to_json(do_api_post('core/collections/' + coll_id + '/bitstreamReadGroup', None, {}))['id']]
+            group_id[coll2group[i['collection_id']]].append(convert_response_to_json(do_api_post('core/collections/' + coll_id + '/itemReadGroup', None, {}))['id'])
 
 def import_handle_with_url():
     """
@@ -407,13 +423,14 @@ def import_hierarchy():
     Import part of dspace: hierarchy
     """
     import_community()
+    import_collection()
 
 
 #call
-#import_licenses()
-#import_registrationdata()
-#import_handle_with_url()
-#import_bitstreamformatregistry()
+import_licenses()
+import_registrationdata()
+import_handle_with_url()
+import_bitstreamformatregistry()
 
 #you have to call together
 import_metadata()
