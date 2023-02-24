@@ -195,7 +195,6 @@ def import_epersongroup():
     Mapped tables: epersongroup
     """
     global group_id
-    metadata = get_metadata_by_type(6)
     json_a = read_json('epersongroup.json')
     # group Administrator and Anonymous already exist
     # we need to remember their id
@@ -212,12 +211,8 @@ def import_epersongroup():
         if id != 0 and id != 1 and id not in group_id:
             #get group metadata
             metadata_group = get_metadata_value(6, i['eperson_group_id'])
-            handle_group = None
-            if (6, i['eperson_group_id']) in handle:
-                handle_group = handle[(6, i['eperson_group_id'])]
-                if len(handle_group) > 0:
-                    handle_group = handle_group[0]
-            json_p = {'name': metadata[i['eperson_group_id']], 'metadata' : metadata_group}
+            #the group_metadata contains the name of the group
+            json_p = {'name': metadata_group['dc.title'][0]['value'], 'metadata' : metadata_group}
             group_id[i['eperson_group_id']] = convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']
 
 
@@ -303,7 +298,7 @@ def import_metadatafieldregistry():
 def import_community():
     """
     Import data into database.
-    Mapped tables: community, community2community, metadatavalue
+    Mapped tables: community, community2community, metadatavalue, handle
     """
     global group_id, metadatavalue, handle
     if not handle:
@@ -327,7 +322,7 @@ def import_community():
             child[child_id] = parent_id
 
     counter = 0
-    while len(json_comm) > 0:
+    while json_comm:
         #process community only when:
         #comm is not parent and child
         #comm is parent and not child
@@ -338,41 +333,31 @@ def import_community():
         if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[i_id] in community_id.keys():
             # resource_type_id for community is 4
             handle_comm = handle[(4, i['community_id'])]
-            if len(handle_comm) > 0:
+            if handle_comm is not None:
                 handle_comm = handle_comm[0]
-            #metadatavalue_comm = get_metadata_value(4, i['community_id'])
-            #'metadata': metadatavalue_comm
-            json_p = {'handle': handle_comm['handle']}
+            metadatavalue_comm = get_metadata_value(4, i['community_id'])
+            json_p = {'handle': handle_comm['handle'], 'metadata': metadatavalue_comm}
             # create community
             parent_id = None
             if i_id in child:
                 parent_id = {'parent' : community_id[child[i_id]]}
             resp_community_id = convert_response_to_json(do_api_post('core/communities', parent_id, json_p))['id']
             community_id[i['community_id']] = resp_community_id
-            # create admingroup
 
+            # create admingroup
             if i['admin'] != None:
-                # get group metadata
-                metadata_group = get_metadata_value(6, i['admin'])
-                if 'dc.title' in metadata_group:
-                    del metadata_group['dc.title']
-                handle_group = None
-                if (6, i['admin']) in handle:
-                    handle_group = handle[(6, i['admin'])]
-                    if len(handle_group) > 0:
-                        handle_group = handle_group[0]
-                json_p = {'metadata': metadata_group, 'handle' : handle_group}
                 group_id[i['admin']] = convert_response_to_json(
-                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, json_p))['id']
+                    do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {}))['id']
             del json_comm[counter]
-        counter += 1
+        else:
+            counter += 1
         if counter == len(json_comm):
             counter = 0
 
 def import_collection():
     """
     Import data into database.
-
+    Mapped tables: collection, community2collection
     """
     json_a = read_json('collection.json')
     for i in json_a:
