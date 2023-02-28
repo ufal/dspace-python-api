@@ -12,6 +12,7 @@ metadata_field_id = dict()
 community_id = dict()
 #maybe we will not need
 collection_id = dict()
+item_id = dict()
 metadatavalue = dict()
 handle = dict()
 
@@ -383,6 +384,23 @@ def import_collection():
         if i['collection_id'] in coll2group:
             group_id[coll2group[i['collection_id']]] = [convert_response_to_json(do_api_post('core/collections/' + coll_id + '/bitstreamReadGroup', None, {}))['id']]
             group_id[coll2group[i['collection_id']]].append(convert_response_to_json(do_api_post('core/collections/' + coll_id + '/itemReadGroup', None, {}))['id'])
+
+def import_item():
+    """
+    Import data into database.
+    Mapped tables: item, collection2item
+    """
+    json_a = read_json("item.json")
+    for i in json_a:
+        metadata_item = get_metadata_value(2, i['item_id'])
+        handle_item = handle[(2, i['item_id'])]
+        json_p = {'discoverable' : i['discoverable'], 'inArchive' : i['in_archive'], 'lastModified' : i['last_modified']}
+    if json_array is None:
+        return
+    for i in json_array:
+        json_data =
+        response = rest_proxy.d.api_post(url, None, json_data)
+        print(response)
 
 def import_handle_with_url():
     """
