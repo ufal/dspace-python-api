@@ -388,7 +388,7 @@ def import_collection():
 def import_item():
     """
     Import data into database.
-    Mapped tables: item, collection2item
+    Mapped tables: item, collection2item, bundle
     """
     json_a = read_json("item.json")
     for i in json_a:
