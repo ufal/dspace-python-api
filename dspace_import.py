@@ -210,7 +210,7 @@ def import_epersongroup():
 def import_eperson():
     """
     Import data into database.
-    Mapped tables: eperson
+    Mapped tables: eperson, metadatavalue
     """
     global eperson_id
     json_a = read_json('eperson.json')
@@ -345,7 +345,7 @@ def import_community():
 def import_collection():
     """
     Import data into database.
-    Mapped tables: collection, community2collection
+    Mapped tables: collection, community2collection, metadatavalue, handle
     """
     global group_id, metadatavalue, handle, commnity_id, collection_id
     if not handle:
@@ -388,19 +388,50 @@ def import_collection():
 def import_item():
     """
     Import data into database.
-    Mapped tables: item, collection2item, bundle
+    Mapped tables: item, collection2item, bundle, workspaceitem, cwf_workflowitem, metadata, handle
     """
+    global item_id
+    #create dict from items by item id
     json_a = read_json("item.json")
+    items = dict()
     for i in json_a:
-        metadata_item = get_metadata_value(2, i['item_id'])
-        handle_item = handle[(2, i['item_id'])]
-        json_p = {'discoverable' : i['discoverable'], 'inArchive' : i['in_archive'], 'lastModified' : i['last_modified']}
-    if json_array is None:
-        return
+        items[i['item_id']] = i
+
+    #create item and workspaceitem
+    json_a = read_json("workspaceitem.json")
+    for i in json_a:
+        item = items[i['item_id']]
+        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
+                             i['stage_reached'], i['page_reached'])
+        del items[i['item_id']]
+
+    #create workflowitem
+    #workflowitem is created from workspaceitem
+    #-1, because the workflowitem doesn't contain this attribute
+    json_a = read_json('workflowitem.json')
+    for i in json_a:
+        item = items[i['item_id']]
+        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
+        del items[i['item_id']]
+        #create workflowitem from created workspaceitem
     for i in json_array:
         json_data =
         response = rest_proxy.d.api_post(url, None, json_data)
         print(response)
+
+def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
+    global item_id
+    metadata_item = get_metadata_value(2, item['item_id'])
+    handle_item = handle[(2, item['item_id'])]
+    json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
+              'lastModified': item['last_modified'], 'handle': handle_item,
+              'metadata': metadata_item}
+    # the params are workspaceitem attributes
+    params = {'owningCollection': owningCollectin, 'multipleTitles': multipleTitles,
+              'publishedBefore': publishedBefore,
+              'multipleFiles': multipleFiles, 'stageReached': stagereached,
+              'pageReached': pageReached}
+    item_id[item['item_id']] = convert_response_to_json(do_api_post('clarin/core/items', params, json_p))['id']
 
 def import_handle_with_url():
     """
