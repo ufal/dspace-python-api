@@ -12,7 +12,7 @@ metadata_field_id = dict()
 community_id = dict()
 #maybe we will not need
 collection_id = dict()
-item_id = dict()
+workspaceitem_id = dict()
 metadatavalue = dict()
 handle = dict()
 
@@ -390,7 +390,7 @@ def import_item():
     Import data into database.
     Mapped tables: item, collection2item, bundle, workspaceitem, cwf_workflowitem, metadata, handle
     """
-    global item_id
+    global workspaceitem_id
     #create dict from items by item id
     json_a = read_json("item.json")
     items = dict()
@@ -412,26 +412,25 @@ def import_item():
     for i in json_a:
         item = items[i['item_id']]
         import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
-        del items[i['item_id']]
         #create workflowitem from created workspaceitem
-    for i in json_array:
-        json_data =
-        response = rest_proxy.d.api_post(url, None, json_data)
-        print(response)
+        do_api_post('workflow/workflowitems', None, const.API_URL + 'submisson/workspaceitems/' + workspaceitem_id[i['item_id']])
+        del items[i['item_id']]
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
-    global item_id
-    metadata_item = get_metadata_value(2, item['item_id'])
-    handle_item = handle[(2, item['item_id'])]
+    global workspaceitem_id, collection_id
+    #metadata_item = get_metadata_value(2, item['item_id'])
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
-              'lastModified': item['last_modified'], 'handle': handle_item,
-              'metadata': metadata_item}
+              'lastModified': item['last_modified']}
+              #'metadata': metadata_item}
+    #if item['item_id'] in handle:
+        #json_p['handle'] = handle[(2, item['item_id'])]
+
     # the params are workspaceitem attributes
-    params = {'owningCollection': owningCollectin, 'multipleTitles': multipleTitles,
+    params = {'owningCollection': collection_id[owningCollectin], 'multipleTitles': multipleTitles,
               'publishedBefore': publishedBefore,
               'multipleFiles': multipleFiles, 'stageReached': stagereached,
               'pageReached': pageReached}
-    item_id[item['item_id']] = convert_response_to_json(do_api_post('clarin/core/items', params, json_p))['id']
+    workspaceitem_id[item['item_id']] = convert_response_to_json(do_api_post('clarin/submission/workspaceitem', params, json_p))['id']
 
 def import_handle_with_url():
     """
@@ -471,18 +470,18 @@ def import_hierarchy():
     """
     Import part of dspace: hierarchy
     """
-    import_community()
-    import_collection()
-
+    #import_community()
+   # import_collection()
+    import_item()
 
 #call
-import_licenses()
-import_registrationdata()
-import_handle_with_url()
-import_bitstreamformatregistry()
+#import_licenses()
+#import_registrationdata()
+#import_handle_with_url()
+#import_bitstreamformatregistry()
 
 #you have to call together
-import_metadata()
+#import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
 import_epersons_and_groups()
