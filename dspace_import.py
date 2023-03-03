@@ -388,7 +388,7 @@ def import_collection():
 def import_item():
     """
     Import data into database.
-    Mapped tables: item, collection2item, bundle, workspaceitem, cwf_workflowitem, metadata, handle
+    Mapped tables: item, collection2item,workspaceitem, cwf_workflowitem, metadata, handle
     """
     global workspaceitem_id
     #create dict from items by item id
@@ -416,21 +416,49 @@ def import_item():
         do_api_post('workflow/workflowitems', None, const.API_URL + 'submisson/workspaceitems/' + workspaceitem_id[i['item_id']])
         del items[i['item_id']]
 
-def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
-    global workspaceitem_id, collection_id
-    #metadata_item = get_metadata_value(2, item['item_id'])
-    json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
-              'lastModified': item['last_modified']}
-              #'metadata': metadata_item}
-    #if item['item_id'] in handle:
-        #json_p['handle'] = handle[(2, item['item_id'])]
+    #create other items
+    for i in items.values():
+        json_p = {'discoverable' : i['discoverable']}
+        params = {'owningCollection' : collection_id[i['collection_id']]}
+        item_id[i['item_id']] = convert_response_to_json(do_api_post('core/items', json_p, params))
 
-    # the params are workspaceitem attributes
-    params = {'owningCollection': collection_id[owningCollectin], 'multipleTitles': multipleTitles,
+def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
+    global workspaceitem_id, item_id, collection_id
+    metadata_item = get_metadata_value(2, item['item_id'])
+    json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
+              'lastModified': item['last_modified'],
+              'metadata': metadata_item}
+    if item['item_id'] in handle:
+        json_p['handle'] = handle[(2, item['item_id'])]
+        # the params are workspaceitem attributes
+    params = {'owningCollection': collection_id[owningCollectin],
+              'multipleTitles': multipleTitles,
               'publishedBefore': publishedBefore,
               'multipleFiles': multipleFiles, 'stageReached': stagereached,
               'pageReached': pageReached}
-    workspaceitem_id[item['item_id']] = convert_response_to_json(do_api_post('clarin/submission/workspaceitem', params, json_p))['id']
+    id = convert_response_to_json(do_api_post('clarin/submission/workspaceitems/import', params, json_p))['id']
+    workspaceitem_id[item['item_id']] = id
+    item_id[item['item_id']] = convert_response_to_json(rest_proxy.d.api_get(const.API_URL + 'clarin/submission/workspaceitems/' + str(id) + "/item", None, None))['id']
+
+def import_bundle():
+    """
+    Import data into database.
+    Mapped tables: item2bundle, bundle, bitstream, bundle2bitstream
+    """
+    global item_id
+    #load item2bundle into dict
+    json_a = read_json("item2bundle.json")
+    item2bundle = dict()
+    for i in json_a:
+        if i['item_id'] in item2bundle:
+            item2bundle[i['item_id']].append(i['bundle_id'])
+        else:
+            item2bundle[i['item_id']] = [i['bundle_id']]
+
+    #load bundles
+    json_a = read_json("bundle.json")
+    for i in json_a:
+        json_p = {}
 
 def import_handle_with_url():
     """
@@ -470,8 +498,8 @@ def import_hierarchy():
     """
     Import part of dspace: hierarchy
     """
-    #import_community()
-   # import_collection()
+    import_community()
+    import_collection()
     import_item()
 
 #call
@@ -481,7 +509,7 @@ def import_hierarchy():
 #import_bitstreamformatregistry()
 
 #you have to call together
-#import_metadata()
+import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
 import_epersons_and_groups()
