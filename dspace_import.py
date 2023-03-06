@@ -12,6 +12,7 @@ metadata_field_id = dict()
 community_id = dict()
 #maybe we will not need
 collection_id = dict()
+item_id = dict()
 workspaceitem_id = dict()
 metadatavalue = dict()
 handle = dict()
@@ -28,7 +29,7 @@ def read_json(file_name):
     x.close()
     return json_p
 
-def do_api_post(url, param, json_p):
+def do_api_post(url, param, json_p, content_type='application/json'):
     """
     Insert data into database by api if they are not None.
     @param url: url for api post
@@ -37,7 +38,7 @@ def do_api_post(url, param, json_p):
     @return: response from api post
     """
     url = const.API_URL + url
-    response = rest_proxy.d.api_post(url, param, json_p)
+    response = rest_proxy.d.api_post(url, param, json_p, content_type=content_type)
     #control of responce status is missing
     log('Api post by ' + url + ' was successfully done!')
     return response
@@ -113,7 +114,10 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
     if not metadatavalue:
         read_metadata()
     #get all metadatavalue for object
-    metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
+    if (old_resource_type_id, old_resource_id) in metadatavalue:
+        metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
+    else:
+        return None
     if metadatavalue_obj:
         #create list of object metadata
         for i in metadatavalue_obj:
@@ -413,7 +417,7 @@ def import_item():
         item = items[i['item_id']]
         import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
         #create workflowitem from created workspaceitem
-        do_api_post('workflow/workflowitems', None, const.API_URL + 'submisson/workspaceitems/' + workspaceitem_id[i['item_id']])
+        do_api_post('workflow/workflowitems', None, [const.API_URL + 'submisson/workspaceitems/' + str(workspaceitem_id[i['item_id']])], 'text/uri-list')
         del items[i['item_id']]
 
     #create other items
@@ -424,10 +428,12 @@ def import_item():
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
     global workspaceitem_id, item_id, collection_id
-    metadata_item = get_metadata_value(2, item['item_id'])
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
-              'lastModified': item['last_modified'],
-              'metadata': metadata_item}
+              'lastModified': item['last_modified']}
+    metadata_item = get_metadata_value(2, item['item_id'])
+    if metadata_item is not None:
+        json_p['metadata']: metadata_item
+
     if item['item_id'] in handle:
         json_p['handle'] = handle[(2, item['item_id'])]
         # the params are workspaceitem attributes
@@ -507,7 +513,6 @@ def import_hierarchy():
 #import_registrationdata()
 #import_handle_with_url()
 #import_bitstreamformatregistry()
-
 #you have to call together
 import_metadata()
 #import hierarchy has to call before import group
