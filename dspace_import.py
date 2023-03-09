@@ -417,7 +417,8 @@ def import_item():
         item = items[i['item_id']]
         import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
         #create workflowitem from created workspaceitem
-        do_api_post('workflow/workflowitems', None, [const.API_URL + 'submisson/workspaceitems/' + str(workspaceitem_id[i['item_id']])], 'text/uri-list')
+        params = {'id' : str(workspaceitem_id[i['item_id']])}
+        do_api_post('clarin/import/workflowitem', params, None)
         del items[i['item_id']]
 
     #create other items
@@ -427,12 +428,13 @@ def import_item():
         item_id[i['item_id']] = convert_response_to_json(do_api_post('core/items', json_p, params))
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
-    global workspaceitem_id, item_id, collection_id
+    global workspaceitem_id, item_id, collection_id, eperson_id
+
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
               'lastModified': item['last_modified']}
     metadata_item = get_metadata_value(2, item['item_id'])
     if metadata_item is not None:
-        json_p['metadata']: metadata_item
+        json_p['metadata'] = metadata_item
 
     if item['item_id'] in handle:
         json_p['handle'] = handle[(2, item['item_id'])]
@@ -441,10 +443,12 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
               'multipleTitles': multipleTitles,
               'publishedBefore': publishedBefore,
               'multipleFiles': multipleFiles, 'stageReached': stagereached,
-              'pageReached': pageReached}
-    id = convert_response_to_json(do_api_post('clarin/submission/workspaceitems/import', params, json_p))['id']
+              'pageReached': pageReached,
+              #we need to create submitter!
+              'epersonUUID': eperson_id[item['submitter_id']]}
+    id = convert_response_to_json(do_api_post('clarin/import/workspaceitem', params, json_p))['id']
     workspaceitem_id[item['item_id']] = id
-    item_id[item['item_id']] = convert_response_to_json(rest_proxy.d.api_get(const.API_URL + 'clarin/submission/workspaceitems/' + str(id) + "/item", None, None))['id']
+    item_id[item['item_id']] = convert_response_to_json(rest_proxy.d.api_get(const.API_URL + 'clarin/import/' + str(id) + "/item", None, None))['id']
 
 def import_bundle():
     """
@@ -506,7 +510,6 @@ def import_hierarchy():
     """
     import_community()
     import_collection()
-    import_item()
 
 #call
 #import_licenses()
@@ -518,3 +521,5 @@ import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
 import_epersons_and_groups()
+#we need to have eperson inported
+import_item()
