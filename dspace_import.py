@@ -222,7 +222,9 @@ def import_eperson():
         metadata = get_metadata_value(7, i['eperson_id'])
         json_p = {'selfRegistered': i['self_registered'], 'requireCertificate' : i['require_certificate'],
                   'netid' : i['netid'], 'canLogIn' : i['can_log_in'], 'lastActive' : i['last_active'],
-                  'email' : i['email'], 'password' : i['password'], 'metadata' : metadata}
+                  'email' : i['email'], 'password' : i['password']}
+        if metadata is not None:
+            json_p['metadata'] = metadata
         eperson_id[i['eperson_id']] = convert_response_to_json(do_api_post('eperson/epersons', None, json_p))['id']
 
 def import_group2group():
@@ -423,15 +425,22 @@ def import_item():
 
     #create other items
     for i in items.values():
-        json_p = {'discoverable' : i['discoverable']}
-        params = {'owningCollection' : collection_id[i['collection_id']]}
-        item_id[i['item_id']] = convert_response_to_json(do_api_post('core/items', json_p, params))
+        json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
+                  'lastModified': i['last_modified'], 'withdrawn' : i['withdrawn']}
+        metadata_item = get_metadata_value(2, i['item_id'])
+        if metadata_item is not None:
+            json_p['metadata'] = metadata_item
+        if i['item_id'] in handle:
+            json_p['handle'] = handle[(2, i['item_id'])]
+        params = {'owningCollection': collection_id[i['owning_collection']],
+                  'epersonUUID' : eperson_id[i['submitter_id']]}
+        item_id[i['item_id']] = convert_response_to_json(do_api_post('clarin/import/item', params, json_p))['id']
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
     global workspaceitem_id, item_id, collection_id, eperson_id
 
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
-              'lastModified': item['last_modified']}
+              'lastModified': item['last_modified'], 'withdrawn' : item['withdrawn']}
     metadata_item = get_metadata_value(2, item['item_id'])
     if metadata_item is not None:
         json_p['metadata'] = metadata_item
