@@ -16,6 +16,7 @@ item_id = dict()
 workspaceitem_id = dict()
 metadatavalue = dict()
 handle = dict()
+bitstreamformat_id = dict()
 
 #using functions
 def read_json(file_name):
@@ -404,24 +405,24 @@ def import_item():
         items[i['item_id']] = i
 
     #create item and workspaceitem
-    json_a = read_json("workspaceitem.json")
-    for i in json_a:
-        item = items[i['item_id']]
-        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
-                             i['stage_reached'], i['page_reached'])
-        del items[i['item_id']]
-
-    #create workflowitem
-    #workflowitem is created from workspaceitem
-    #-1, because the workflowitem doesn't contain this attribute
-    json_a = read_json('workflowitem.json')
-    for i in json_a:
-        item = items[i['item_id']]
-        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
-        #create workflowitem from created workspaceitem
-        params = {'id' : str(workspaceitem_id[i['item_id']])}
-        do_api_post('clarin/import/workflowitem', params, None)
-        del items[i['item_id']]
+    # json_a = read_json("workspaceitem.json")
+    # for i in json_a:
+    #     item = items[i['item_id']]
+    #     import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
+    #                          i['stage_reached'], i['page_reached'])
+    #     del items[i['item_id']]
+    #
+    # #create workflowitem
+    # #workflowitem is created from workspaceitem
+    # #-1, because the workflowitem doesn't contain this attribute
+    # json_a = read_json('workflowitem.json')
+    # for i in json_a:
+    #     item = items[i['item_id']]
+    #     import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
+    #     #create workflowitem from created workspaceitem
+    #     params = {'id' : str(workspaceitem_id[i['item_id']])}
+    #     do_api_post('clarin/import/workflowitem', params, None)
+    #     del items[i['item_id']]
 
     #create other items
     for i in items.values():
@@ -433,7 +434,7 @@ def import_item():
         if i['item_id'] in handle:
             json_p['handle'] = handle[(2, i['item_id'])]
         params = {'owningCollection': collection_id[i['owning_collection']],
-                  'epersonUUID' : eperson_id[i['submitter_id']]}
+                  'epersonUUID': eperson_id[i['submitter_id']]}
         item_id[i['item_id']] = convert_response_to_json(do_api_post('clarin/import/item', params, json_p))['id']
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
@@ -453,7 +454,6 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
               'publishedBefore': publishedBefore,
               'multipleFiles': multipleFiles, 'stageReached': stagereached,
               'pageReached': pageReached,
-              #we need to create submitter!
               'epersonUUID': eperson_id[item['submitter_id']]}
     id = convert_response_to_json(do_api_post('clarin/import/workspaceitem', params, json_p))['id']
     workspaceitem_id[item['item_id']] = id
@@ -476,8 +476,17 @@ def import_bundle():
 
     #load bundles
     json_a = read_json("bundle.json")
-    for i in json_a:
-        json_p = {}
+
+    for item in item2bundle.items():
+        for bundle in item[1]:
+            json_p = {}
+            metadata_item = get_metadata_value(1, item['item_id'])
+            if metadata_item is not None:
+                json_p['metadata'] = metadata_item
+
+            if item['item_id'] in handle:
+                json_p['handle'] = handle[(1, item['item_id'])]
+            res = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, {}))
 
 def import_handle_with_url():
     """
@@ -499,12 +508,12 @@ def import_epersons_and_groups():
     """
     Import part of dspace: epersons and groups.
     """
-    import_registrationdata()
+    #JUST FOR NOW
+    #import_registrationdata()
     import_epersongroup()
     import_group2group()
     import_eperson()
     import_group2eperson()
-    #missing epersongroup2workspace
 
 def import_metadata():
     """
@@ -522,7 +531,6 @@ def import_hierarchy():
 
 #call
 #import_licenses()
-#import_registrationdata()
 #import_handle_with_url()
 #import_bitstreamformatregistry()
 #you have to call together
@@ -532,3 +540,4 @@ import_hierarchy()
 import_epersons_and_groups()
 #we need to have eperson inported
 import_item()
+import_bundle()
