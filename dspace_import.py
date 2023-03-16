@@ -162,6 +162,7 @@ def import_registrationdata():
         do_api_post('eperson/registrations', None, json_p)
 
 def import_bitstreamformatregistry():
+    global bitstreamformat_id
     json_a = read_json('bitstreamformatregistry.json')
     for i in json_a:
         level = i['support_level']
@@ -178,7 +179,7 @@ def import_bitstreamformatregistry():
                      'shortDescription' : i['short_description'], 'supportLevel' : level_str,
                      'internal' : i['internal']}
         try:
-            do_api_post('core/bitstreamformats', None, json_p)
+            bitstreamformat_id = do_api_post('core/bitstreamformats', None, json_p)['id']
         except:
             log('Bitstreamformatregistry with short description ' + i['short_description'] + ' already exists in database!')
 
@@ -381,6 +382,8 @@ def import_collection():
         params = {'parent' : community_id[coll2comm[i['collection_id']]]}
         coll_id = convert_response_to_json(do_api_post('core/collections', params, json_p))['id']
         collection_id[i['collection_id']] = coll_id
+        #import logo
+        
 
         #greate group
         #template_item_id, workflow_step_1, workflow_step_3, admin are not implemented, because they are null in all data
@@ -404,7 +407,7 @@ def import_item():
     for i in json_a:
         items[i['item_id']] = i
 
-    #create item and workspaceitem
+    # #create item and workspaceitem
     # json_a = read_json("workspaceitem.json")
     # for i in json_a:
     #     item = items[i['item_id']]
@@ -478,15 +481,15 @@ def import_bundle():
     json_a = read_json("bundle.json")
 
     for item in item2bundle.items():
-        for bundle in item[1]:
-            json_p = {}
-            metadata_item = get_metadata_value(1, item['item_id'])
+        for bundle_id in item[1]:
+            json_p = dict()
+            metadata_item = get_metadata_value(1, bundle_id)
             if metadata_item is not None:
                 json_p['metadata'] = metadata_item
-
-            if item['item_id'] in handle:
-                json_p['handle'] = handle[(1, item['item_id'])]
-            res = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, {}))
+                json_p['name'] = metadata_item['dc.title'][0]['value']
+            if bundle_id in handle:
+                json_p['handle'] = handle[(1, bundle_id)]
+            res = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p))
 
 def import_handle_with_url():
     """
