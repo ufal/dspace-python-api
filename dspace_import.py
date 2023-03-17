@@ -1,4 +1,5 @@
 import json
+import time
 
 import const
 from support.logs import log
@@ -383,7 +384,7 @@ def import_collection():
         coll_id = convert_response_to_json(do_api_post('core/collections', params, json_p))['id']
         collection_id[i['collection_id']] = coll_id
         #import logo
-        
+
 
         #greate group
         #template_item_id, workflow_step_1, workflow_step_3, admin are not implemented, because they are null in all data
@@ -407,26 +408,27 @@ def import_item():
     for i in json_a:
         items[i['item_id']] = i
 
-    # #create item and workspaceitem
-    # json_a = read_json("workspaceitem.json")
-    # for i in json_a:
-    #     item = items[i['item_id']]
-    #     import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
-    #                          i['stage_reached'], i['page_reached'])
-    #     del items[i['item_id']]
-    #
-    # #create workflowitem
-    # #workflowitem is created from workspaceitem
-    # #-1, because the workflowitem doesn't contain this attribute
-    # json_a = read_json('workflowitem.json')
-    # for i in json_a:
-    #     item = items[i['item_id']]
-    #     import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
-    #     #create workflowitem from created workspaceitem
-    #     params = {'id' : str(workspaceitem_id[i['item_id']])}
-    #     do_api_post('clarin/import/workflowitem', params, None)
-    #     del items[i['item_id']]
+    #create item and workspaceitem
+    json_a = read_json("workspaceitem.json")
+    for i in json_a:
+        item = items[i['item_id']]
+        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
+                             i['stage_reached'], i['page_reached'])
+        del items[i['item_id']]
 
+    #create workflowitem
+    #workflowitem is created from workspaceitem
+    #-1, because the workflowitem doesn't contain this attribute
+    json_a = read_json('workflowitem.json')
+    for i in json_a:
+        item = items[i['item_id']]
+        import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'], -1, -1)
+        #create workflowitem from created workspaceitem
+        params = {'id' : str(workspaceitem_id[i['item_id']])}
+        do_api_post('clarin/import/workflowitem', params, None)
+        del items[i['item_id']]
+
+    counter = 0
     #create other items
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
@@ -438,7 +440,16 @@ def import_item():
             json_p['handle'] = handle[(2, i['item_id'])]
         params = {'owningCollection': collection_id[i['owning_collection']],
                   'epersonUUID': eperson_id[i['submitter_id']]}
-        item_id[i['item_id']] = convert_response_to_json(do_api_post('clarin/import/item', params, json_p))['id']
+        try:
+            if counter % 10 == 0:
+                rest_proxy.reauthenticated()
+            counter += 1
+            response = do_api_post('clarin/import/item', params, json_p)
+            response_json = convert_response_to_json(response)
+            item_id[i['item_id']] = response_json['id']
+        except Exception as e:
+            print("An exception occurred with id: " + str(i['item_id']))
+            print(e)
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
     global workspaceitem_id, item_id, collection_id, eperson_id
