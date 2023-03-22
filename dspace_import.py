@@ -428,6 +428,7 @@ def import_item():
         do_api_post('clarin/import/workflowitem', params, None)
         del items[i['item_id']]
 
+    rest_proxy.reauthenticated()
     counter = 0
     #create other items
     for i in items.values():
@@ -441,7 +442,7 @@ def import_item():
         params = {'owningCollection': collection_id[i['owning_collection']],
                   'epersonUUID': eperson_id[i['submitter_id']]}
         try:
-            if counter % 10 == 0:
+            if counter % 500 == 0:
                 rest_proxy.reauthenticated()
             counter += 1
             response = do_api_post('clarin/import/item', params, json_p)
