@@ -1,17 +1,16 @@
 import json
-import time
 
 import const
+import migration_const
 from support.logs import log
 from support.dspace_proxy import rest_proxy
 
-#global param
+#global params
 eperson_id = dict()
 group_id = dict()
 metadata_schema_id = dict()
 metadata_field_id = dict()
 community_id = dict()
-#maybe we will not need
 collection_id = dict()
 item_id = dict()
 workspaceitem_id = dict()
@@ -19,14 +18,14 @@ metadatavalue = dict()
 handle = dict()
 bitstreamformat_id = dict()
 
-#using functions
+#functions
 def read_json(file_name):
     """
     Read data from file as json.
     @param file_name: file name
     @return: data as json
     """
-    x = open(const.FILE_PATH + file_name)
+    x = open(import_const.DATA_PATH + file_name)
     json_p = json.load(x)
     x.close()
     return json_p
@@ -152,6 +151,8 @@ def import_licenses():
     for f,e in zip(files, end_points):
         do_api_post(e, None, read_json(f))
 
+    print("License_label, Extended_mapping, License_definitions were successfully imported!")
+
 def import_registrationdata():
     """
     Import data into database.
@@ -161,6 +162,8 @@ def import_registrationdata():
     for i in json_a:
         json_p = {'email' : i['email']}
         do_api_post('eperson/registrations', None, json_p)
+
+    print("Registration data was successfully imported!")
 
 def import_bitstreamformatregistry():
     global bitstreamformat_id
@@ -183,6 +186,8 @@ def import_bitstreamformatregistry():
             bitstreamformat_id = do_api_post('core/bitstreamformats', None, json_p)['id']
         except:
             log('Bitstreamformatregistry with short description ' + i['short_description'] + ' already exists in database!')
+
+    print("Bitstream format registry was successfully imported!")
 
 
 def import_epersongroup():
@@ -213,6 +218,7 @@ def import_epersongroup():
             json_p = {'name': name, 'metadata' : metadata_group}
             group_id[i['eperson_group_id']] = [convert_response_to_json(do_api_post('eperson/groups', None, json_p))['id']]
 
+    print("Eperson group was successfully imported!")
 
 def import_eperson():
     """
@@ -230,6 +236,8 @@ def import_eperson():
             json_p['metadata'] = metadata
         eperson_id[i['eperson_id']] = convert_response_to_json(do_api_post('eperson/epersons', None, json_p))['id']
 
+    print("Eperson was successfully imported!")
+
 def import_group2group():
     """
     Import data into database.
@@ -240,6 +248,7 @@ def import_group2group():
     for i in json_a:
         do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
                     const.API_URL + 'eperson/groups/' + group_id[i['child_id']][0])
+    print("Group2group was successfully imported!")
 
 def import_group2eperson():
     """
@@ -251,6 +260,7 @@ def import_group2eperson():
     for i in json_a:
         do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
                     const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
+    print("Epersongroup2eperson was successfully imported!")
 
 def import_metadataschemaregistry():
     """
@@ -271,7 +281,7 @@ def import_metadataschemaregistry():
                 if j['prefix'] == i['short_id']:
                     metadata_schema_id[i['metadata_schema_id']] = j['id']
                     break
-
+    print("MetadataSchemaRegistry was successfully imported!")
 
 def import_metadatafieldregistry():
     """
@@ -292,7 +302,7 @@ def import_metadatafieldregistry():
                 if j['element'] == i['element'] and j['qualifier'] == i['qualifier']:
                     metadata_field_id[i['metadata_field_id']] = j['id']
                     break
-
+    print("MetadataFieldRegistry was successfully imported!")
 
 
 def import_community():
@@ -351,6 +361,8 @@ def import_community():
         if counter == len(json_comm):
             counter = 0
 
+    print("Community and Community2Community were successfully imported!")
+
 def import_collection():
     """
     Import data into database.
@@ -396,6 +408,8 @@ def import_collection():
             group_id[coll2group[i['collection_id']]] = [convert_response_to_json(do_api_post('core/collections/' + coll_id + '/bitstreamReadGroup', None, {}))['id']]
             group_id[coll2group[i['collection_id']]].append(convert_response_to_json(do_api_post('core/collections/' + coll_id + '/itemReadGroup', None, {}))['id'])
 
+    print("Collection and Community2collection were successfully imported!")
+
 def import_item():
     """
     Import data into database.
@@ -416,6 +430,8 @@ def import_item():
                              i['stage_reached'], i['page_reached'])
         del items[i['item_id']]
 
+    print("Workspaceitem was successfully imported!")
+
     #create workflowitem
     #workflowitem is created from workspaceitem
     #-1, because the workflowitem doesn't contain this attribute
@@ -427,6 +443,8 @@ def import_item():
         params = {'id' : str(workspaceitem_id[i['item_id']])}
         do_api_post('clarin/import/workflowitem', params, None)
         del items[i['item_id']]
+
+    print("Cwf_workflowitem was successfully imported!")
 
     rest_proxy.reauthenticated()
     counter = 0
@@ -441,16 +459,13 @@ def import_item():
             json_p['handle'] = handle[(2, i['item_id'])]
         params = {'owningCollection': collection_id[i['owning_collection']],
                   'epersonUUID': eperson_id[i['submitter_id']]}
-        try:
-            if counter % 500 == 0:
-                rest_proxy.reauthenticated()
-            counter += 1
-            response = do_api_post('clarin/import/item', params, json_p)
-            response_json = convert_response_to_json(response)
-            item_id[i['item_id']] = response_json['id']
-        except Exception as e:
-            print("An exception occurred with id: " + str(i['item_id']))
-            print(e)
+        if counter % 500 == 0:
+            rest_proxy.reauthenticated()
+        counter += 1
+        response = do_api_post('clarin/import/item', params, json_p)
+        response_json = convert_response_to_json(response)
+        item_id[i['item_id']] = response_json['id']
+    print("Item and Collection2item were successfully imported!")
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
     global workspaceitem_id, item_id, collection_id, eperson_id
@@ -503,6 +518,8 @@ def import_bundle():
                 json_p['handle'] = handle[(1, bundle_id)]
             res = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p))
 
+    print("Bundle and Item2Bundle were successfully imported!")
+
 def import_handle_with_url():
     """
     Import handles into database with url.
@@ -519,12 +536,13 @@ def import_handle_with_url():
         json_p = {'handle': i['handle'], 'url': i['url']}
         do_api_post('core/handles', None, json_p)
 
+    print("Handles with url were successfully imported!")
+
 def import_epersons_and_groups():
     """
     Import part of dspace: epersons and groups.
     """
-    #JUST FOR NOW
-    #import_registrationdata()
+    import_registrationdata()
     import_epersongroup()
     import_group2group()
     import_eperson()
@@ -545,9 +563,10 @@ def import_hierarchy():
     import_collection()
 
 #call
-#import_licenses()
-#import_handle_with_url()
-#import_bitstreamformatregistry()
+print("Data nugraton started!")
+import_licenses()
+import_bitstreamformatregistry()
+import_handle_with_url()
 #you have to call together
 import_metadata()
 #import hierarchy has to call before import group
@@ -556,3 +575,4 @@ import_epersons_and_groups()
 #we need to have eperson inported
 import_item()
 import_bundle()
+print("Data migration is completed!")
