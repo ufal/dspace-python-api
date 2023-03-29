@@ -25,7 +25,7 @@ def read_json(file_name):
     @param file_name: file name
     @return: data as json
     """
-    x = open(import_const.DATA_PATH + file_name)
+    x = open(migration_const.DATA_PATH + file_name)
     json_p = json.load(x)
     x.close()
     return json_p
@@ -39,7 +39,7 @@ def do_api_post(url, param, json_p, content_type='application/json'):
     @return: response from api post
     """
     url = const.API_URL + url
-    response = rest_proxy.d.api_post(url, param, json_p, content_type=content_type)
+    response = rest_proxy.d.api_post(url, param, json_p)
     #control of responce status is missing
     log('Api post by ' + url + ' was successfully done!')
     return response
