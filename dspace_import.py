@@ -17,6 +17,8 @@ workspaceitem_id = dict()
 metadatavalue = dict()
 handle = dict()
 bitstreamformat_id = dict()
+primaryBitstream = dict()
+bitstream2bundle = dict()
 
 #functions
 def read_json(file_name):
@@ -494,7 +496,7 @@ def import_bundle():
     Import data into database.
     Mapped tables: item2bundle, bundle, bitstream, bundle2bitstream
     """
-    global item_id
+    global item_id, handle
     #load item2bundle into dict
     json_a = read_json("item2bundle.json")
     item2bundle = dict()
@@ -504,21 +506,54 @@ def import_bundle():
         else:
             item2bundle[i['item_id']] = [i['bundle_id']]
 
-    #load bundles
+    #load bundles and map bundles to their primary bitstream ids
     json_a = read_json("bundle.json")
+    for i in json_a:
+        if i['primary_bitstream_id'] is not None:
+            primaryBitstream['bundle_id'] = i['primary_bitstream_id']
 
+    #import bundle withour primary bitstream id
     for item in item2bundle.items():
         for bundle_id in item[1]:
             json_p = dict()
-            metadata_item = get_metadata_value(1, bundle_id)
-            if metadata_item is not None:
-                json_p['metadata'] = metadata_item
-                json_p['name'] = metadata_item['dc.title'][0]['value']
+            metadata_bundle = get_metadata_value(1, bundle_id)
+            if metadata_bundle is not None:
+                json_p['metadata'] = metadata_bundle
+                json_p['name'] = metadata_bundle['dc.title'][0]['value']
             if bundle_id in handle:
                 json_p['handle'] = handle[(1, bundle_id)]
             res = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p))
 
     print("Bundle and Item2Bundle were successfully imported!")
+
+def import_bitstream():
+    global bitstreamformat_id, handle, primaryBitstream, bitstream2bundle
+    #load bundle2bitstream
+    json_a = read_json("bundle2bitstream.json")
+    for i in json_a:
+        bitstream2bundle[i['bitstream_id']] = i['bundle_id']
+
+    #load and import bitstreams
+    json_a = read_json("bitstream_my.json")
+    for i in json_a:
+        json_p = dict()
+        metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
+        if metadata_bitstream is not None:
+            json_p['metadata'] = metadata_bitstream
+        if i['bitstream_id'] in handle:
+            json_p['handle'] = handle[(0, i['bitstream_id'])]
+        json_p['sizeBytes'] = i['size_bytes']
+        json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
+        params = {'internal_id': i['internal_id'],
+                  'storeNumber': i['store_number'],
+                  'bitstreamFormat': bitstreamformat_id[i['bitstream_format_id']],
+                  'deleted': i['deleted'],
+                  'sequenceId': i['sequence_id']}
+        if primaryBitstream[bitstream2bundle[i['bitstream_id']]] == i['bitstream_id']:
+            params['primaryBitstream'] = True
+        else:
+            params['primaryBitstream'] = False
+        res = convert_response_to_json(do_api_post('clarin/import/core/bundles/' + str(bitstream2bundle[i['bitstream_id']]) + "/bitstreams", params, json_p))
 
 def import_handle_with_url():
     """
@@ -563,16 +598,16 @@ def import_hierarchy():
     import_collection()
 
 #call
-print("Data nugraton started!")
+print("Data migraton started!")
 import_licenses()
-import_bitstreamformatregistry()
-import_handle_with_url()
+# import_bitstreamformatregistry()
+# import_handle_with_url()
 #you have to call together
-import_metadata()
+# import_metadata()
 #import hierarchy has to call before import group
-import_hierarchy()
-import_epersons_and_groups()
+# import_hierarchy()
+# import_epersons_and_groups()
 #we need to have eperson inported
-import_item()
-import_bundle()
+# import_item()
+# import_bundle()
 print("Data migration is completed!")
