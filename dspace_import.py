@@ -151,7 +151,7 @@ def import_licenses():
     """
     files = ['license_label.json', 'license_label_extended_mapping.json', 'license_definition.json']
     end_points = ['licenses/import/labels', 'licenses/import/extendedMapping', 'licenses/import/licenses']
-    for f,e in zip(files, end_points):
+    for f, e in zip(files, end_points):
         do_api_post(e, None, read_json(f))
 
     print("License_label, Extended_mapping, License_definitions were successfully imported!")
@@ -237,7 +237,16 @@ def import_eperson():
     Mapped tables: eperson, metadatavalue
     """
     global eperson_id
+
+    #read user_registration
+    json_a = read_json("user_registration.json")
+    #create dict from user registrations
+    user_reg = dict()
+    for i in json_a:
+        user_reg[i['eperson_id']] = {'organization': i['organization'], 'confirmation': i['confirmation']}
+
     json_a = read_json('eperson.json')
+
     for i in json_a:
         metadata = get_metadata_value(7, i['eperson_id'])
         json_p = {'selfRegistered': i['self_registered'], 'requireCertificate' : i['require_certificate'],
@@ -245,7 +254,15 @@ def import_eperson():
                   'email' : i['email'], 'password' : i['password']}
         if metadata is not None:
             json_p['metadata'] = metadata
-        eperson_id[i['eperson_id']] = convert_response_to_json(do_api_post('eperson/epersons', None, json_p))['id']
+        if i['eperson_id'] in user_reg:
+            param = user_reg[i['eperson_id']]
+            param['userRegistration'] = True
+        else:
+            param = {'userRegistration': False}
+        param['selfRegistered'] = i['self_registered']
+        param['lastActive'] = i['last_active']
+        res = do_api_post('clarin/import/eperson', param, json_p)
+        eperson_id[i['eperson_id']] = convert_response_to_json(res)['id']
 
     print("Eperson was successfully imported!")
 
@@ -269,9 +286,10 @@ def import_group2eperson():
     """
     global group_id, eperson_id
     json_a = read_json('epersongroup2eperson.json')
-    for i in json_a:
-        do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
-                    const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
+    if json_a is not None:
+        for i in json_a:
+            do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
+                        const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
     print("Epersongroup2eperson was successfully imported!")
 
 def import_metadataschemaregistry():
@@ -545,14 +563,15 @@ def import_bundle():
             json_p = dict()
             #zmena
             metadata_bundle = get_metadata_value(1, bundle)
-            # if metadata_bundle is not None:
-            #     json_p['metadata'] = metadata_bundle
-            #     json_p['name'] = metadata_bundle['dc.title'][0]['value']
+            if metadata_bundle is not None:
+                json_p['metadata'] = metadata_bundle
+                json_p['name'] = metadata_bundle['dc.title'][0]['value']
             # else:
-            json_p['name'] = counter
-            counter+=1
-            # if bundle_id in handle:
-            #     json_p['handle'] = handle[(1, bundle_id)]
+            # json_p['name'] = counter
+            # counter += 1
+
+            if bundle in handle:
+                json_p['handle'] = handle[(1, bundle)]
             bundle_id[bundle] = convert_response_to_json(do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p))['uuid']
 
     print("Bundle and Item2Bundle were successfully imported!")
@@ -569,11 +588,11 @@ def import_bitstream():
     for i in json_a:
         json_p = dict()
         #zmena
-        # metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
-        # if metadata_bitstream is not None:
-        #     json_p['metadata'] = metadata_bitstream
-        # if i['bitstream_id'] in handle:
-        #     json_p['handle'] = handle[(0, i['bitstream_id'])]
+        metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
+        if metadata_bitstream is not None:
+            json_p['metadata'] = metadata_bitstream
+        if i['bitstream_id'] in handle:
+            json_p['handle'] = handle[(0, i['bitstream_id'])]
         json_p['sizeBytes'] = i['size_bytes']
         json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
         params = {'internal_id': i['internal_id'],
@@ -581,10 +600,20 @@ def import_bitstream():
                   'bitstreamFormat': bitstreamformat_id[i['bitstream_format_id']],
                   'deleted': i['deleted'],
                   'sequenceId': i['sequence_id'],
-                  'primaryBitstream': bitstream2bundle[i['bitstream_id']] in primaryBitstream and primaryBitstream[bitstream2bundle[i['bitstream_id']]] == i['bitstream_id']}
-        convert_response_to_json(do_api_post('clarin/import/core/bundles/' + str(bundle_id[bitstream2bundle[i['bitstream_id']]]) + "/bitstreams", params, json_p))
+                  'primaryBitstream': i['bitstream_id'] in bitstream2bundle and bitstream2bundle[i['bitstream_id']] in primaryBitstream and primaryBitstream[bitstream2bundle[i['bitstream_id']]] == i['bitstream_id']}
+        if i['bitstream_id'] in bitstream2bundle:
+            params['bundle_id'] = bundle_id[bitstream2bundle[i['bitstream_id']]]
+        else:
+            params['bundle_id'] = None
+
+        convert_response_to_json(do_api_post('clarin/import/core/bitstream', params, json_p))
+
+    #do bitstream checksum
+    do_api_post('clarin/import/core/bitstream/checksum', None, None)
 
     print("Bitstream and bundle2bitstream were successfully imported!")
+
+
 
 def import_handle_with_url():
     """
@@ -634,7 +663,7 @@ print("Data migraton started!")
 import_licenses()
 import_bitstreamformatregistry()
 import_handle_with_url()
-#you have to call together
+# #you have to call together
 import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
@@ -643,4 +672,6 @@ import_epersons_and_groups()
 import_item()
 import_bundle()
 import_bitstream()
+#license imprt need bitstream for license_resource_mapping
+
 print("Data migration is completed!")
