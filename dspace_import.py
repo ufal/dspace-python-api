@@ -1,7 +1,7 @@
 import json
-
 import const
 import migration_const
+
 from support.logs import log
 from support.dspace_proxy import rest_proxy
 
@@ -125,10 +125,10 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
     if metadatavalue_obj:
         #create list of object metadata
         for i in metadatavalue_obj:
-            # get metadatafield
+            #get metadatafield
             metadatafield_json = convert_response_to_json(
                 do_api_get_one('core/metadatafields', metadata_field_id[i['metadata_field_id']]))
-            # get metadataschema
+            #get metadataschema
             metadataschema_json = convert_response_to_json(do_api_get_one('core/metadataschemas',
                                                            metadatafield_json['_embedded']['schema']['id']))
             #define and insert key and value of dict
@@ -171,7 +171,7 @@ def import_registrationdata():
 
 def import_bitstreamformatregistry():
     global bitstreamformat_id
-    #read all existing data from bitstrreamformatregistry
+    #read all existing data from bitstreamformatregistry
     shortDesc2Id = dict()
     bitstreamformat = convert_response_to_json(do_api_get_all('core/bitstreamformats'))['_embedded']['bitstreamformats']
     for i in bitstreamformat:
@@ -431,12 +431,11 @@ def import_collection():
         if (3, i['collection_id']) in handle:
             handle_col = handle[(3, i['collection_id'])][0]
             json_p['handle'] = handle_col['handle']
-        #missing submitter and logo
+        #TODO
+        #missing submitter
         params = {'parent' : community_id[coll2comm[i['collection_id']]]}
         coll_id = convert_response_to_json(do_api_post('core/collections', params, json_p))['id']
         collection_id[i['collection_id']] = coll_id
-        #import logo
-
 
         #greate group
         #template_item_id, workflow_step_1, workflow_step_3, admin are not implemented, because they are null in all data
@@ -450,8 +449,6 @@ def import_collection():
 
     print("Collection and Community2collection were successfully imported!")
 
-#TODO
-#Why are ze not using metadata???
 def import_item():
     """
     Import data into database.
@@ -513,6 +510,11 @@ def import_item():
     print("Item and Collection2item were successfully imported!")
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached, pageReached):
+    """
+    Auxiliary method for import item.
+    Import data into database.
+    Mapped tables: workspaceitem, metadata, handle
+    """
     global workspaceitem_id, item_id, collection_id, eperson_id
 
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
@@ -523,7 +525,7 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
 
     if item['item_id'] in handle:
         json_p['handle'] = handle[(2, item['item_id'])]
-        # the params are workspaceitem attributes
+    #the params are workspaceitem attributes
     params = {'owningCollection': collection_id[owningCollectin],
               'multipleTitles': multipleTitles,
               'publishedBefore': publishedBefore,
@@ -537,7 +539,7 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
 def import_bundle():
     """
     Import data into database.
-    Mapped tables: item2bundle, bundle, bitstream, bundle2bitstream
+    Mapped tables: item2bundle, bundle
     """
     global item_id, handle, bundle_id
     #load item2bundle into dict
@@ -555,20 +557,14 @@ def import_bundle():
         if i['primary_bitstream_id'] is not None:
             primaryBitstream[i['bundle_id']] = i['primary_bitstream_id']
 
-#zmena
-    counter = 0
     #import bundle without primary bitstream id
     for item in item2bundle.items():
         for bundle in item[1]:
             json_p = dict()
-            #zmena
             metadata_bundle = get_metadata_value(1, bundle)
             if metadata_bundle is not None:
                 json_p['metadata'] = metadata_bundle
                 json_p['name'] = metadata_bundle['dc.title'][0]['value']
-            # else:
-            # json_p['name'] = counter
-            # counter += 1
 
             if bundle in handle:
                 json_p['handle'] = handle[(1, bundle)]
@@ -577,6 +573,10 @@ def import_bundle():
     print("Bundle and Item2Bundle were successfully imported!")
 
 def import_bitstream():
+    """
+    Import data into database.
+    Mapped tables: bitstream, bundle2bitstream, metadata, handle, most_recent_checksum and checksum_result
+    """
     global bitstreamformat_id, handle, primaryBitstream, bitstream2bundle
     #load bundle2bitstream
     json_a = read_json("bundle2bitstream.json")
@@ -609,11 +609,10 @@ def import_bitstream():
         convert_response_to_json(do_api_post('clarin/import/core/bitstream', params, json_p))
 
     #do bitstream checksum
+    #fill the tables: most_recent_checksum and checksum_result based on imported bitstreams
     do_api_post('clarin/import/core/bitstream/checksum', None, None)
 
-    print("Bitstream and bundle2bitstream were successfully imported!")
-
-
+    print("Bitstream, bundle2bitstream, most_recent_checksum and checksum_result were successfully imported!")
 
 def import_handle_with_url():
     """
@@ -633,6 +632,13 @@ def import_handle_with_url():
             do_api_post('core/handles', None, json_p)
 
     print("Handles with url were successfully imported!")
+
+def import_dspace_clarin():
+    """
+    Import tables, that were added to dspace-clarin.
+    """
+    import_licenses()
+    import_handle_with_url()
 
 def import_epersons_and_groups():
     """
@@ -658,20 +664,23 @@ def import_hierarchy():
     import_community()
     import_collection()
 
+def import_bundles_and_bitstreams():
+    """
+    Import part of dspace: bundles and bitstreams
+    """
+    import_item()
+    import_bitstreamformatregistry()
+    import_bundle()
+    import_bitstream()
+
 #call
 print("Data migraton started!")
-import_licenses()
-import_bitstreamformatregistry()
-import_handle_with_url()
+import_dspace_clarin()
+
 # #you have to call together
 import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
 import_epersons_and_groups()
-#we need to have eperson inported
-import_item()
-import_bundle()
-import_bitstream()
-#license imprt need bitstream for license_resource_mapping
-
+import_bundles_and_bitstreams()
 print("Data migration is completed!")
