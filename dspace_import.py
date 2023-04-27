@@ -11,7 +11,9 @@ group_id = dict()
 metadata_schema_id = dict()
 metadata_field_id = dict()
 community_id = dict()
+community2logo = dict()
 collection_id = dict()
+collection2logo = dict()
 item_id = dict()
 workspaceitem_id = dict()
 metadatavalue = dict()
@@ -20,6 +22,7 @@ bitstreamformat_id = dict()
 primaryBitstream = dict()
 bitstream2bundle = dict()
 bundle_id = dict()
+bitstream_id = dict()
 
 #functions
 def read_json(file_name):
@@ -33,7 +36,7 @@ def read_json(file_name):
     x.close()
     return json_p
 
-def do_api_post(url, param, json_p, content_type='application/json'):
+def do_api_post(url, param, json_p):
     """
     Insert data into database by api if they are not None.
     @param url: url for api post
@@ -340,7 +343,7 @@ def import_community():
     Import data into database.
     Mapped tables: community, community2community, metadatavalue, handle
     """
-    global group_id, metadatavalue, handle, community_id
+    global group_id, metadatavalue, handle, community_id, community2logo
     if not handle:
         read_handle()
 
@@ -386,6 +389,10 @@ def import_community():
             resp_community_id = convert_response_to_json(do_api_post('core/communities', parent_id, json_p))['id']
             community_id[i['community_id']] = resp_community_id
 
+            #add to community2logo, if community has logo
+            if i["logo_bitstream_id"] != None:
+                community2logo[i_id] = i["logo_bitstream_id"]
+
             # create admingroup
             if i['admin'] != None:
                 group_id[i['admin']] = [convert_response_to_json(
@@ -403,7 +410,7 @@ def import_collection():
     Import data into database.
     Mapped tables: collection, community2collection, metadatavalue, handle
     """
-    global group_id, metadatavalue, handle, commnity_id, collection_id
+    global group_id, metadatavalue, handle, community_id, collection_id, collection2logo
     if not handle:
         read_handle()
     json_a = read_json('collection.json')
@@ -436,6 +443,10 @@ def import_collection():
         params = {'parent' : community_id[coll2comm[i['collection_id']]]}
         coll_id = convert_response_to_json(do_api_post('core/collections', params, json_p))['id']
         collection_id[i['collection_id']] = coll_id
+
+        # add to collection2logo, if collection has logo
+        if i["logo_bitstream_id"] != None:
+            community2logo[i['collection_id']] = i["logo_bitstream_id"]
 
         #greate group
         #template_item_id, workflow_step_1, workflow_step_3, admin are not implemented, because they are null in all data
@@ -606,13 +617,39 @@ def import_bitstream():
         else:
             params['bundle_id'] = None
 
-        convert_response_to_json(do_api_post('clarin/import/core/bitstream', params, json_p))
+        bitstream_id[i['bitstream_id']] = convert_response_to_json(do_api_post('clarin/import/core/bitstream', params, json_p))['id']
+
+    #add logos (bitstreams) to collections and communities
+    add_logo_to_community()
+    add_logo_to_collection()
 
     #do bitstream checksum
     #fill the tables: most_recent_checksum and checksum_result based on imported bitstreams
     do_api_post('clarin/import/core/bitstream/checksum', None, None)
 
     print("Bitstream, bundle2bitstream, most_recent_checksum and checksum_result were successfully imported!")
+
+def add_logo_to_community():
+    """
+    Add bitstream to community as community logo.
+    Logo has to exist in database.
+    """
+    global community2logo, bitstream_id, community_id
+    for key, value in community2logo.items():
+        if key in community_id and value in bitstream_id:
+            params = {'community_id': community_id[key], 'bitstream_id': bitstream_id[value]}
+            do_api_post("/api/clarin/import/logo/community", params, None)
+
+def add_logo_to_collection():
+    """
+    Add bitstream to collection as collection logo.
+    Logo has to exist in database.
+    """
+    global collection2logo, bitstream_id, collection_id
+    for key, value in collection2logo.items():
+        if key in collection_id and value in bitstream_id:
+            params = {'collection_id': collection_id[key], 'bitstream_id': bitstream_id[value]}
+            do_api_post("/api/clarin/import/logo/collection", params, None)
 
 def import_handle_with_url():
     """
