@@ -156,8 +156,11 @@ def import_licenses():
     Import data into database.
     Mapped tables: license_label, extended_mapping, license_definitions
     """
-    files = ['license_label.json', 'license_label_extended_mapping.json', 'license_definition.json']
-    end_points = ['licenses/import/labels', 'licenses/import/extendedMapping', 'licenses/import/licenses']
+    global eperson_id
+
+    #import license_label and license_extended_mapping
+    files = ['license_label.json', 'license_label_extended_mapping.json']
+    end_points = ['licenses/import/labels', 'licenses/import/extendedMapping']
     for f, e in zip(files, end_points):
         json_a = read_json(f)
         if json_a:
@@ -168,6 +171,20 @@ def import_licenses():
             except Exception as e:
                 json_e = json.loads(e.args[0])
                 log('Import ' + f + ': status code ' + str(json_e['status']))
+
+    #import license_definition
+    json_a = read_json('license_definition.json')
+    if json_a:
+        for data in json_a:
+            data['eperson_id'] = eperson_id[data['eperson_id']]
+        try:
+            response = do_api_post( 'licenses/import/licenses', None, json_a)
+            if response.status_code != 200:
+                log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+        except Exception as e:
+            json_e = json.loads(e.args[0])
+            log('POST request ' + json_e['path'] + ' failed. Status code ' + str(json_e['status']))
+
     print("License_label, Extended_mapping, License_definitions were successfully imported!")
 
 def import_registrationdata():
@@ -219,7 +236,7 @@ def import_bitstreamformatregistry():
                     response = do_api_post('core/bitstreamformats', None, json_p)
                     bitstreamformat_id[i['bitstream_format_id']] = convert_response_to_json(response)['id']
                 except:
-                    if response.status_code == 200:
+                    if response.status_code == 200 or response.status_code == 201:
                         bitstreamformat_id[i['bitstream_format_id']] = shortDesc2Id[i['short_description']]
                         log('Bitstreamformatregistry with short description ' + i[
                             'short_description'] + ' already exists in database!')
@@ -374,12 +391,18 @@ def import_metadataschemaregistry():
                 response = do_api_post('core/metadataschemas', None, json_p)
                 metadata_schema_id[i['metadata_schema_id']] = convert_response_to_json(response)['id']
             except:
-                log('POST request ' + response.url + ' for id: ' + str(i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
+                found = False
                 if existing_data:
                     for j in existing_data:
                         if j['prefix'] == i['short_id']:
                             metadata_schema_id[i['metadata_schema_id']] = j['id']
+                            log('Metadataschemaregistry with prefix: ' + i['short_id']
+                                + 'already exists in database!')
+                            found = True
                             break
+                if not found:
+                    log('POST request ' + response.url + ' for id: ' + str(
+                    i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
     print("MetadataSchemaRegistry was successfully imported!")
 
 def import_metadatafieldregistry():
@@ -404,13 +427,17 @@ def import_metadatafieldregistry():
                 response = do_api_post('core/metadatafields', param, json_p)
                 metadata_field_id[i['metadata_field_id']] = convert_response_to_json(response)['id']
             except:
-                log('POST request ' + response.url + ' for id: ' + str(
-                    i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
+                found = False
                 if existing_data:
                     for j in existing_data:
                         if j['element'] == i['element'] and j['qualifier'] == i['qualifier']:
                             metadata_field_id[i['metadata_field_id']] = j['id']
+                            log('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
+                            found = True
                             break
+                if not found:
+                    log('POST request ' + response.url + ' for id: ' + str(
+                        i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
     print("MetadataFieldRegistry was successfully imported!")
 
 def import_community():
@@ -826,13 +853,6 @@ def import_handle_with_url():
 
     print("Handles with url were successfully imported!")
 
-def import_dspace_clarin():
-    """
-    Import tables, that were added to dspace-clarin.
-    """
-    import_licenses()
-    import_handle_with_url()
-
 def import_epersons_and_groups():
     """
     Import part of dspace: epersons and groups.
@@ -871,14 +891,14 @@ print("Data migraton started!")
 #at the beginning
 read_metadata()
 read_handle()
-import_bitstreamformatregistry()
 #not depends on the ather tables
-import_dspace_clarin()
+import_handle_with_url()
 
 #you have to call together
 import_metadata()
 #import hierarchy has to call before import group
 import_hierarchy()
 import_epersons_and_groups()
+import_licenses()
 import_bundles_and_bitstreams()
 print("Data migration is completed!")
