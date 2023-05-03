@@ -8,7 +8,7 @@ Blackbox tests for dspace repository
 - Installed CLARIN-DSpace7.*. with running database, solr, tomcat
 
 ### Steps:
-1. Clone python-api: https://github.com/dataquest-dev/dspace-python-api (branch `internal/data-migration-items` - it's still in progress) and dpace://https://github.com/dataquest-dev/DSpace (branch `internal/migrate-clarin-dspace5-to-clarin-dspace7`
+1. Clone python-api: https://github.com/dataquest-dev/dspace-python-api (branch `main`) and dpace://https://github.com/dataquest-dev/DSpace (branch `dtq-dev`)
 
 ***
 2. Get database dump (old CLARIN-DSpace) and unzip it into the `<PSQL_PATH>/bin` (or wherever you want)
