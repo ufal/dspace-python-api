@@ -77,7 +77,7 @@ Update `migration_const.py`
 - Run `python data_migration.py <DATABSE NAME> <HOST> postgres <PASSWORD FOR POSTGRES>` e.g., `python data_migration.py clarin-dspace localhost postgres pass` (arguments for database connection - database, host, user, password) for the BOTH databases // NOTE there must exist data folder in the project structure
 
 ***
-9. Copy `assetstore` from dspace5 to dspace7 (for bitstream import)
+9. Copy `assetstore` from dspace5 to dspace7 (for bitstream import). `assetstore` is in the folder where you have installed DSpace `dspace/assetstore`.
 
 ***
 10. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
