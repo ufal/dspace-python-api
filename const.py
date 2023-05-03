@@ -5,7 +5,10 @@ import expected
 from support.logs import log, Severity
 
 user = "test@test.edu"
-password = "admin"
+password = "dspace"
+# password = "admin"
+# user = "m@edu.com"
+# password = "dspace"
 
 # http or https
 use_ssl = False
@@ -69,6 +72,7 @@ OAI_openaire_datacite = OAI_url + "openaire_data?verb=ListRecords&metadataPrefix
 OAI_olac = OAI_url + "request?verb=ListRecords&metadataPrefix=olac&set="
 OAI_cmdi = OAI_url + "request?verb=ListRecords&metadataPrefix=cmdi&set="
 API_URL = BE_url + "api/"
+IMPORT_DATA_PATH = "data/license_import/"
 COM = "BB-TEST-COM"
 com_UUID = None
 COL = "BB-TEST-COL"

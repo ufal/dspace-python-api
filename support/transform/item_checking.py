@@ -230,6 +230,8 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'icon': clarin_license_label["icon"]
     }
 
+    
+
     url = const.API_URL + 'core/clarinlicenses'
     license_json = {
         'name': name,
