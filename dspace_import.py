@@ -309,12 +309,8 @@ def import_eperson():
             user_reg[i['eperson_id']] = {'organization': i['organization'], 'confirmation': i['confirmation']}
 
     json_a = read_json('eperson.json')
-    counter = 0
     if json_a:
         for i in json_a:
-            if counter % 500 == 0:
-                rest_proxy.reauthenticated()
-            counter += 1
             metadata = get_metadata_value(7, i['eperson_id'])
             json_p = {'selfRegistered': i['self_registered'], 'requireCertificate' : i['require_certificate'],
                       'netid' : i['netid'], 'canLogIn' : i['can_log_in'], 'lastActive' : i['last_active'],
@@ -601,7 +597,6 @@ def import_item():
     Mapped tables: item, collection2item,workspaceitem, cwf_workflowitem, metadata, handle
     """
     global workspaceitem_id
-    rest_proxy.reauthenticated()
     #create dict from items by item id
     json_a = read_json("item.json")
     items = dict()
@@ -612,11 +607,7 @@ def import_item():
     #create item and workspaceitem
     json_a = read_json("workspaceitem.json")
     if json_a:
-        counter = 0
         for i in json_a:
-            if counter % 500 == 0:
-                rest_proxy.reauthenticated()
-            counter += 1
             item = items[i['item_id']]
             import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'], i['multiple_files'],
                                  i['stage_reached'], i['page_reached'])
@@ -628,13 +619,9 @@ def import_item():
     #workflowitem is created from workspaceitem
     #-1, because the workflowitem doesn't contain this attribute
     json_a = read_json('workflowitem.json')
-    counter = 0
     if json_a:
         for i in json_a:
             item = items[i['item_id']]
-            if counter % 500 == 0:
-                rest_proxy.reauthenticated()
-            counter += 1
             import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'],
                                  i['multiple_files'], -1, -1)
             #create workflowitem from created workspaceitem
@@ -736,13 +723,9 @@ def import_bundle():
                 primaryBitstream[i['primary_bitstream_id']] = i['bundle_id']
 
     #import bundle without primary bitstream id
-    counter = 0
     if item2bundle:
         for item in item2bundle.items():
             for bundle in item[1]:
-                if counter % 500 == 0:
-                    rest_proxy.reauthenticated()
-                counter += 1
                 json_p = dict()
                 metadata_bundle = get_metadata_value(1, bundle)
                 if metadata_bundle:
