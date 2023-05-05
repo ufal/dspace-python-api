@@ -202,8 +202,9 @@ def import_licenses():
                       'requiredInfo': i['required_info'], 'clarinLicenseLabel': labels[i['label_id']]}
             if i['license_id'] in extended_label:
                 json_p['extendedClarinLicenseLabels'] = extended_label[i['license_id']]
+            param = {'eperson': eperson_id[i['eperson_id']]}
             try:
-                response = do_api_post( 'core/clarinlicenses', None, json_p)
+                response = do_api_post( 'clarin/import/license', param, json_p)
             except:
                 log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
 
@@ -928,16 +929,16 @@ def import_bundles_and_bitstreams():
 #call
 print("Data migraton started!")
 #at the beginning
-# read_metadata()
-# read_handle()
-# #not depends on the ather tables
-# import_handle_with_url()
+read_metadata()
+read_handle()
+#not depends on the ather tables
+import_handle_with_url()
 
-# #you have to call together
-# import_metadata()
+#you have to call together
+import_metadata()
 #import hierarchy has to call before import group
-# import_hierarchy()
-# import_epersons_and_groups()
+import_hierarchy()
+import_epersons_and_groups()
 import_licenses()
-# import_bundles_and_bitstreams()
+import_bundles_and_bitstreams()
 print("Data migration is completed!")
