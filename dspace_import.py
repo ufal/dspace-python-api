@@ -8,7 +8,7 @@ from support.logs import log
 from support.dspace_proxy import rest_proxy
 
 #global params
-labels_id = dict()
+labels = dict()
 eperson_id = dict()
 group_id = dict()
 metadata_schema_id = dict()
@@ -177,45 +177,35 @@ def import_licenses():
                 log("Exception while reading label image with name: " + i['label'].lower() + ".png occurred: " + e)
             try:
                 response = do_api_post('core/clarinlicenselabels', None, json_p)
-                labels_id[i['label_id']] = convert_response_to_json(response)['id']
+                created_label = convert_response_to_json(response)
+                del created_label['license']
+                del created_label['_links']
+                labels[i['label_id']] = created_label
             except:
                 log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+
+    #read license label extended mapping
+    extended_label = dict()
+    json_a = read_json('license_label_extended_mapping.json')
+    if json_a:
+        for i in json_a:
+            if i['license_id'] in extended_label.keys():
+                extended_label[i['license_id']].append(labels[i['label_id']])
+            else:
+                extended_label[i['license_id']] = [labels[i['label_id']]]
 
     #import license_definition
     json_a = read_json('license_definition.json')
     if json_a:
         for i in json_a:
-            json_p = {'name': i['name'], 'definition': i['definition'], 'createdOn': i['created_on'],
-                      'confirmation': i['confirmation'], 'requiredInfo': i['required_info'],
-                      'label_id': labels_id[i['label_id']]}
-        try:
-            response = do_api_post( 'core/clarinlicenses', None, json_p)
-        except:
-            log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
-
-    # # license_extended_mapping
-    # json_a = read_json('license_label_extended_mapping.json')
-    # if json_a:
-    #     try:
-    #         response = do_api_post('licenses/import/extendedMapping', None, json_a)
-    #         if response.status_code != 200:
-    #             log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
-    #     except Exception as e:
-    #         json_e = json.loads(e.args[0])
-    #         log('POST request ' + json_e['path'] + ' failed. Status code ' + str(json_e['status']))
-    #
-    # #import license_definition
-    # json_a = read_json('license_definition.json')
-    # if json_a:
-    #     for data in json_a:
-    #         data['eperson_id'] = eperson_id[data['eperson_id']]
-    #     try:
-    #         response = do_api_post( 'licenses/import/licenses', None, json_a)
-    #         if response.status_code != 200:
-    #             log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
-    #     except Exception as e:
-    #         json_e = json.loads(e.args[0])
-    #         log('POST request ' + json_e['path'] + ' failed. Status code ' + str(json_e['status']))
+            json_p = {'name': i['name'], 'definition': i['definition'], 'confirmation': i['confirmation'],
+                      'requiredInfo': i['required_info'], 'clarinLicenseLabel': labels[i['label_id']]}
+            if i['license_id'] in extended_label:
+                json_p['extendedClarinLicenseLabels'] = extended_label[i['license_id']]
+            try:
+                response = do_api_post( 'core/clarinlicenses', None, json_p)
+            except:
+                log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
 
     print("License_label, Extended_mapping, License_definitions were successfully imported!")
 
