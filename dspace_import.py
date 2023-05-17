@@ -22,6 +22,7 @@ workspaceitem_id = dict()
 metadatavalue = dict()
 handle = dict()
 bitstreamformat_id = dict()
+unknown_format_id = None
 primaryBitstream = dict()
 bitstream2bundle = dict()
 bundle_id = dict()
@@ -231,6 +232,7 @@ def import_registrationdata():
 
 def import_bitstreamformatregistry():
     global bitstreamformat_id
+    global unknown_format_id
     #read all existing data from bitstreamformatregistry
     shortDesc2Id = dict()
     try:
@@ -239,6 +241,8 @@ def import_bitstreamformatregistry():
         if bitstreamformat:
             for i in bitstreamformat:
                 shortDesc2Id[i['shortDescription']] = i['id']
+                if i['description'] == 'Unknown data format':
+                    unknown_format_id = i['id']
 
         json_a = read_json('bitstreamformatregistry.json')
         if json_a:
@@ -787,6 +791,9 @@ def import_bitstream():
                 json_p['metadata'] = metadata_bitstream
             json_p['sizeBytes'] = i['size_bytes']
             json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
+            if not i['bitstream_format_id']:
+                log(f'Bitstream {i["bitstream_id"]} does not hava a bitstream_format_id. Using {unknown_format_id} instead.')
+                i['bitstream_format_id'] = unknown_format_id
             params = {'internal_id': i['internal_id'],
                       'storeNumber': i['store_number'],
                       'bitstreamFormat': bitstreamformat_id[i['bitstream_format_id']],
@@ -905,7 +912,7 @@ def import_bundles_and_bitstreams():
     import_item()
     import_bitstreamformatregistry()
     import_bundle()
-    #import_bitstream()
+    import_bitstream()
 
 #call
 print("Data migraton started!")
