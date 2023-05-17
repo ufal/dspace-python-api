@@ -792,7 +792,7 @@ def import_bitstream():
             json_p['sizeBytes'] = i['size_bytes']
             json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
             if not i['bitstream_format_id']:
-                log(f'Bitstream {i["bitstream_id"]} does not hava a bitstream_format_id. Using {unknown_format_id} instead.')
+                log(f'Bitstream {i["bitstream_id"]} does not have a bitstream_format_id. Using {unknown_format_id} instead.')
                 i['bitstream_format_id'] = unknown_format_id
             params = {'internal_id': i['internal_id'],
                       'storeNumber': i['store_number'],
