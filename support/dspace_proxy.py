@@ -22,8 +22,6 @@ class DspaceRESTProxy:
             raise ConnectionError("Cannot connect to dspace!")
         log("Successfully logged in to dspace on " + const.API_URL)
 
-    def reauthenticated(self):
-        authenticated = self.d.authenticate()
     def get(self, command, params=None, data=None):
         """
         Simple GET of url.

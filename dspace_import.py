@@ -664,8 +664,6 @@ def import_item():
 
     print("Cwf_workflowitem was successfully imported!")
 
-    rest_proxy.reauthenticated()
-    counter = 0
     #create other items
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
@@ -677,10 +675,6 @@ def import_item():
             json_p['handle'] = handle[(2, i['item_id'])]
         params = {'owningCollection': collection_id[i['owning_collection']],
                   'epersonUUID': eperson_id[i['submitter_id']]}
-        #we have to do reauthorization after some time
-        if counter % 500 == 0:
-            rest_proxy.reauthenticated()
-        counter += 1
         try:
             response = do_api_post('clarin/import/item', params, json_p)
             response_json = convert_response_to_json(response)
