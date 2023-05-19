@@ -372,11 +372,19 @@ def import_group2group():
     if json_a:
         for i in json_a:
             try:
-                do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
+                response = do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
                     const.API_URL + 'eperson/groups/' + group_id[i['child_id']][0])
             except Exception as e:
-                json_e = json.loads(e.args[0])
-                log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
+                # Sometimes the Exception `e` is type of `int`
+                if isinstance(e, int):
+                    log('POST request ' + 'clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups' +
+                        ' failed.')
+                else:
+                    print("type:" + str(e.args[0]))
+                    # json_e = json.loads(str(e.args[0]))
+                    log('POST request ' + response.url + ' for id: ' + str(group_id[i['parent_id']][0]) +
+                        ' failed. Status: ' + str(response.status_code))
+                    # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
     print("Group2group was successfully imported!")
 
 def import_group2eperson():
@@ -680,8 +688,9 @@ def import_item():
             response_json = convert_response_to_json(response)
             item_id[i['item_id']] = response_json['id']
         except:
-            log('POST request ' + response.url + ' for id: ' + str(i['item_id'] + ' failed. Status: ' +
-                                                                   str(response.status_code)))
+            print("str(response.url)" + str(response.url))
+            log('POST request ' + str(response.url) + ' for id: ' + str(i['item_id'] + ' failed. Status: ' +
+                                                                        str(response.status_code)))
     print("Item and Collection2item were successfully imported!")
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached,

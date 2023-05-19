@@ -166,7 +166,7 @@ class DSpaceClient:
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
-        if r.status_code == 403 or 401:
+        if r.status_code == 403 or r.status_code == 401:
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
             # After speaking in #dev it seems that these do need occasional refreshes but I suspect
@@ -179,7 +179,7 @@ class DSpaceClient:
                 else:
                     log("API Post: Retrying request with updated CSRF token")
                     #try to authenticate
-                    self.d.authenticate()
+                    self.authenticate()
                     return self.api_post(url, params=params, json_p=json_p, retry=True)
         check_response(r, "api post")
         return r
