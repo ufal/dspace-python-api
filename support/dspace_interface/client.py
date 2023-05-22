@@ -67,6 +67,8 @@ class DSpaceClient:
 
     verbose = False
 
+    exception401Counter = 0
+
     # Simple enum for patch operation types
     class PatchOperation:
         ADD = 'add'
@@ -166,7 +168,7 @@ class DSpaceClient:
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
-        if r.status_code == 403 or r.status_code == 401:
+        if r.status_code == 403:
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
             # After speaking in #dev it seems that these do need occasional refreshes but I suspect
@@ -178,9 +180,24 @@ class DSpaceClient:
                     log('API Post: Already retried... something must be wrong')
                 else:
                     log("API Post: Retrying request with updated CSRF token")
-                    #try to authenticate
-                    self.authenticate()
                     return self.api_post(url, params=params, json_p=json_p, retry=True)
+        elif r.status_code == 401:
+            log(r.text)
+            r_json = r.json()
+            if 'message' in r_json and 'Authentication is required' in r_json['message']:
+                if retry:
+                    log('API Post: Already retried... something must be wrong')
+                else:
+                    log("API Post: Retrying request with updated CSRF token")
+                    # try to authenticate
+                    self.authenticate()
+                    # Try to authenticate and repeat the request 3 times - if it won't happen log error
+                    self.exception401Counter = self.exception401Counter + 1
+                    retry_value = False
+                    if self.exception401Counter > 3:
+                        retry_value = True
+                    return self.api_post(url, params=params, json_p=json_p, retry=retry_value)
+
         check_response(r, "api post")
         return r
 
