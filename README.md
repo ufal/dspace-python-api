@@ -1,7 +1,7 @@
 [![Test dspace on dev-5](https://github.com/dataquest-dev/dspace-blackbox-testing/actions/workflows/test.yml/badge.svg)](https://github.com/dataquest-dev/dspace-blackbox-testing/actions/workflows/test.yml)
 
-# Dspace-blackbox-testing
-Blackbox tests for dspace repository
+# Dspace-python-api
+used for blackbox testing, data-ingestion procedures
 
 # How to migrate CLARIN-DSpace5.* to CLARIN-DSpace7.*
 ### Prerequisites:
