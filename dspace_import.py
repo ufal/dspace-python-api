@@ -385,20 +385,24 @@ def import_group2group():
     json_a = read_json('group2group.json')
     if json_a:
         for i in json_a:
-            try:
-                response = do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
-                                       const.API_URL + 'eperson/groups/' + group_id[i['child_id']][0])
-            except Exception as e:
-                # Sometimes the Exception `e` is type of `int`
-                if isinstance(e, int):
-                    log('POST request ' + 'clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups' +
-                        ' failed.')
-                else:
-                    print("type:" + str(e.args[0]))
-                    # json_e = json.loads(str(e.args[0]))
-                    log('POST request ' + response.url + ' for id: ' + str(group_id[i['parent_id']][0]) +
-                        ' failed. Status: ' + str(response.status_code))
-                    # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
+            parents = group_id[i['parent_id']]
+            childs = group_id[i['child_id']]
+            for parent in parents:
+                for child in childs:
+                    try:
+                        response = do_api_post('clarin/eperson/groups/' + parent + '/subgroups', None,
+                                    const.API_URL + 'eperson/groups/' + child)
+                    except Exception as e:
+                        # Sometimes the Exception `e` is type of `int`
+                        if isinstance(e, int):
+                            log('POST request ' + 'clarin/eperson/groups/' + parent + '/subgroups' +
+                                ' failed.')
+                        else:
+                            print("type:" + str(e.args[0]))
+                            # json_e = json.loads(str(e.args[0]))
+                            log('POST request ' + response.url + ' for id: ' + str(parent) +
+                                ' failed. Status: ' + str(response.status_code))
+                            # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
     print("Group2group was successfully imported!")
 
 
