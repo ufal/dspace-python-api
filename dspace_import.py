@@ -19,6 +19,7 @@ collection_id = dict()
 collection2logo = dict()
 item_id = dict()
 workspaceitem_id = dict()
+workflowitem_id = dict()
 metadatavalue = dict()
 handle = dict()
 bitstreamformat_id = dict()
@@ -686,6 +687,7 @@ def import_item():
             params = {'id': str(workspaceitem_id[i['item_id']])}
             try:
                 response = do_api_post('clarin/import/workflowitem', params, None)
+                workflowitem_id[i['workflow_id']] = response.headers['workflowitem_id']
             except:
                 log('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: '
                     + str(response.status_code))
@@ -909,6 +911,9 @@ def import_handle_with_url():
 
     print("Handles with url were successfully imported!")
 
+def import_tasklistitem():
+    global workflowitem_id, eperson_id
+    
 
 def import_epersons_and_groups():
     """
