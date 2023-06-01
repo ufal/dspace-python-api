@@ -398,11 +398,8 @@ def import_group2group():
                             log('POST request ' + 'clarin/eperson/groups/' + parent + '/subgroups' +
                                 ' failed.')
                         else:
-                            print("type:" + str(e.args[0]))
-                            # json_e = json.loads(str(e.args[0]))
                             log('POST request ' + response.url + ' for id: ' + str(parent) +
                                 ' failed. Status: ' + str(response.status_code))
-                            # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
     print("Group2group was successfully imported!")
 
 
