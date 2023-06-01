@@ -835,6 +835,7 @@ def import_bitstream():
             if i['bitstream_id'] in primaryBitstream:
                 params['primaryBundle_id'] = bundle_id[primaryBitstream[i['bitstream_id']]]
             try:
+                log('Going to process Bitstream with internal_id: ' + str(i['internal_id']))
                 response = do_api_post('clarin/import/core/bitstream', params, json_p)
                 bitstream_id[i['bitstream_id']] = convert_response_to_json(response)['id']
             except:
