@@ -694,7 +694,6 @@ def import_item():
             del items[i['item_id']]
 
     print("Cwf_workflowitem was successfully imported!")
-
     # create other items
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
@@ -912,8 +911,19 @@ def import_handle_with_url():
     print("Handles with url were successfully imported!")
 
 def import_tasklistitem():
+    """
+     Import data into database.
+     Mapped table: tasklistitem
+     """
     global workflowitem_id, eperson_id
-    
+    json_a = read_json("tasklistitem.json")
+    for i in json_a:
+        params = {'epersonUUID': eperson_id[i['eperson_id']], 'workflowitem_id': workflowitem_id[i['workflow_id']]}
+        try:
+            response = do_api_post('clarin/eperson/groups/tasklistitem', params, None)
+        except:
+            log('POST request clarin/eperson/groups/tasklistitem failed.')
+    print("Tasklistitem was sucessfully imported!")
 
 def import_epersons_and_groups():
     """
@@ -947,6 +957,7 @@ def import_bundles_and_bitstreams():
     Import part of dspace: bundles and bitstreams
     """
     import_item()
+    import_tasklistitem()
     import_bitstreamformatregistry()
     import_bundle()
     import_bitstream()
