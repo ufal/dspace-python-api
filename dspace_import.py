@@ -693,7 +693,7 @@ def import_item():
                     + str(response.status_code))
             del items[i['item_id']]
 
-    print("Cwf_workflowitem was successfully imported!")
+    log("Cwf_workflowitem was successfully imported!")
     # create other items
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
@@ -923,7 +923,7 @@ def import_tasklistitem():
             response = do_api_post('clarin/eperson/groups/tasklistitem', params, None)
         except:
             log('POST request clarin/eperson/groups/tasklistitem failed.')
-    print("Tasklistitem was sucessfully imported!")
+    log("Tasklistitem was sucessfully imported!")
 
 def import_epersons_and_groups():
     """
