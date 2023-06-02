@@ -221,7 +221,7 @@ def import_licenses():
             except:
                 log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
 
-    print("License_label, Extended_mapping, License_definitions were successfully imported!")
+    log("License_label, Extended_mapping, License_definitions were successfully imported!")
 
 
 def import_registrationdata():
@@ -239,7 +239,7 @@ def import_registrationdata():
                 json_e = json.loads(e.args[0])
                 log('POST request' + json_e['path'] + ' for email: ' + i['email'] + ' failed. Status: ' +
                     str(json_e['status']))
-    print("Registration data was successfully imported!")
+    log("Registration data was successfully imported!")
 
 
 def import_bitstreamformatregistry():
@@ -287,7 +287,7 @@ def import_bitstreamformatregistry():
     except:
         log('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-    print("Bitstream format registry was successfully imported!")
+    log("Bitstream format registry was successfully imported!")
 
 
 def import_epersongroup():
@@ -334,7 +334,7 @@ def import_epersongroup():
                     log('POST request ' + response.url + ' for id: ' + str(i['eperson_group_id']) +
                         ' failed. Status: ' + str(response.status_code))
 
-    print("Eperson group was successfully imported!")
+    log("Eperson group was successfully imported!")
 
 
 def import_eperson():
@@ -374,7 +374,7 @@ def import_eperson():
                 log('POST request ' + response.url + ' for id: ' + str(i['eperson_id']) +
                     ' failed. Status: ' + str(response.status_code))
 
-    print("Eperson was successfully imported!")
+    log("Eperson was successfully imported!")
 
 
 def import_group2group():
@@ -386,21 +386,22 @@ def import_group2group():
     json_a = read_json('group2group.json')
     if json_a:
         for i in json_a:
-            try:
-                response = do_api_post('clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups', None,
-                                       const.API_URL + 'eperson/groups/' + group_id[i['child_id']][0])
-            except Exception as e:
-                # Sometimes the Exception `e` is type of `int`
-                if isinstance(e, int):
-                    log('POST request ' + 'clarin/eperson/groups/' + group_id[i['parent_id']][0] + '/subgroups' +
-                        ' failed.')
-                else:
-                    print("type:" + str(e.args[0]))
-                    # json_e = json.loads(str(e.args[0]))
-                    log('POST request ' + response.url + ' for id: ' + str(group_id[i['parent_id']][0]) +
-                        ' failed. Status: ' + str(response.status_code))
-                    # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
-    print("Group2group was successfully imported!")
+            parents = group_id[i['parent_id']]
+            childs = group_id[i['child_id']]
+            for parent in parents:
+                for child in childs:
+                    try:
+                        response = do_api_post('clarin/eperson/groups/' + parent + '/subgroups', None,
+                                    const.API_URL + 'eperson/groups/' + child)
+                    except Exception as e:
+                        # Sometimes the Exception `e` is type of `int`
+                        if isinstance(e, int):
+                            log('POST request ' + 'clarin/eperson/groups/' + parent + '/subgroups' +
+                                ' failed.')
+                        else:
+                            log('POST request ' + response.url + ' for id: ' + str(parent) +
+                                ' failed. Status: ' + str(response.status_code))
+    log("Group2group was successfully imported!")
 
 
 def import_group2eperson():
@@ -419,7 +420,7 @@ def import_group2eperson():
                 json_e = json.loads(e.args[0])
                 log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
 
-    print("Epersongroup2eperson was successfully imported!")
+    log("Epersongroup2eperson was successfully imported!")
 
 
 def import_metadataschemaregistry():
@@ -456,7 +457,7 @@ def import_metadataschemaregistry():
                 if not found:
                     log('POST request ' + response.url + ' for id: ' + str(
                         i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
-    print("MetadataSchemaRegistry was successfully imported!")
+    log("MetadataSchemaRegistry was successfully imported!")
 
 
 def import_metadatafieldregistry():
@@ -492,7 +493,7 @@ def import_metadatafieldregistry():
                 if not found:
                     log('POST request ' + response.url + ' for id: ' + str(
                         i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
-    print("MetadataFieldRegistry was successfully imported!")
+    log("MetadataFieldRegistry was successfully imported!")
 
 
 def import_community():
@@ -567,7 +568,7 @@ def import_community():
             if counter == len(json_comm):
                 counter = 0
 
-    print("Community and Community2Community were successfully imported!")
+    log("Community and Community2Community were successfully imported!")
 
 
 def import_collection():
@@ -646,7 +647,7 @@ def import_collection():
                 except:
                     log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-    print("Collection and Community2collection were successfully imported!")
+    log("Collection and Community2collection were successfully imported!")
 
 
 def import_item():
@@ -672,7 +673,7 @@ def import_item():
                                  i['stage_reached'], i['page_reached'])
             del items[i['item_id']]
 
-    print("Workspaceitem was successfully imported!")
+    log("Workspaceitem was successfully imported!")
 
     # create workflowitem
     # workflowitem is created from workspaceitem
@@ -694,6 +695,7 @@ def import_item():
             del items[i['item_id']]
 
     log("Cwf_workflowitem was successfully imported!")
+
     # create other items
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
@@ -712,7 +714,7 @@ def import_item():
         except:
             log('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: ' +
                 str(response.status_code))
-    print("Item and Collection2item were successfully imported!")
+    log("Item and Collection2item were successfully imported!")
 
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached,
@@ -792,7 +794,7 @@ def import_bundle():
                 except:
                     log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-    print("Bundle and Item2Bundle were successfully imported!")
+    log("Bundle and Item2Bundle were successfully imported!")
 
 
 def import_bitstream():
@@ -836,6 +838,7 @@ def import_bitstream():
             if i['bitstream_id'] in primaryBitstream:
                 params['primaryBundle_id'] = bundle_id[primaryBitstream[i['bitstream_id']]]
             try:
+                log('Going to process Bitstream with internal_id: ' + str(i['internal_id']))
                 response = do_api_post('clarin/import/core/bitstream', params, json_p)
                 bitstream_id[i['bitstream_id']] = convert_response_to_json(response)['id']
             except:
@@ -853,7 +856,7 @@ def import_bitstream():
     except Exception as e:
         json_e = json.loads(e.args[0])
         log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
-    print("Bitstream, bundle2bitstream, most_recent_checksum and checksum_result were successfully imported!")
+    log("Bitstream, bundle2bitstream, most_recent_checksum and checksum_result were successfully imported!")
 
 
 def add_logo_to_community():
@@ -908,7 +911,7 @@ def import_handle_with_url():
             except:
                 log('POST response ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-    print("Handles with url were successfully imported!")
+    log("Handles with url were successfully imported!")
 
 def import_tasklistitem():
     """
@@ -964,7 +967,7 @@ def import_bundles_and_bitstreams():
 
 
 # call
-print("Data migraton started!")
+log("Data migraton started!")
 # at the beginning
 read_metadata()
 read_handle()
@@ -978,4 +981,4 @@ import_hierarchy()
 import_epersons_and_groups()
 import_licenses()
 import_bundles_and_bitstreams()
-print("Data migration is completed!")
+log("Data migration is completed!")
