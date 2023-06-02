@@ -921,8 +921,8 @@ def import_tasklistitem():
     global workflowitem_id, eperson_id
     json_a = read_json("tasklistitem.json")
     for i in json_a:
-        params = {'epersonUUID': eperson_id[i['eperson_id']], 'workflowitem_id': workflowitem_id[i['workflow_id']]}
         try:
+            params = {'epersonUUID': eperson_id[i['eperson_id']], 'workflowitem_id': workflowitem_id[i['workflow_id']]}
             response = do_api_post('clarin/eperson/groups/tasklistitem', params, None)
         except:
             log('POST request clarin/eperson/groups/tasklistitem failed.')
