@@ -356,7 +356,8 @@ def import_eperson():
             metadata = get_metadata_value(7, i['eperson_id'])
             json_p = {'selfRegistered': i['self_registered'], 'requireCertificate': i['require_certificate'],
                       'netid': i['netid'], 'canLogIn': i['can_log_in'], 'lastActive': i['last_active'],
-                      'email': i['email'], 'password': i['password']}
+                      'email': i['email'], 'password': i['password'], 'welcomeInfo': i['welcome_info'],
+                      'canEditSubmissionMetadata': i['can_edit_submission_metadata']}
             if metadata:
                 json_p['metadata'] = metadata
             if i['eperson_id'] in user_reg:
