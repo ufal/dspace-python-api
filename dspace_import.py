@@ -19,6 +19,7 @@ collection_id = dict()
 collection2logo = dict()
 item_id = dict()
 workspaceitem_id = dict()
+workflowitem_id = dict()
 metadatavalue = dict()
 handle = dict()
 bitstreamformat_id = dict()
@@ -688,6 +689,7 @@ def import_item():
             params = {'id': str(workspaceitem_id[i['item_id']])}
             try:
                 response = do_api_post('clarin/import/workflowitem', params, None)
+                workflowitem_id[i['workflow_id']] = response.headers['workflowitem_id']
             except:
                 log('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: '
                     + str(response.status_code))
@@ -912,6 +914,20 @@ def import_handle_with_url():
 
     log("Handles with url were successfully imported!")
 
+def import_tasklistitem():
+    """
+     Import data into database.
+     Mapped table: tasklistitem
+     """
+    global workflowitem_id, eperson_id
+    json_a = read_json("tasklistitem.json")
+    for i in json_a:
+        try:
+            params = {'epersonUUID': eperson_id[i['eperson_id']], 'workflowitem_id': workflowitem_id[i['workflow_id']]}
+            response = do_api_post('clarin/eperson/groups/tasklistitem', params, None)
+        except:
+            log('POST request clarin/eperson/groups/tasklistitem failed.')
+    log("Tasklistitem was sucessfully imported!")
 
 def import_epersons_and_groups():
     """
@@ -945,6 +961,7 @@ def import_bundles_and_bitstreams():
     Import part of dspace: bundles and bitstreams
     """
     import_item()
+    import_tasklistitem()
     import_bitstreamformatregistry()
     import_bundle()
     import_bitstream()
