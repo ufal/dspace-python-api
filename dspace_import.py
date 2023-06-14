@@ -98,15 +98,16 @@ def read_metadata():
     """
     global metadatavalue
     metadatavalue_json = read_json('metadatavalue.json')
-    if metadatavalue_json:
-        for i in metadatavalue_json:
-            key = (i['resource_type_id'], i['resource_id'])
-            # replace separator @@ by ;
-            i['text_value'] = i['text_value'].replace("@@", ";")
-            if key in metadatavalue.keys():
-                metadatavalue[key].append(i)
-            else:
-                metadatavalue[key] = [i]
+    if not metadatavalue_json:
+        return
+    for i in metadatavalue_json:
+        key = (i['resource_type_id'], i['resource_id'])
+        # replace separator @@ by ;
+        i['text_value'] = i['text_value'].replace("@@", ";")
+        if key in metadatavalue.keys():
+            metadatavalue[key].append(i)
+        else:
+            metadatavalue[key] = [i]
 
 
 def read_handle():
@@ -116,13 +117,14 @@ def read_handle():
     """
     global handle
     handle_json = read_json('handle.json')
-    if handle_json:
-        for i in handle_json:
-            key = (i['resource_type_id'], i['resource_id'])
-            if key in handle.keys():
-                handle[key].append(i)
-            else:
-                handle[key] = [i]
+    if not handle_json:
+        return
+    for i in handle_json:
+        key = (i['resource_type_id'], i['resource_id'])
+        if key in handle.keys():
+            handle[key].append(i)
+        else:
+            handle[key] = [i]
 
 
 def get_metadata_value(old_resource_type_id, old_resource_id):
@@ -134,37 +136,38 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
     if not metadatavalue:
         read_metadata()
     # get all metadatavalue for object
-    if (old_resource_type_id, old_resource_id) in metadatavalue:
-        metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
-    else:
+    if (old_resource_type_id, old_resource_id) not in metadatavalue:
         return None
-    if metadatavalue_obj:
-        # create list of object metadata
-        for i in metadatavalue_obj:
-            if i['metadata_field_id'] in metadata_field_id:
-                try:
-                    response = do_api_get_one('core/metadatafields', metadata_field_id[i['metadata_field_id']])
-                    metadatafield_json = convert_response_to_json(response)
-                except:
-                    log('GET request' + response.url + ' failed. Status: ' + str(response.status_code))
-                    continue
-                # get metadataschema
-                try:
-                    response = do_api_get_one('core/metadataschemas', metadatafield_json['_embedded']['schema']['id'])
-                    metadataschema_json = convert_response_to_json(response)
-                except:
-                    log('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
-                    continue
-                # define and insert key and value of dict
-                key = metadataschema_json['prefix'] + '.' + metadatafield_json['element']
-                value = {'value': i['text_value'], 'language': i['text_lang'], 'authority': i['authority'],
-                         'confidence': i['confidence'], 'place': i['place']}
-                if metadatafield_json['qualifier']:
-                    key += '.' + metadatafield_json['qualifier']
-                if key in result.keys():
-                    result[key].append(value)
-                else:
-                    result[key] = [value]
+    metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
+    if not metadatavalue_obj:
+        return result
+    # create list of object metadata
+    for i in metadatavalue_obj:
+        if i['metadata_field_id'] not in metadata_field_id:
+            continue
+        try:
+            response = do_api_get_one('core/metadatafields', metadata_field_id[i['metadata_field_id']])
+            metadatafield_json = convert_response_to_json(response)
+        except:
+            log('GET request' + response.url + ' failed. Status: ' + str(response.status_code))
+            continue
+        # get metadataschema
+        try:
+            response = do_api_get_one('core/metadataschemas', metadatafield_json['_embedded']['schema']['id'])
+            metadataschema_json = convert_response_to_json(response)
+        except:
+            log('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            continue
+        # define and insert key and value of dict
+        key = metadataschema_json['prefix'] + '.' + metadatafield_json['element']
+        value = {'value': i['text_value'], 'language': i['text_lang'], 'authority': i['authority'],
+                 'confidence': i['confidence'], 'place': i['place']}
+        if metadatafield_json['qualifier']:
+            key += '.' + metadatafield_json['qualifier']
+        if key in result.keys():
+            result[key].append(value)
+        else:
+            result[key] = [value]
     return result
 
 
@@ -178,55 +181,61 @@ def import_licenses():
     imported = 0
     # import license_label
     json_a = read_json('license_label.json')
-    if json_a:
-        for i in json_a:
-            json_p = {'label': i['label'], 'title': i['title'], 'extended': i['is_extended'], 'icon': None}
-            # find image with label name
-            try:
-                image_path = migration_const.ICON_PATH + i['label'].lower() + ".png"
-                if os.path.exists(image_path):
-                    with open(image_path, "rb") as image:
-                        file = image.read()
-                        json_p['icon'] = list(file)
-            except Exception as e:
-                log("Exception while reading label image with name: " + i['label'].lower() + ".png occurred: " + e)
-            try:
-                response = do_api_post('core/clarinlicenselabels', None, json_p)
-                created_label = convert_response_to_json(response)
-                imported+=1
-                del created_label['license']
-                del created_label['_links']
-                labels[i['label_id']] = created_label
-            except:
-                log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
-        statistics['license_label'] = (len(json_a), imported)
+    if not json_a:
+        log("License_label JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'label': i['label'], 'title': i['title'], 'extended': i['is_extended'], 'icon': None}
+        # find image with label name
+        try:
+            image_path = migration_const.ICON_PATH + i['label'].lower() + ".png"
+            if os.path.exists(image_path):
+                with open(image_path, "rb") as image:
+                    file = image.read()
+                    json_p['icon'] = list(file)
+        except Exception as e:
+            log("Exception while reading label image with name: " + i['label'].lower() + ".png occurred: " + e)
+        try:
+            response = do_api_post('core/clarinlicenselabels', None, json_p)
+            created_label = convert_response_to_json(response)
+            imported+=1
+            del created_label['license']
+            del created_label['_links']
+            labels[i['label_id']] = created_label
+        except:
+            log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+    statistics['license_label'] = (len(json_a), imported)
 
     # read license label extended mapping
     extended_label = dict()
     json_a = read_json('license_label_extended_mapping.json')
-    if json_a:
-        for i in json_a:
-            if i['license_id'] in extended_label.keys():
-                extended_label[i['license_id']].append(labels[i['label_id']])
-            else:
-                extended_label[i['license_id']] = [labels[i['label_id']]]
+    if not json_a:
+        log("Extended_mapping JSON is empty.")
+        return
+    for i in json_a:
+        if i['license_id'] in extended_label.keys():
+            extended_label[i['license_id']].append(labels[i['label_id']])
+        else:
+            extended_label[i['license_id']] = [labels[i['label_id']]]
 
     # import license_definition
     imported = 0
     json_a = read_json('license_definition.json')
-    if json_a:
-        for i in json_a:
-            json_p = {'name': i['name'], 'definition': i['definition'], 'confirmation': i['confirmation'],
-                      'requiredInfo': i['required_info'], 'clarinLicenseLabel': labels[i['label_id']]}
-            if i['license_id'] in extended_label:
-                json_p['extendedClarinLicenseLabels'] = extended_label[i['license_id']]
-            param = {'eperson': eperson_id[i['eperson_id']]}
-            try:
-                response = do_api_post('clarin/import/license', param, json_p)
-                imported+=1
-            except:
-                log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
-        statistics['license_definition'] = (len(json_a), imported)
+    if not json_a:
+        log("License_definitions JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'name': i['name'], 'definition': i['definition'], 'confirmation': i['confirmation'],
+                  'requiredInfo': i['required_info'], 'clarinLicenseLabel': labels[i['label_id']]}
+        if i['license_id'] in extended_label:
+            json_p['extendedClarinLicenseLabels'] = extended_label[i['license_id']]
+        param = {'eperson': eperson_id[i['eperson_id']]}
+        try:
+            response = do_api_post('clarin/import/license', param, json_p)
+            imported+=1
+        except:
+            log('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+    statistics['license_definition'] = (len(json_a), imported)
     log("License_label, Extended_mapping, License_definitions were successfully imported!")
 
 
@@ -238,21 +247,27 @@ def import_registrationdata():
     global statistics
     imported = 0
     json_a = read_json('registrationdata.json')
-    if json_a:
-        for i in json_a:
-            json_p = {'email': i['email']}
-            try:
-                do_api_post('eperson/registrations', None, json_p)
-                imported+=1
-            except Exception as e:
-                json_e = json.loads(e.args[0])
-                log('POST request' + json_e['path'] + ' for email: ' + i['email'] + ' failed. Status: ' +
-                    str(json_e['status']))
-        statistics['registrationdata'] = (len(json_a), imported)
+    if not json_a:
+        log("Registrationdata JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'email': i['email']}
+        try:
+            do_api_post('eperson/registrations', None, json_p)
+            imported+=1
+        except Exception as e:
+            json_e = json.loads(e.args[0])
+            log('POST request' + json_e['path'] + ' for email: ' + i['email'] + ' failed. Status: ' +
+                str(json_e['status']))
+    statistics['registrationdata'] = (len(json_a), imported)
     log("Registration data was successfully imported!")
 
 
 def import_bitstreamformatregistry():
+    """
+    Import data into database.
+    Mapped tables: bitstreamformatregistry
+    """
     global bitstreamformat_id, unknown_format_id, statistics
     imported = 0
     # read all existing data from bitstreamformatregistry
@@ -267,35 +282,37 @@ def import_bitstreamformatregistry():
                     unknown_format_id = i['id']
 
         json_a = read_json('bitstreamformatregistry.json')
-        if json_a:
-            for i in json_a:
-                level = i['support_level']
-                if level == 0:
-                    level_str = "UNKNOWN"
-                elif level == 1:
-                    level_str = "KNOWN"
-                elif level == 2:
-                    level_str = "SUPPORTED"
-                else:
-                    log('Unsupported bitstream format registry id: ' + str(level))
-                    continue
+        if not json_a:
+            log("Bitstreamformatregistry JSON is empty.")
+            return
+        for i in json_a:
+            level = i['support_level']
+            if level == 0:
+                level_str = "UNKNOWN"
+            elif level == 1:
+                level_str = "KNOWN"
+            elif level == 2:
+                level_str = "SUPPORTED"
+            else:
+                log('Unsupported bitstream format registry id: ' + str(level))
+                continue
 
-                json_p = {'mimetype': i['mimetype'], 'description': i['description'],
-                          'shortDescription': i['short_description'], 'supportLevel': level_str,
-                          'internal': i['internal']}
-                try:
-                    response = do_api_post('core/bitstreamformats', None, json_p)
-                    bitstreamformat_id[i['bitstream_format_id']] = convert_response_to_json(response)['id']
-                    imported+=1
-                except:
-                    if response.status_code == 200 or response.status_code == 201:
-                        bitstreamformat_id[i['bitstream_format_id']] = shortDesc2Id[i['short_description']]
-                        log('Bitstreamformatregistry with short description ' + i[
-                            'short_description'] + ' already exists in database!')
-                    else:
-                        log('POST request ' + response.url + ' for id: ' + str(i['bitstream_format_id']) +
-                            ' failed. Status: ' + str(response.status_code))
-            statistics['bitstreamformatregistry'] = (len(json_a), imported)
+            json_p = {'mimetype': i['mimetype'], 'description': i['description'],
+                      'shortDescription': i['short_description'], 'supportLevel': level_str,
+                      'internal': i['internal']}
+            try:
+                response = do_api_post('core/bitstreamformats', None, json_p)
+                bitstreamformat_id[i['bitstream_format_id']] = convert_response_to_json(response)['id']
+                imported+=1
+            except:
+                if response.status_code == 200 or response.status_code == 201:
+                    bitstreamformat_id[i['bitstream_format_id']] = shortDesc2Id[i['short_description']]
+                    log('Bitstreamformatregistry with short description ' + i[
+                        'short_description'] + ' already exists in database!')
+                else:
+                    log('POST request ' + response.url + ' for id: ' + str(i['bitstream_format_id']) +
+                        ' failed. Status: ' + str(response.status_code))
+        statistics['bitstreamformatregistry'] = (len(json_a), imported)
     except:
         log('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
@@ -327,32 +344,32 @@ def import_epersongroup():
             else:
                 log('Unrecognized eperson group ' + i['name'])
 
-    if json_a:
-        for i in json_a:
-            id = i['eperson_group_id']
-            # group Administrator and Anonymous already exist
-            # group is created with dspace object too
-            if id != 0 and id != 1 and id not in group_id:
-                # get group metadata
-                metadata_group = get_metadata_value(6, i['eperson_group_id'])
-                name = metadata_group['dc.title'][0]['value']
-                del metadata_group['dc.title']
-                # the group_metadata contains the name of the group
-                json_p = {'name': name, 'metadata': metadata_group}
-                try:
-                    response = do_api_post('eperson/groups', None, json_p)
-                    group_id[i['eperson_group_id']] = [
-                        convert_response_to_json(response)['id']]
-                except:
-                    log('POST request ' + response.url + ' for id: ' + str(i['eperson_group_id']) +
-                        ' failed. Status: ' + str(response.status_code))
-            imported+=1
-        if 'epersongroup' in statistics:
-            statistics['epersongroup'] = (len(json_a),  statistics['epersongroup'][1] + imported)
-        else:
-            statistics['epersongroup'] = (len(json_a), imported)
+    if not json_a:
+        log("Epersongroup JSON is empty.")
+        return
+    for i in json_a:
+        id = i['eperson_group_id']
+        # group Administrator and Anonymous already exist
+        # group is created with dspace object too
+        if id != 0 and id != 1 and id not in group_id:
+            # get group metadata
+            metadata_group = get_metadata_value(6, i['eperson_group_id'])
+            name = metadata_group['dc.title'][0]['value']
+            del metadata_group['dc.title']
+            # the group_metadata contains the name of the group
+            json_p = {'name': name, 'metadata': metadata_group}
+            try:
+                response = do_api_post('eperson/groups', None, json_p)
+                group_id[i['eperson_group_id']] = [convert_response_to_json(response)['id']]
+                imported += 1
+            except:
+                log('POST request ' + response.url + ' for id: ' + str(i['eperson_group_id']) +
+                    ' failed. Status: ' + str(response.status_code))
+    if 'epersongroup' in statistics:
+        statistics['epersongroup'] = (len(json_a),  statistics['epersongroup'][1] + imported)
+    else:
+        statistics['epersongroup'] = (len(json_a), imported)
     log("Eperson group was successfully imported!")
-
 
 
 def import_eperson():
@@ -362,28 +379,29 @@ def import_eperson():
     """
     global eperson_id, email2epersonId, statistics
     imported = 0
-
     json_a = read_json('eperson.json')
-    if json_a:
-        for i in json_a:
-            metadata = get_metadata_value(7, i['eperson_id'])
-            json_p = {'selfRegistered': i['self_registered'], 'requireCertificate': i['require_certificate'],
-                      'netid': i['netid'], 'canLogIn': i['can_log_in'], 'lastActive': i['last_active'],
-                      'email': i['email'], 'password': i['password'], 'welcomeInfo': i['welcome_info'],
-                      'canEditSubmissionMetadata': i['can_edit_submission_metadata']}
-            email2epersonId[i['email']] = i['eperson_id']
-            if metadata:
-                json_p['metadata'] = metadata
-            param = {'selfRegistered': i['self_registered'], 'lastActive': i['last_active']}
-            try:
-                response = do_api_post('clarin/import/eperson', param, json_p)
-                eperson_id[i['eperson_id']] = convert_response_to_json(response)['id']
-                imported+=1
-            except:
-                log('POST request ' + response.url + ' for id: ' + str(i['eperson_id']) +
-                    ' failed. Status: ' + str(response.status_code))
+    if not json_a:
+        log("Eperson JSON is empty.")
+        return
+    for i in json_a:
+        metadata = get_metadata_value(7, i['eperson_id'])
+        json_p = {'selfRegistered': i['self_registered'], 'requireCertificate': i['require_certificate'],
+                  'netid': i['netid'], 'canLogIn': i['can_log_in'], 'lastActive': i['last_active'],
+                  'email': i['email'], 'password': i['password'], 'welcomeInfo': i['welcome_info'],
+                  'canEditSubmissionMetadata': i['can_edit_submission_metadata']}
+        email2epersonId[i['email']] = i['eperson_id']
+        if metadata:
+            json_p['metadata'] = metadata
+        param = {'selfRegistered': i['self_registered'], 'lastActive': i['last_active']}
+        try:
+            response = do_api_post('clarin/import/eperson', param, json_p)
+            eperson_id[i['eperson_id']] = convert_response_to_json(response)['id']
+            imported+=1
+        except:
+            log('POST request ' + response.url + ' for id: ' + str(i['eperson_id']) +
+                ' failed. Status: ' + str(response.status_code))
 
-        statistics['eperson'] = (len(json_a), imported)
+    statistics['eperson'] = (len(json_a), imported)
     log("Eperson was successfully imported!")
 
 def import_user_registration():
@@ -395,23 +413,24 @@ def import_user_registration():
     imported = 0
     # read user_registration
     json_a = read_json("user_registration.json")
-    if json_a:
-        for i in json_a:
-            json_p = {'email': i['email'], 'organization': i['organization'],
-                      'confirmation': i['confirmation']}
-            if i['email'] in email2epersonId:
-                json_p['ePersonID'] = eperson_id[email2epersonId[i['email']]]
-            else:
-                json_p['ePersonID'] = None
-            try:
-                response = do_api_post('clarin/import/userregistration', None, json_p)
-                userRegistration_id[i['eperson_id']] = convert_response_to_json(response)['id']
-                imported+=1
-            except:
-                log('POST request clarin/import/userregistration for id: ' + str(i['eperson_id']) +
-                    ' failed. Status: ' + str(response.status_code))
-
-        statistics['user_registration'] = (len(json_a), imported)
+    if not json_a:
+        log("User_registration JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'email': i['email'], 'organization': i['organization'],
+                  'confirmation': i['confirmation']}
+        if i['email'] in email2epersonId:
+            json_p['ePersonID'] = eperson_id[email2epersonId[i['email']]]
+        else:
+            json_p['ePersonID'] = None
+        try:
+            response = do_api_post('clarin/import/userregistration', None, json_p)
+            userRegistration_id[i['eperson_id']] = convert_response_to_json(response)['id']
+            imported+=1
+        except:
+            log('POST request clarin/import/userregistration for id: ' + str(i['eperson_id']) +
+                ' failed. Status: ' + str(response.status_code))
+    statistics['user_registration'] = (len(json_a), imported)
     log("User registration was successfully imported!")
 
 def import_group2group():
@@ -422,28 +441,27 @@ def import_group2group():
     global group_id, statistics
     imported = 0
     json_a = read_json('group2group.json')
-    if json_a:
-        for i in json_a:
-            parents = group_id[i['parent_id']]
-            childs = group_id[i['child_id']]
-            for parent in parents:
-                for child in childs:
-                    try:
-                        response = do_api_post('clarin/eperson/groups/' + parent + '/subgroups', None,
-                                    const.API_URL + 'eperson/groups/' + child)
-                        imported+=1
-                    except Exception as e:
-                        # Sometimes the Exception `e` is type of `int`
-                        if isinstance(e, int):
-                            log('POST request ' + 'clarin/eperson/groups/' + parent + '/subgroups' +
-                                ' failed.')
-                        else:
-                            log('POST request ' + response.url + ' for id: ' + str(parent) +
-                                ' failed. Status: ' + str(response.status_code))
-
-                            # log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
-
-        statistics['group2group'] = (len(json_a), imported)
+    if not json_a:
+        log("Group2group JSON is empty.")
+        return
+    for i in json_a:
+        parents = group_id[i['parent_id']]
+        childs = group_id[i['child_id']]
+        for parent in parents:
+            for child in childs:
+                try:
+                    response = do_api_post('clarin/eperson/groups/' + parent + '/subgroups', None,
+                                const.API_URL + 'eperson/groups/' + child)
+                    imported+=1
+                except Exception as e:
+                    # Sometimes the Exception `e` is type of `int`
+                    if isinstance(e, int):
+                        log('POST request ' + 'clarin/eperson/groups/' + parent + '/subgroups' +
+                            ' failed.')
+                    else:
+                        log('POST request ' + response.url + ' for id: ' + str(parent) +
+                            ' failed. Status: ' + str(response.status_code))
+    statistics['group2group'] = (len(json_a), imported)
     log("Group2group was successfully imported!")
 
 
@@ -456,17 +474,19 @@ def import_group2eperson():
     global group_id, eperson_id, statistics
     imported = 0
     json_a = read_json('epersongroup2eperson.json')
-    if json_a:
-        for i in json_a:
-            try:
-                do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
-                            const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
-                imported+=1
-            except Exception as e:
-                json_e = json.loads(e.args[0])
-                log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
+    if not json_a:
+        log("Eepersongroup2eperson JSON is empty.")
+        return
+    for i in json_a:
+        try:
+            do_api_post('clarin/eperson/groups/' + group_id[i['eperson_group_id']][0] + '/epersons', None,
+                        const.API_URL + 'eperson/groups/' + eperson_id[i['eperson_id']])
+            imported+=1
+        except Exception as e:
+            json_e = json.loads(e.args[0])
+            log('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
 
-        statistics['epersongroup2eperson'] = (len(json_a), imported)
+    statistics['epersongroup2eperson'] = (len(json_a), imported)
     log("Epersongroup2eperson was successfully imported!")
 
 
@@ -485,31 +505,37 @@ def import_metadataschemaregistry():
         log('GET request ' + response.url + ' failed.')
 
     json_a = read_json('metadataschemaregistry.json')
-    if json_a:
-        for i in json_a:
-            json_p = {'namespace': i['namespace'], 'prefix': i['short_id']}
-            # prefix has to be unique
-            try:
-                response = do_api_post('core/metadataschemas', None, json_p)
-                metadata_schema_id[i['metadata_schema_id']] = convert_response_to_json(response)['id']
+    if not json_a:
+        log("Metadataschemaregistry JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'namespace': i['namespace'], 'prefix': i['short_id']}
+        # prefix has to be unique
+        try:
+            response = do_api_post('core/metadataschemas', None, json_p)
+            metadata_schema_id[i['metadata_schema_id']] = convert_response_to_json(response)['id']
+            imported+=1
+        except:
+            found = False
+            if not existing_data:
+                log('POST request ' + response.url + ' for id: ' + str(
+                    i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
+                break
+            for j in existing_data:
+                if j['prefix'] != i['short_id']:
+                    continue
+                metadata_schema_id[i['metadata_schema_id']] = j['id']
+                log('Metadataschemaregistry '
+                    ' prefix: ' + i['short_id']
+                    + 'already exists in database!')
+                found = True
                 imported+=1
-            except:
-                found = False
-                if existing_data:
-                    for j in existing_data:
-                        if j['prefix'] == i['short_id']:
-                            metadata_schema_id[i['metadata_schema_id']] = j['id']
-                            log('Metadataschemaregistry '
-                                ' prefix: ' + i['short_id']
-                                + 'already exists in database!')
-                            found = True
-                            imported+=1
-                            break
-                if not found:
-                    log('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
+                break
+            if not found:
+                log('POST request ' + response.url + ' for id: ' + str(
+                    i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
 
-        statistics['metadataschemaregistry'] = (len(json_a), imported)
+    statistics['metadataschemaregistry'] = (len(json_a), imported)
     log("MetadataSchemaRegistry was successfully imported!")
 
 
@@ -528,30 +554,36 @@ def import_metadatafieldregistry():
         log('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
     json_a = read_json('metadatafieldregistry.json')
-    if json_a:
-        for i in json_a:
-            json_p = {'element': i['element'], 'qualifier': i['qualifier'], 'scopeNote': i['scope_note']}
-            param = {'schemaId': metadata_schema_id[i['metadata_schema_id']]}
-            # element and qualifier have to be unique
-            try:
-                response = do_api_post('core/metadatafields', param, json_p)
-                metadata_field_id[i['metadata_field_id']] = convert_response_to_json(response)['id']
+    if not json_a:
+        log("CAnnot import metadatafieldregistry because JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {'element': i['element'], 'qualifier': i['qualifier'], 'scopeNote': i['scope_note']}
+        param = {'schemaId': metadata_schema_id[i['metadata_schema_id']]}
+        # element and qualifier have to be unique
+        try:
+            response = do_api_post('core/metadatafields', param, json_p)
+            metadata_field_id[i['metadata_field_id']] = convert_response_to_json(response)['id']
+            imported+=1
+        except:
+            found = False
+            if not existing_data:
+                log('POST request ' + response.url + ' for id: ' + str(
+                    i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
+                break
+            for j in existing_data:
+                if j['element'] != i['element'] and j['qualifier'] != i['qualifier']:
+                    continue
+                metadata_field_id[i['metadata_field_id']] = j['id']
+                log('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
+                found = True
                 imported+=1
-            except:
-                found = False
-                if existing_data:
-                    for j in existing_data:
-                        if j['element'] == i['element'] and j['qualifier'] == i['qualifier']:
-                            metadata_field_id[i['metadata_field_id']] = j['id']
-                            log('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
-                            found = True
-                            imported+=1
-                            break
-                if not found:
-                    log('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
+                break
+            if not found:
+                log('POST request ' + response.url + ' for id: ' + str(
+                    i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
 
-        statistics['metadatafieldregistry'] = (len(json_a), imported)
+    statistics['metadatafieldregistry'] = (len(json_a), imported)
     log("MetadataFieldRegistry was successfully imported!")
 
 
@@ -580,65 +612,65 @@ def import_community():
                 child[child_id].append(parent_id)
             else:
                 child[child_id] = parent_id
-
         statistics['community'] = (len(json_comm), 0)
-    if json_comm:
-        counter = 0
-        while json_comm:
-            json_p = {}
-            # process community only when:
-            # comm is not parent and child
-            # comm is parent and not child
-            # parent comm exists
-            # else process it later
-            i = json_comm[counter]
-            i_id = i['community_id']
-            if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[
-                i_id] in community_id.keys():
-                # resource_type_id for community is 4
-                if (4, i['community_id']) in handle:
-                    handle_comm = handle[(4, i['community_id'])][0]
-                    json_p['handle'] = handle_comm['handle']
-                    imported_handle+=1
-                metadatavalue_comm = get_metadata_value(4, i['community_id'])
-                if metadatavalue_comm:
-                    json_p['metadata'] = metadatavalue_comm
-                # create community
-                parent_id = None
-                if i_id in child:
-                    parent_id = {'parent': community_id[child[i_id]]}
+    if not json_comm:
+        log("Community JSON is empty.")
+        return
+    counter = 0
+    while json_comm:
+        json_p = {}
+        # process community only when:
+        # comm is not parent and child
+        # comm is parent and not child
+        # parent comm exists
+        # else process it later
+        i = json_comm[counter]
+        i_id = i['community_id']
+        if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[
+            i_id] in community_id.keys():
+            # resource_type_id for community is 4
+            if (4, i['community_id']) in handle:
+                handle_comm = handle[(4, i['community_id'])][0]
+                json_p['handle'] = handle_comm['handle']
+                imported_handle += 1
+            metadatavalue_comm = get_metadata_value(4, i['community_id'])
+            if metadatavalue_comm:
+                json_p['metadata'] = metadatavalue_comm
+            # create community
+            parent_id = None
+            if i_id in child:
+                parent_id = {'parent': community_id[child[i_id]]}
+            try:
+                response = do_api_post('core/communities', parent_id, json_p)
+                resp_community_id = convert_response_to_json(response)['id']
+                community_id[i['community_id']] = resp_community_id
+                importedComm += 1
+            except:
+                log('POST request ' + response.url + ' for id: ' + str(i_id) + ' failed. Status: ' +
+                    str(response.status_code))
+
+            # add to community2logo, if community has logo
+            if i["logo_bitstream_id"] != None:
+                community2logo[i_id] = i["logo_bitstream_id"]
+
+            # create admingroup
+            if i['admin'] != None:
                 try:
-                    response = do_api_post('core/communities', parent_id, json_p)
-                    resp_community_id = convert_response_to_json(response)['id']
-                    community_id[i['community_id']] = resp_community_id
-                    importedComm+=1
+                    response = do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {})
+                    group_id[i['admin']] = [convert_response_to_json(response)['id']]
+                    importedGroup+=1
                 except:
-                    log('POST request ' + response.url + ' for id: ' + str(i_id) + ' failed. Status: ' +
-                        str(response.status_code))
+                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            del json_comm[counter]
+        else:
+            counter += 1
+        if counter == len(json_comm):
+            counter = 0
 
-                # add to community2logo, if community has logo
-                if i["logo_bitstream_id"] != None:
-                    community2logo[i_id] = i["logo_bitstream_id"]
-
-                # create admingroup
-                if i['admin'] != None:
-                    try:
-                        response = do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {})
-                        group_id[i['admin']] = [convert_response_to_json(response)['id']]
-                        importedGroup+=1
-                    except:
-                        log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-                del json_comm[counter]
-            else:
-                counter += 1
-            if counter == len(json_comm):
-                counter = 0
-
-        if 'community' in statistics:
-            statistics['community'] = (statistics['community'][0], importedComm)
-        statistics['epersongroup'] = (0, importedGroup)
+    if 'community' in statistics:
+        statistics['community'] = (statistics['community'][0], importedComm)
+    statistics['epersongroup'] = (0, importedGroup)
     log("Community and Community2Community were successfully imported!")
-
 
 
 def import_collection():
@@ -653,9 +685,11 @@ def import_collection():
     json_a = read_json('collection.json')
     comm_2_coll_json = read_json('community2collection.json')
     coll2comm = dict()
-    if comm_2_coll_json:
-        for i in comm_2_coll_json:
-            coll2comm[i['collection_id']] = i['community_id']
+    if not comm_2_coll_json:
+        log("Community2collection JSON is empty.")
+        return
+    for i in comm_2_coll_json:
+        coll2comm[i['collection_id']] = i['community_id']
 
     # because the role DEFAULT_READ is without old group id in collection
     coll2group = dict()
@@ -667,65 +701,66 @@ def import_collection():
                 text = i['text_value']
                 positions = [ind for ind, ch in enumerate(text) if ch == '_']
                 coll2group[int(text[positions[0] + 1: positions[1]])] = i['resource_id']
-    if json_a:
-        for i in json_a:
-            json_p = {}
-            metadata_col = get_metadata_value(3, i['collection_id'])
-            if metadata_col:
-                json_p['metadata'] = metadata_col
-            if (3, i['collection_id']) in handle:
-                handle_col = handle[(3, i['collection_id'])][0]
-                json_p['handle'] = handle_col['handle']
-                imported_handle+=1
-            params = {'parent': community_id[coll2comm[i['collection_id']]]}
+    if not json_a:
+        log("Collection JSON is empty.")
+        return
+    for i in json_a:
+        json_p = {}
+        metadata_col = get_metadata_value(3, i['collection_id'])
+        if metadata_col:
+            json_p['metadata'] = metadata_col
+        if (3, i['collection_id']) in handle:
+            handle_col = handle[(3, i['collection_id'])][0]
+            json_p['handle'] = handle_col['handle']
+            imported_handle+=1
+        params = {'parent': community_id[coll2comm[i['collection_id']]]}
+        try:
+            response = do_api_post('core/collections', params, json_p)
+            coll_id = convert_response_to_json(response)['id']
+            collection_id[i['collection_id']] = coll_id
+            importedColl+=1
+        except:
+            log('POST request ' + response.url + ' for id: ' + str(i['collection_id']) + 'failed. Status: ' +
+                str(response.status_code))
+
+        # add to collection2logo, if collection has logo
+        if i["logo_bitstream_id"] != None:
+            community2logo[i['collection_id']] = i["logo_bitstream_id"]
+
+        # greate group
+        # template_item_id, workflow_step_1, workflow_step_3, admin are not implemented,
+        # because they are null in all data
+        if i['workflow_step_2']:
             try:
-                response = do_api_post('core/collections', params, json_p)
-                coll_id = convert_response_to_json(response)['id']
-                collection_id[i['collection_id']] = coll_id
-                importedColl+=1
+                response = do_api_post('core/collections/' + coll_id + '/workflowGroups/editor', None, {})
+                group_id[i['workflow_step_2']] = [convert_response_to_json(response)['id']]
+                importedGroup+=1
             except:
-                log('POST request ' + response.url + ' for id: ' + str(i['collection_id']) + 'failed. Status: ' +
-                    str(response.status_code))
+                log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+        if i['submitter']:
+            try:
+                response = do_api_post('core/collections/' + coll_id + '/submittersGroup', None, {})
+                group_id[i['submitter']] = [convert_response_to_json(response)['id']]
+                importedGroup += 1
+            except:
+                log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+        if i['collection_id'] in coll2group:
+            try:
+                response = do_api_post('core/collections/' + coll_id + '/bitstreamReadGroup', None, {})
+                group_id[coll2group[i['collection_id']]] = [convert_response_to_json(response)['id']]
+                importedGroup += 1
+            except:
+                log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            try:
+                response = do_api_post('core/collections/' + coll_id + '/itemReadGroup', None, {})
+                group_id[coll2group[i['collection_id']]].append(convert_response_to_json(response)['id'])
+                importedGroup += 1
+            except:
+                log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-            # add to collection2logo, if collection has logo
-            if i["logo_bitstream_id"] != None:
-                community2logo[i['collection_id']] = i["logo_bitstream_id"]
-
-            # greate group
-            # template_item_id, workflow_step_1, workflow_step_3, admin are not implemented,
-            # because they are null in all data
-            if i['workflow_step_2']:
-                try:
-                    response = do_api_post('core/collections/' + coll_id + '/workflowGroups/editor', None, {})
-                    group_id[i['workflow_step_2']] = [convert_response_to_json(response)['id']]
-                    importedGroup+=1
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-            if i['submitter']:
-                try:
-                    response = do_api_post('core/collections/' + coll_id + '/submittersGroup', None, {})
-                    group_id[i['submitter']] = [convert_response_to_json(response)['id']]
-                    importedGroup += 1
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-            if i['collection_id'] in coll2group:
-                try:
-                    response = do_api_post('core/collections/' + coll_id + '/bitstreamReadGroup', None, {})
-                    group_id[coll2group[i['collection_id']]] = [convert_response_to_json(response)['id']]
-                    importedGroup += 1
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-                try:
-                    response = do_api_post('core/collections/' + coll_id + '/itemReadGroup', None, {})
-                    group_id[coll2group[i['collection_id']]].append(convert_response_to_json(response)['id'])
-                    importedGroup += 1
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-
-        statistics['collection'] = (len(json_a), importedColl)
-        statistics['epersongroup'] = (0, statistics['epersongroup'][1] + importedGroup)
+    statistics['collection'] = (len(json_a), importedColl)
+    statistics['epersongroup'] = (0, statistics['epersongroup'][1] + importedGroup)
     log("Collection and Community2collection were successfully imported!")
-
 
 
 def import_item():
@@ -739,10 +774,12 @@ def import_item():
     # create dict from items by item id
     json_a = read_json("item.json")
     items = dict()
-    if json_a:
-        for i in json_a:
-            items[i['item_id']] = i
-        statistics['item'] = (len(json_a), 0)
+    if not json_a:
+        log("Item JSON is empty.")
+        return
+    for i in json_a:
+        items[i['item_id']] = i
+    statistics['item'] = (len(json_a), 0)
 
     # create item and workspaceitem
     json_a = read_json("workspaceitem.json")
@@ -756,9 +793,10 @@ def import_item():
             del items[i['item_id']]
 
         statistics['workspaceitem'] = (len(json_a), imported)
-    importedItem += imported
-    log("Workspaceitem was successfully imported!")
-
+        importedItem += imported
+        log("Workspaceitem was successfully imported!")
+    else:
+        log("Workspaceitem JSON is empty.")
     # create workflowitem
     # workflowitem is created from workspaceitem
     # -1, because the workflowitem doesn't contain this attribute
@@ -781,8 +819,10 @@ def import_item():
             del items[i['item_id']]
 
         statistics['workflowitem'] = (len(json_a), imported)
-    importedItem+=imported
-    log("Cwf_workflowitem was successfully imported!")
+        importedItem += imported
+        log("Cwf_workflowitem was successfully imported!")
+    else:
+        log("Workflowitem JSON is empty.")
 
     # create other items
     for i in items.values():
@@ -807,6 +847,7 @@ def import_item():
 
     statistics['item'] = (statistics['item'][0], importedItem)
     log("Item and Collection2item were successfully imported!")
+
 
 def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached,
                          pageReached):
@@ -857,40 +898,45 @@ def import_bundle():
     json_a = read_json("item2bundle.json")
     statistics['item2bundle'] = (len(json_a), 0)
     item2bundle = dict()
-    if json_a:
-        for i in json_a:
-            if i['item_id'] in item2bundle:
-                item2bundle[i['item_id']].append(i['bundle_id'])
-            else:
-                item2bundle[i['item_id']] = [i['bundle_id']]
+    if not json_a:
+        log("Item2bundle JSON is empty.")
+        return
+    for i in json_a:
+        if i['item_id'] in item2bundle:
+            item2bundle[i['item_id']].append(i['bundle_id'])
+        else:
+            item2bundle[i['item_id']] = [i['bundle_id']]
 
     # load bundles and map bundles to their primary bitstream ids
     json_a = read_json("bundle.json")
-    if json_a:
-        for i in json_a:
-            if i['primary_bitstream_id']:
-                primaryBitstream[i['primary_bitstream_id']] = i['bundle_id']
+    if not json_a:
+        log("Bundle JSON is empty.")
+        return
+    for i in json_a:
+        if i['primary_bitstream_id']:
+            primaryBitstream[i['primary_bitstream_id']] = i['bundle_id']
 
     # import bundle without primary bitstream id
-    if item2bundle:
-        for item in item2bundle.items():
-            for bundle in item[1]:
-                json_p = dict()
-                metadata_bundle = get_metadata_value(1, bundle)
-                if metadata_bundle:
-                    json_p['metadata'] = metadata_bundle
-                    json_p['name'] = metadata_bundle['dc.title'][0]['value']
+    if not item2bundle:
+        log("Bundle JSON is empty.")
+        return
+    for item in item2bundle.items():
+        for bundle in item[1]:
+            json_p = dict()
+            metadata_bundle = get_metadata_value(1, bundle)
+            if metadata_bundle:
+                json_p['metadata'] = metadata_bundle
+                json_p['name'] = metadata_bundle['dc.title'][0]['value']
 
-                try:
-                    response = do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p)
-                    bundle_id[bundle] = convert_response_to_json(response)['uuid']
-                    imported+=1
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            try:
+                response = do_api_post('core/items/' + str(item_id[item[0]]) + "/bundles", None, json_p)
+                bundle_id[bundle] = convert_response_to_json(response)['uuid']
+                imported+=1
+            except:
+                log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
-        statistics['item2bundle'] = (statistics['item2bundle'][0], imported)
+    statistics['item2bundle'] = (statistics['item2bundle'][0], imported)
     log("Bundle and Item2Bundle were successfully imported!")
-
 
 
 def import_bitstream():
@@ -908,42 +954,44 @@ def import_bitstream():
 
     # load and import bitstreams
     json_a = read_json("bitstream.json")
-    if json_a:
-        for i in json_a:
-            json_p = dict()
-            metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
-            if metadata_bitstream:
-                json_p['metadata'] = metadata_bitstream
-            json_p['sizeBytes'] = i['size_bytes']
-            json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
-            if not i['bitstream_format_id']:
-                log(f'Bitstream {i["bitstream_id"]} does not have a bitstream_format_id. Using {unknown_format_id} instead.')
-                i['bitstream_format_id'] = unknown_format_id
-            params = {'internal_id': i['internal_id'],
-                      'storeNumber': i['store_number'],
-                      'bitstreamFormat': bitstreamformat_id[i['bitstream_format_id']],
-                      'deleted': i['deleted'],
-                      'sequenceId': i['sequence_id'],
-                      'bundle_id': None,
-                      'primaryBundle_id': None}
+    if not json_a:
+        log("Bitstream JSON is empty.")
+        return
+    for i in json_a:
+        json_p = dict()
+        metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
+        if metadata_bitstream:
+            json_p['metadata'] = metadata_bitstream
+        json_p['sizeBytes'] = i['size_bytes']
+        json_p['checkSum'] = {'checkSumAlgorithm': i['checksum_algorithm'], 'value': i['checksum']}
+        if not i['bitstream_format_id']:
+            log(f'Bitstream {i["bitstream_id"]} does not have a bitstream_format_id. Using {unknown_format_id} instead.')
+            i['bitstream_format_id'] = unknown_format_id
+        params = {'internal_id': i['internal_id'],
+                  'storeNumber': i['store_number'],
+                  'bitstreamFormat': bitstreamformat_id[i['bitstream_format_id']],
+                  'deleted': i['deleted'],
+                  'sequenceId': i['sequence_id'],
+                  'bundle_id': None,
+                  'primaryBundle_id': None}
 
-            # if bitstream has bundle, set bundle_id from None to id
-            if i['bitstream_id'] in bitstream2bundle:
-                params['bundle_id'] = bundle_id[bitstream2bundle[i['bitstream_id']]]
+        # if bitstream has bundle, set bundle_id from None to id
+        if i['bitstream_id'] in bitstream2bundle:
+            params['bundle_id'] = bundle_id[bitstream2bundle[i['bitstream_id']]]
 
-            # if bitstream is primary bitstream of some bundle, set primaryBundle_id from None to id
-            if i['bitstream_id'] in primaryBitstream:
-                params['primaryBundle_id'] = bundle_id[primaryBitstream[i['bitstream_id']]]
-            try:
-                log('Going to process Bitstream with internal_id: ' + str(i['internal_id']))
-                response = do_api_post('clarin/import/core/bitstream', params, json_p)
-                bitstream_id[i['bitstream_id']] = convert_response_to_json(response)['id']
-                imported+=1
-            except:
-                log('POST request ' + response.url + ' for id: ' + str(i['bitstream_id']) + ' failed. Status: ' +
-                    str(response.status_code))
+        # if bitstream is primary bitstream of some bundle, set primaryBundle_id from None to id
+        if i['bitstream_id'] in primaryBitstream:
+            params['primaryBundle_id'] = bundle_id[primaryBitstream[i['bitstream_id']]]
+        try:
+            log('Going to process Bitstream with internal_id: ' + str(i['internal_id']))
+            response = do_api_post('clarin/import/core/bitstream', params, json_p)
+            bitstream_id[i['bitstream_id']] = convert_response_to_json(response)['id']
+            imported+=1
+        except:
+            log('POST request ' + response.url + ' for id: ' + str(i['bitstream_id']) + ' failed. Status: ' +
+                str(response.status_code))
 
-        statistics['bitstream'] = (len(json_a), imported)
+    statistics['bitstream'] = (len(json_a), imported)
     #add logos (bitstreams) to collections and communities
     add_logo_to_community()
     add_logo_to_collection()
@@ -964,14 +1012,16 @@ def add_logo_to_community():
     Logo has to exist in database.
     """
     global community2logo, bitstream_id, community_id
-    if community2logo:
-        for key, value in community2logo.items():
-            if key in community_id and value in bitstream_id:
-                params = {'community_id': community_id[key], 'bitstream_id': bitstream_id[value]}
-                try:
-                    response = do_api_post("clarin/import/logo/community", params, None)
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+    if not community2logo:
+        return
+    for key, value in community2logo.items():
+        if key not in community_id or value not in bitstream_id:
+            continue
+        params = {'community_id': community_id[key], 'bitstream_id': bitstream_id[value]}
+        try:
+            response = do_api_post("clarin/import/logo/community", params, None)
+        except:
+            log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
 
 def add_logo_to_collection():
@@ -980,14 +1030,16 @@ def add_logo_to_collection():
     Logo has to exist in database.
     """
     global collection2logo, bitstream_id, collection_id
-    if collection2logo:
-        for key, value in collection2logo.items():
-            if key in collection_id and value in bitstream_id:
-                params = {'collection_id': collection_id[key], 'bitstream_id': bitstream_id[value]}
-                try:
-                    response = do_api_post("clarin/import/logo/collection", params, None)
-                except:
-                    log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+    if not collection2logo:
+        return
+    for key, value in collection2logo.items():
+        if key not in collection_id or value not in bitstream_id:
+            continue
+        params = {'collection_id': collection_id[key], 'bitstream_id': bitstream_id[value]}
+        try:
+            response = do_api_post("clarin/import/logo/collection", params, None)
+        except:
+            log('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
 
 
 def import_handle_with_url():
@@ -1001,15 +1053,17 @@ def import_handle_with_url():
     if not handle:
         read_handle()
     # handle with defined url has key (None, None)
-    if (None, None) in handle:
-        handles_url = handle[(None, None)]
-        for i in handles_url:
-            json_p = {'handle': i['handle'], 'url': i['url']}
-            try:
-                response = do_api_post('core/handles', None, json_p)
-                imported_handle+=1
-            except:
-                log('POST response ' + response.url + ' failed. Status: ' + str(response.status_code))
+    if (None, None) not in handle:
+        log("Handles with url don't exist.")
+        return
+    handles_url = handle[(None, None)]
+    for i in handles_url:
+        json_p = {'handle': i['handle'], 'url': i['url']}
+        try:
+            response = do_api_post('core/handles', None, json_p)
+            imported_handle+=1
+        except:
+            log('POST response ' + response.url + ' failed. Status: ' + str(response.status_code))
 
     log("Handles with url were successfully imported!")
 
@@ -1020,7 +1074,7 @@ def import_handle_without_object():
     Mapped table: handles
     """
     if (2, None) not in handle:
-        log("Handles without objects were not imported, because they don't exist!")
+        log("Handles without objects don't exist.")
         return
 
     handles = handle[(2, None)]
@@ -1044,38 +1098,43 @@ def import_user_metadata():
     # mapping transaction_id to mapping_id
     user_allowance = dict()
     json_a = read_json("license_resource_user_allowance.json")
-    if json_a:
-        for i in json_a:
-            user_allowance[i['transaction_id']] = i
+    if not json_a:
+        log("License_resource_user_allowance JSON is empty.")
+        return
+    for i in json_a:
+        user_allowance[i['transaction_id']] = i
 
     # read license_resource_mapping
     # mapping bitstream_id to mapping_id
     resource_mapping = read_json('license_resource_mapping.json')
     mappings = dict()
-    if resource_mapping:
-        for i in resource_mapping:
-            mappings[i['mapping_id']] = i['bitstream_id']
+    if not resource_mapping:
+        log("License_resource_mapping JSON is empty.")
+        return
+    for i in resource_mapping:
+        mappings[i['mapping_id']] = i['bitstream_id']
 
     # read user_metadata
     json_a = read_json("user_metadata.json")
-    if json_a:
-        for i in json_a:
-            if i['transaction_id'] in user_allowance:
-                dataUA = user_allowance[i['transaction_id']]
-                json_p = [{'metadataKey': i['metadata_key'], 'metadataValue': i['metadata_value']}]
-                try:
-                    param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
-                             'createdOn': dataUA['created_on'], 'token': dataUA['token'],
-                             'userRegistrationId': userRegistration_id[i['eperson_id']]}
-                    do_api_post('clarin/import/usermetadata', param, json_p)
-                    imported += 1
-                except:
-                    log('POST response clarin/import/usermetadata failed for user registration id: ' + str(
-                        i['eperson_id'])
-                        + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
+    if not json_a:
+        log("User_metadata JSON is empty.")
+        return
+    for i in json_a:
+        if i['transaction_id'] in user_allowance:
+            dataUA = user_allowance[i['transaction_id']]
+            json_p = [{'metadataKey': i['metadata_key'], 'metadataValue': i['metadata_value']}]
+            try:
+                param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
+                         'createdOn': dataUA['created_on'], 'token': dataUA['token'],
+                         'userRegistrationId': userRegistration_id[i['eperson_id']]}
+                do_api_post('clarin/import/usermetadata', param, json_p)
+                imported += 1
+            except:
+                log('POST response clarin/import/usermetadata failed for user registration id: ' + str(
+                    i['eperson_id'])
+                    + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
 
-
-        statistics['user_metadata'] = (len(json_a), imported)
+    statistics['user_metadata'] = (len(json_a), imported)
     log("User metadata successfully imported!")
 
 def import_tasklistitem():
@@ -1085,6 +1144,9 @@ def import_tasklistitem():
      """
     global workflowitem_id, eperson_id
     json_a = read_json("tasklistitem.json")
+    if not json_a:
+        log("Tasklistitem JSON is empty.")
+        return
     for i in json_a:
         try:
             params = {'epersonUUID': eperson_id[i['eperson_id']], 'workflowitem_id': workflowitem_id[i['workflow_id']]}
