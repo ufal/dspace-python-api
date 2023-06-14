@@ -598,11 +598,11 @@ def import_community():
                 # resource_type_id for community is 4
                 if (4, i['community_id']) in handle:
                     handle_comm = handle[(4, i['community_id'])][0]
-                    json_p = {'handle': handle_comm['handle']}
+                    json_p['handle'] = handle_comm['handle']
                     imported_handle+=1
                 metadatavalue_comm = get_metadata_value(4, i['community_id'])
                 if metadatavalue_comm:
-                    json_p = {'metadata': metadatavalue_comm}
+                    json_p['metadata'] = metadatavalue_comm
                 # create community
                 parent_id = None
                 if i_id in child:
@@ -791,8 +791,8 @@ def import_item():
         metadata_item = get_metadata_value(2, i['item_id'])
         if metadata_item:
             json_p['metadata'] = metadata_item
-        if i['item_id'] in handle:
-            json_p['handle'] = handle[(2, i['item_id'])]
+        if (2, i['item_id']) in handle:
+            json_p['handle'] = handle[(2, i['item_id'])][0]['handle']
             imported_handle+=1
         params = {'owningCollection': collection_id[i['owning_collection']],
                   'epersonUUID': eperson_id[i['submitter_id']]}
@@ -822,9 +822,8 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
     metadata_item = get_metadata_value(2, item['item_id'])
     if metadata_item:
         json_p['metadata'] = metadata_item
-
-    if item['item_id'] in handle:
-        json_p['handle'] = handle[(2, item['item_id'])]
+    if (2, item['item_id']) in handle:
+        json_p['handle'] = handle[(2, item['item_id'])][0]['handle']
         imported_handle+=1
     # the params are workspaceitem attributes
     params = {'owningCollection': collection_id[owningCollectin],
@@ -1014,6 +1013,25 @@ def import_handle_with_url():
 
     log("Handles with url were successfully imported!")
 
+def import_handle_without_object():
+    """
+    Import handles which have not objects into database.
+    Other handles are imported by dspace objects.
+    Mapped table: handles
+    """
+    if (2, None) not in handle:
+        log("Handles without objects were not imported, because they don't exist!")
+        return
+
+    handles = handle[(2, None)]
+    for i in handles:
+        json_p = {'handle': i['handle'], 'resourceTypeID': i['resource_type_id']}
+        try:
+            response = do_api_post('clarin/import/handle', None, json_p)
+        except:
+            log('POST response clarin/import/handle failed. Status: ' + str(response.status_code))
+
+    log("Handles without object were successfully imported!")
 
 def import_user_metadata():
     """
@@ -1059,7 +1077,6 @@ def import_user_metadata():
 
         statistics['user_metadata'] = (len(json_a), imported)
     log("User metadata successfully imported!")
-
 
 def import_tasklistitem():
     """
@@ -1130,9 +1147,9 @@ log("Data migraton started!")
 # at the beginning
 read_metadata()
 read_handle()
-#not depends on the ather tables
+# not depends on the ather tables
+import_handle_without_object()
 import_handle_with_url()
-
 # you have to call together
 import_metadata()
 #import hierarchy has to call before import group
