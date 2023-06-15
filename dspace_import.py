@@ -571,7 +571,7 @@ def import_metadatafieldregistry():
                     i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
                 continue
             for j in existing_data:
-                if j['element'] != i['element'] and j['qualifier'] != i['qualifier']:
+                if j['element'] != i['element'] or j['qualifier'] != i['qualifier']:
                     continue
                 metadata_field_id[i['metadata_field_id']] = j['id']
                 log('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
@@ -1207,10 +1207,10 @@ log("Data migraton started!")
 
 # at the beginning
 read_metadata()
-#read_handle()
+read_handle()
 # not depends on the ather tables
-#import_handle_without_object()
-#import_handle_with_url()
+import_handle_without_object()
+import_handle_with_url()
 # you have to call together
 import_metadata()
 #import hierarchy has to call before import group
