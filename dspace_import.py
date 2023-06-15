@@ -139,8 +139,6 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
     if (old_resource_type_id, old_resource_id) not in metadatavalue:
         return None
     metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
-    if not metadatavalue_obj:
-        return result
     # create list of object metadata
     for i in metadatavalue_obj:
         if i['metadata_field_id'] not in metadata_field_id:
@@ -168,6 +166,7 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
             result[key].append(value)
         else:
             result[key] = [value]
+
     return result
 
 
@@ -520,7 +519,7 @@ def import_metadataschemaregistry():
             if not existing_data:
                 log('POST request ' + response.url + ' for id: ' + str(
                     i['metadata_schema_id']) + ' failed. Status: ' + str(response.status_code))
-                break
+                continue
             for j in existing_data:
                 if j['prefix'] != i['short_id']:
                     continue
@@ -570,7 +569,7 @@ def import_metadatafieldregistry():
             if not existing_data:
                 log('POST request ' + response.url + ' for id: ' + str(
                     i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
-                break
+                continue
             for j in existing_data:
                 if j['element'] != i['element'] and j['qualifier'] != i['qualifier']:
                     continue
@@ -1208,10 +1207,10 @@ log("Data migraton started!")
 
 # at the beginning
 read_metadata()
-read_handle()
+#read_handle()
 # not depends on the ather tables
-import_handle_without_object()
-import_handle_with_url()
+#import_handle_without_object()
+#import_handle_with_url()
 # you have to call together
 import_metadata()
 #import hierarchy has to call before import group
