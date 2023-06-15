@@ -2,19 +2,16 @@
 Defines how dspace api (rest_proxy) behaves on responses.
 Add specific reactions to response_map.
 """
+import logging
 from json import JSONDecodeError
-
-from support.logs import log, Severity
-
 
 def check_response(r, additional_message):
     if r is None:
-        log("Failed to receive response. " + additional_message, Severity.ERROR)
+        logging.ERROR("Failed to receive response. " + additional_message)
         raise Exception("No response from server where one was expected")
-    log(str(additional_message) + " Response " + str(r.status_code))
+    logging.info(str(additional_message) + " Response " + str(r.status_code))
     if r.status_code not in response_map:
-        log("Unexpected response while creating item: " + str(r.status_code) + "; " + r.url + "; " + r.text,
-            Severity.WARN)
+        logging.warning("Unexpected response while creating item: " + str(r.status_code) + "; " + r.url + "; " + r.text)
     else:
         response_map[r.status_code](r)
 
@@ -34,6 +31,6 @@ def error(r):
 def response_success(r):
     try:
         r = r.json()
-        log(f'{r["type"]} created successfully!')
+        logging.info(f'{r["type"]} created successfully!')
     except JSONDecodeError:
-        log("request successfully")
+        logging.info("request successfully")

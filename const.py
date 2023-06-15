@@ -1,8 +1,7 @@
 import enum
 import sys
-
+import logging
 import expected
-from support.logs import log, Severity
 
 user = "test@test.edu"
 password = "dspace"
@@ -19,6 +18,9 @@ fe_port = None
 # be_port = ":8080"
 be_port = None
 be_location = "/server/"
+
+#config logging
+logging.basicConfig(filename='logs.log', encoding='utf-8', level=logging.INFO)
 
 # command that imports items into oai
 # in github action, this command is correct
@@ -37,15 +39,15 @@ if use_ssl != expected.exp_SSL or host != expected.exp_host or fe_port != expect
     main = "Host settings are not what is expected for tests!!"
     print(main)
     print(main, file=sys.stderr)
-    log(main + ":", Severity.WARN)
-    log("use_ssl: " + str(use_ssl), Severity.WARN)
-    log("host: " + str(host), Severity.WARN)
-    log("fe_port: " + str(fe_port), Severity.WARN)
-    log("be_port: " + str(be_port), Severity.WARN)
-    log("import_command: " + str(import_command), Severity.WARN)
-    log("Please check expected.py and correct values in const.py", Severity.WARN)
+    logging.warning(main + ":")
+    logging.warning("use_ssl: " + str(use_ssl))
+    logging.warning("host: " + str(host))
+    logging.warning("fe_port: " + str(fe_port))
+    logging.warning("be_port: " + str(be_port))
+    logging.warning("import_command: " + str(import_command))
+    logging.warning("Please check expected.py and correct values in const.py")
 else:
-    log("Host settings are what is expected", Severity.DEBUG)
+    logging.debug("Host settings are what is expected")
 
 """
  when starting tests, import everything once, to have most recent views

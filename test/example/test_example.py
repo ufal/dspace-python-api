@@ -2,12 +2,11 @@
 This serves as example test
 """
 import unittest
-
+import logging
 from bs4 import BeautifulSoup
 
 from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, assure_item_from_file, get_test_soup
-from support.logs import log
 
 
 class ExampleTest(unittest.TestCase):
@@ -43,7 +42,7 @@ class ExampleTest(unittest.TestCase):
         item = rest_proxy.d.get_item(uuid)
         item_json = item.json()
         item_tile_from_metadata = item_json["metadata"]["dc.title"][0]["value"]
-        log("Example_test item with title: " + item_tile_from_metadata)
+        logging.info("Example_test item with title: " + item_tile_from_metadata)
 
         # In order to compare xml objects, BeautifulSoup objects can be constructed and compared:
         # Use function to obtain soup (soup is name of library, also used as name for objects

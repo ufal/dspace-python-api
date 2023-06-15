@@ -1,4 +1,5 @@
 import unittest
+import logging
 
 import requests
 from bs4 import BeautifulSoup
@@ -8,8 +9,6 @@ from support.dspace_interface.response_map import check_response
 from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
     assure_item_from_file, import_items, oai_fail_message, get_test_soup
-from support.logs import log, Severity
-
 
 class CMDIFormatTest(unittest.TestCase):
 
@@ -30,7 +29,7 @@ class CMDIFormatTest(unittest.TestCase):
         if oai_response.content is None:
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         if oai_response.status_code == 500:
-            log(oai_response.content, Severity.WARN)
+            logging.warning(oai_response.content)
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)
@@ -86,5 +85,5 @@ class CMDIFormatTest(unittest.TestCase):
 
         response = rest_proxy.d.api_patch(const.BE_url + "api/core/items/" + str(uuid),
                                           "remove", "/metadata/" + metadatum + "/" + str(idx), None)
-        log(response)
+        logging.info(response)
         return True

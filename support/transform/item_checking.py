@@ -1,12 +1,11 @@
 import json
 import os
-
+import logging
 from bs4 import BeautifulSoup
 
 import const
 from support.dspace_interface.models import Item
 from support.dspace_proxy import rest_proxy
-from support.logs import log, Severity
 
 com_col_checked = False
 
@@ -20,7 +19,7 @@ def check_com_col():
     global com_col_checked
     if com_col_checked:
         return
-    log("checking if community and collection for test items exist")
+    logging.info("checking if community and collection for test items exist")
     if const.ENABLE_IMPORT_AT_START:
         import_items()
     top_community_exists = False
@@ -32,7 +31,7 @@ def check_com_col():
         comms = comm_list['_embedded']["communities"]
         for cm in comms:
             if cm["name"] == const.COM:
-                log("top community found")
+                logging.info("top community found")
                 const.com_UUID = cm["uuid"]
                 top_community_exists = True
 
@@ -49,7 +48,7 @@ def check_com_col():
 
     for cl in colls:
         if cl["name"] == const.COL:
-            log("test collection found")
+            logging.info("test collection found")
             const.col_UUID = cl["uuid"]
             collection_exists = True
     if not collection_exists:
@@ -67,7 +66,7 @@ def import_items():
     Is by far the biggest bottleneck, if called when not necessary, but
     we don't need to run those tests fast.
     """
-    log("Importing items into OAI-PMH", Severity.INFO)
+    logging.info("Importing items into OAI-PMH")
     result = os.system(const.import_command)
 
 
@@ -78,7 +77,7 @@ def assure_item_with_name_suffix(name):
     """
     check_com_col()
     name = str(name)
-    log("checking existence of item with suffix " + name)
+    logging.info("checking existence of item with suffix " + name)
     itm_uuid = None
     item_exists = False
     items_inside = rest_proxy.get("discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
@@ -89,7 +88,7 @@ def assure_item_with_name_suffix(name):
             itm_uuid = i["uuid"]
             item_exists = True
     if not item_exists:
-        log("creating item with suffix " + name)
+        logging.info("creating item with suffix " + name)
         x = open("test/data/itm.sample.json")
         item_data = json.load(x)
         x.close()
@@ -142,7 +141,7 @@ def assure_item_from_file(filename, postpone=False):
     or will not be visible in OAI at all.
     """
     check_com_col()
-    log("Checking item from filename " + filename)
+    logging.info("Checking item from filename " + filename)
     itm_uuid = None
     item_exists = False
     items_inside = rest_proxy.get("discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
@@ -162,7 +161,7 @@ def assure_item_from_file(filename, postpone=False):
             itm_uuid = i["uuid"]
             item_exists = True
     if not item_exists:
-        log("creating item from file " + filename)
+        logging.info("creating item from file " + filename)
         result = rest_proxy.d.create_item(const.col_UUID, Item(data))
         itm_uuid = result.uuid
         if not postpone:
@@ -180,8 +179,8 @@ def get_handle(uuid):
     response = raw_response.json()
     ret = response["handle"]
     if ret is None:
-        log("did not receive handle from object, even tho uuid exists!!", Severity.WARN)
-        log(f'uuid={uuid} name of item={response["name"]}', Severity.WARN)
+        logging.warning("did not receive handle from object, even tho uuid exists!!")
+        logging.warning(f'uuid={uuid} name of item={response["name"]}')
     return ret
 
 
@@ -241,4 +240,4 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'requiredInfo': required_info
     }
     r = rest_proxy.d.api_post(url, None, license_json)
-    log(definition + " imported")
+    logging.info(definition + " imported")
