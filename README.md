@@ -77,10 +77,14 @@ Update `migration_const.py`
 - Run `python data_migration.py <DATABSE NAME> <HOST> postgres <PASSWORD FOR POSTGRES>` e.g., `python data_migration.py clarin-dspace localhost postgres pass` (arguments for database connection - database, host, user, password) for the BOTH databases // NOTE there must exist data folder in the project structure
 
 ***
-9. Copy `assetstore` from dspace5 to dspace7 (for bitstream import). `assetstore` is in the folder where you have installed DSpace `dspace/assetstore`.
+9. Make sure, your backend configuration (`dspace.cfg`) includes all handle prefixes from generated handle json in property `handle.additional.prefixes`, 
+e.g.,`handle.additional.prefixes = 11858, 11234, 11372, 11346, 20.500.12801, 20.500.12800`
 
 ***
-10. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
+10. Copy `assetstore` from dspace5 to dspace7 (for bitstream import). `assetstore` is in the folder where you have installed DSpace `dspace/assetstore`.
+
+***
+11. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
 - **NOTE:** database must be up to date (`dspace database migrate force` must be called in the `dspace/bin`)
 - **NOTE:** dspace server must be running
 - From the `dspace-python-api` run command `python dspace_import.py`
@@ -88,9 +92,8 @@ Update `migration_const.py`
 ***
 ## !!!Migration notes:!!!
 - The values of table attributes that describe the last modification time of dspace object (for example attribute `last_modified` in table `Item`) have a value that represents the time when that object was migrated and not the value from migrated database dump.
-
-
-
+- If you don't have valid and complete data, not all data will be imported.
+    
 ## How to write new tests
 Check test.example package. Everything necessary should be there.
 
