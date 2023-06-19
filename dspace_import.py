@@ -477,7 +477,7 @@ def import_group2eperson():
     imported = 0
     json_a = read_json('epersongroup2eperson.json')
     if not json_a:
-        logging.info("Eepersongroup2eperson JSON is empty.")
+        logging.info("Epersongroup2eperson JSON is empty.")
         return
     for i in json_a:
         try:
