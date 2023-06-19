@@ -98,6 +98,7 @@ def read_metadata():
     global metadatavalue
     metadatavalue_json = read_json('metadatavalue.json')
     if not metadatavalue_json:
+        logging.info('Metadatavalue JSON is empty.')
         return
     for i in metadatavalue_json:
         key = (i['resource_type_id'], i['resource_id'])
@@ -117,6 +118,7 @@ def read_handle():
     global handle
     handle_json = read_json('handle.json')
     if not handle_json:
+        logging.info('Handle JSON is empty.')
         return
     for i in handle_json:
         key = (i['resource_type_id'], i['resource_id'])
@@ -136,6 +138,8 @@ def get_metadata_value(old_resource_type_id, old_resource_id):
         read_metadata()
     # get all metadatavalue for object
     if (old_resource_type_id, old_resource_id) not in metadatavalue:
+        logging.info('Metadatavalue for resource_type_id: ' + str(old_resource_type_id) +
+                     ' and resource_id: ' + str(old_resource_id) + 'does not exist.')
         return None
     metadatavalue_obj = metadatavalue[(old_resource_type_id, old_resource_id)]
     # create list of object metadata
@@ -1011,6 +1015,7 @@ def add_logo_to_community():
     """
     global community2logo, bitstream_id, community_id
     if not community2logo:
+        logging.info("There are no logos for communities.")
         return
     for key, value in community2logo.items():
         if key not in community_id or value not in bitstream_id:
@@ -1029,6 +1034,7 @@ def add_logo_to_collection():
     """
     global collection2logo, bitstream_id, collection_id
     if not collection2logo:
+        logging.info("There are no logos for collections.")
         return
     for key, value in collection2logo.items():
         if key not in collection_id or value not in bitstream_id:
@@ -1118,19 +1124,20 @@ def import_user_metadata():
         logging.info("User_metadata JSON is empty.")
         return
     for i in json_a:
-        if i['transaction_id'] in user_allowance:
-            dataUA = user_allowance[i['transaction_id']]
-            json_p = [{'metadataKey': i['metadata_key'], 'metadataValue': i['metadata_value']}]
-            try:
-                param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
-                         'createdOn': dataUA['created_on'], 'token': dataUA['token'],
-                         'userRegistrationId': userRegistration_id[i['eperson_id']]}
-                do_api_post('clarin/import/usermetadata', param, json_p)
-                imported += 1
-            except:
-                logging.error('POST response clarin/import/usermetadata failed for user registration id: ' + str(
-                    i['eperson_id'])
-                    + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
+        if i['transaction_id'] not in user_allowance:
+            continue
+        dataUA = user_allowance[i['transaction_id']]
+        json_p = [{'metadataKey': i['metadata_key'], 'metadataValue': i['metadata_value']}]
+        try:
+            param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
+                     'createdOn': dataUA['created_on'], 'token': dataUA['token'],
+                     'userRegistrationId': userRegistration_id[i['eperson_id']]}
+            do_api_post('clarin/import/usermetadata', param, json_p)
+            imported += 1
+        except:
+            logging.error('POST response clarin/import/usermetadata failed for user registration id: ' + str(
+                i['eperson_id'])
+                + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
 
     statistics['user_metadata'] = (len(json_a), imported)
     logging.info("User metadata successfully imported!")
