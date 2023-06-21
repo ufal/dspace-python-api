@@ -1,6 +1,7 @@
 import asyncio
 import io
 import unittest
+import logging
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,7 +11,6 @@ from support.dspace_interface.models import Item
 from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
     assure_item_from_file, import_items, oai_fail_message, get_test_soup
-from support.logs import log, Severity
 
 
 class CMDIBundleTest(unittest.TestCase):
@@ -55,7 +55,7 @@ class CMDIBundleTest(unittest.TestCase):
         if oai_response.content is None:
             self.fail(fail_message)
         if oai_response.status_code == 500:
-            log(oai_response.content, Severity.WARN)
+            logging.warning(oai_response.content)
             self.fail(fail_message)
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)

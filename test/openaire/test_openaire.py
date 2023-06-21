@@ -1,4 +1,5 @@
 import unittest
+import logging
 from bs4 import BeautifulSoup
 import requests
 
@@ -7,7 +8,6 @@ from support.dspace_proxy import rest_proxy
 from support.item_checking import assure_item_with_name_suffix, check_com_col, transform_handle_to_oai_set_id, \
     get_handle, \
     assure_item_from_file, oai_fail_message, get_test_soup
-from support.logs import log, Severity
 
 
 class OpenaireTest(unittest.TestCase):
@@ -33,7 +33,7 @@ class OpenaireTest(unittest.TestCase):
         if oai_response.content is None:
             self.fail(err_msg)
         if oai_response.status_code == 500:
-            log(oai_response.content, Severity.WARN)
+            logging.warning(oai_response.content)
             self.fail(err_msg)
         parsed_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_response.find("ListRecords", recursive=True)
@@ -54,7 +54,7 @@ class OpenaireTest(unittest.TestCase):
         if oai_response.content is None:
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         if oai_response.status_code == 500:
-            log(oai_response.content, Severity.WARN)
+            logging.warning(oai_response.content)
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)
@@ -87,7 +87,7 @@ class OpenaireTest(unittest.TestCase):
         if oai_response.content is None:
             self.fail(fail_mesage)
         if oai_response.status_code == 500:
-            log(oai_response.content, Severity.WARN)
+            logging.warning(oai_response.content)
             self.fail(fail_mesage)
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)

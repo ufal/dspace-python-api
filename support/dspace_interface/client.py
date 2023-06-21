@@ -26,8 +26,7 @@ from .models import *
 
 __all__ = ['DSpaceClient']
 
-from ..logs import log, Severity
-
+import logging
 
 def parse_json(response):
     """
@@ -40,7 +39,7 @@ def parse_json(response):
     try:
         response_json = response.json()
     except ValueError as err:
-        log(f'Error parsing response JSON: {err}. Body text: {response.text}', Severity.ERROR)
+        logging.error(f'Error parsing response JSON: {err}. Body text: {response.text}')
     return response_json
 
 
@@ -100,7 +99,7 @@ class DSpaceClient:
         # Look for DSPACE-XSRF-TOKEN and persist it as X-XSRF-Token in session headers
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -115,7 +114,7 @@ class DSpaceClient:
             return False
         r_json = r.json()
         if 'authenticated' in r_json and r_json['authenticated'] is True:
-            log(f'Authenticated successfully as {self.USERNAME}')
+            logging.info(f'Authenticated successfully as {self.USERNAME}')
         else:
             return False
 
@@ -130,7 +129,7 @@ class DSpaceClient:
         # Look for DSPACE-XSRF-TOKEN and persist it as X-XSRF-Token in session headers
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -145,7 +144,7 @@ class DSpaceClient:
         r = self.session.get(url, params=params, data=data)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
         return r
@@ -164,7 +163,7 @@ class DSpaceClient:
         r = self.session.post(url, json=json_p, params=params, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('API Post: Updating token to ' + t, Severity.DEBUG)
+            logging.debug('API Post: Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -177,18 +176,18 @@ class DSpaceClient:
             r_json = r.json()
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    log('API Post: Already retried... something must be wrong')
+                    logging.error('API Post: Already retried... something must be wrong')
                 else:
-                    log("API Post: Retrying request with updated CSRF token")
+                    logging.info("API Post: Retrying request with updated CSRF token")
                     return self.api_post(url, params=params, json_p=json_p, retry=True)
         elif r.status_code == 401:
             r_json = r.json()
             if 'message' in r_json and 'Authentication is required' in r_json['message']:
                 if retry:
-                    log('API Post: Already retried... something must be wrong')
+                    logging.error('API Post: Already retried... something must be wrong')
                     self.exception401Counter = 0
                 else:
-                    log("API Post: Retrying request with updated CSRF token")
+                    logging.info("API Post: Retrying request with updated CSRF token")
                     # try to authenticate
                     self.authenticate()
                     # Try to authenticate and repeat the request 3 times - if it won't happen log error
@@ -215,7 +214,7 @@ class DSpaceClient:
         r = self.session.put(url, params=params, json=json_p, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -224,13 +223,13 @@ class DSpaceClient:
             # If we had a CSRF failure, retry the request with the updated token
             # After speaking in #dev it seems that these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
-            log(r.text)
+            logging.error(r.text)
             r_json = r.json()
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    log('Already retried... something must be wrong')
+                    logging.error('Already retried... something must be wrong')
                 else:
-                    log("Retrying request with updated CSRF token")
+                    logging.info("Retrying request with updated CSRF token")
                     return self.api_put(url, params=params, json_p=json_p, retry=True)
 
         return r
@@ -248,7 +247,7 @@ class DSpaceClient:
         r = self.session.delete(url, params=params, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -257,13 +256,13 @@ class DSpaceClient:
             # If we had a CSRF failure, retry the request with the updated token
             # After speaking in #dev it seems that these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
-            log(r.text)
+            logging.error(r.text)
             r_json = r.json()
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    log('Already retried... something must be wrong')
+                    logging.error('Already retried... something must be wrong')
                 else:
-                    log("Retrying request with updated CSRF token")
+                    logging.info("Retrying request with updated CSRF token")
                     return self.api_delete(url, params=params, retry=True)
 
         return r
@@ -279,15 +278,15 @@ class DSpaceClient:
         @see https://github.com/DSpace/RestContract/blob/main/metadata-patch.md
         """
         if url is None:
-            log(f'Missing required URL argument')
+            logging.info(f'Missing required URL argument')
             return None
         if path is None:
-            log(f'Need valid path eg. /withdrawn or /metadata/dc.title/0/language')
+            logging.info(f'Need valid path eg. /withdrawn or /metadata/dc.title/0/language')
             return None
         if (operation == self.PatchOperation.ADD or operation == self.PatchOperation.REPLACE
                 or operation == self.PatchOperation.MOVE) and value is None:
             # missing value required for add/replace/move operations
-            log(f'Missing required "value" argument for add/replace/move operations')
+            logging.info(f'Missing required "value" argument for add/replace/move operations')
             return None
 
         # compile patch data
@@ -307,7 +306,7 @@ class DSpaceClient:
         r = self.session.patch(url, json=[data], headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('API Post: Updating token to ' + t, Severity.DEBUG)
+            logging.debug('API Post: Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
 
@@ -316,17 +315,17 @@ class DSpaceClient:
             # If we had a CSRF failure, retry the request with the updated token
             # After speaking in #dev it seems that these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
-            log(r.text)
+            logging.error(r.text)
             r_json = parse_json(r)
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    log('Already retried... something must be wrong')
+                    logging.error('Already retried... something must be wrong')
                 else:
-                    log("Retrying request with updated CSRF token")
+                    logging.info("Retrying request with updated CSRF token")
                     return self.api_patch(url, operation, path, value, True)
         elif r.status_code == 200:
             # 200 Success
-            log(f'successful patch update to {r.json()["type"]} {r.json()["id"]}')
+            logging.info(f'successful patch update to {r.json()["type"]} {r.json()["id"]}')
 
         # Return the raw API response
         return r
@@ -359,7 +358,7 @@ class DSpaceClient:
                 dso = DSpaceObject(resource)
                 dsos.append(dso)
         except (TypeError, ValueError) as err:
-            log(f'error parsing search result json {err}')
+            logging.info(f'error parsing search result json {err}')
 
         return dsos
 
@@ -373,7 +372,7 @@ class DSpaceClient:
         """
         r = self.api_get(url, params, None)
         if r.status_code != 200:
-            log(f'Error encountered fetching resource: {r.text}', Severity.WARN)
+            logging.warning(f'Error encountered fetching resource: {r.text}')
             return None
         # ValueError / JSON handling moved to static method
         return parse_json(r)
@@ -389,11 +388,11 @@ class DSpaceClient:
         try:
             # Try to get UUID version to test validity
             id_of_uuid = UUID(uuid).version
-            log("dso id is " + str(id_of_uuid))
+            logging.info("dso id is " + str(id_of_uuid))
             url = f'{url}/{uuid}'
             return self.api_get(url, None, None)
         except ValueError:
-            log(f'Invalid DSO UUID: {uuid}')
+            logging.info(f'Invalid DSO UUID: {uuid}')
             return None
 
     def create_dso(self, url, params, data):
@@ -425,7 +424,7 @@ class DSpaceClient:
             return None
         dso_type = type(dso)
         if not isinstance(dso, SimpleDSpaceObject):
-            log(f'Only SimpleDSpaceObject types (eg Item, Collection, Community) '
+            logging.info(f'Only SimpleDSpaceObject types (eg Item, Collection, Community) '
                 f'are supported by generic update_dso PUT.')
             return dso
         try:
@@ -450,14 +449,14 @@ class DSpaceClient:
             if r.status_code == 200:
                 # 200 OK - success!
                 updated_dso = dso_type(parse_json(r))
-                log(f'{updated_dso.type} {updated_dso.uuid} updated successfully!')
+                logging.info(f'{updated_dso.type} {updated_dso.uuid} updated successfully!')
                 return updated_dso
             else:
-                log(f'update operation failed: {r.status_code}: {r.text} ({url})', Severity.ERROR)
+                logging.error(f'update operation failed: {r.status_code}: {r.text} ({url})')
                 return None
 
         except ValueError as e:
-            log(f'{e}', Severity.ERROR)
+            logging.error(f'{e}')
             return None
 
     def delete_dso(self, dso=None, url=None, params=None):
@@ -472,12 +471,12 @@ class DSpaceClient:
         """
         if dso is None:
             if url is None:
-                log(f'Need a DSO or a URL to delete', Severity.WARN)
+                logging.warning(f'Need a DSO or a URL to delete')
                 return None
         else:
             if not isinstance(dso, SimpleDSpaceObject):
-                log(f'Only SimpleDSpaceObject types (eg Item, Collection, Community, EPerson) '
-                    f'are supported by generic update_dso PUT.', Severity.WARN)
+                logging.warning(f'Only SimpleDSpaceObject types (eg Item, Collection, Community, EPerson) '
+                    f'are supported by generic update_dso PUT.')
                 return dso
             # Get self URI from HAL links
             url = dso.links['self']['href']
@@ -486,14 +485,14 @@ class DSpaceClient:
             r = self.api_delete(url, params=params)
             if r.status_code == 204:
                 # 204 No Content - success!
-                log(f'{url} was deleted successfully!')
+                logging.info(f'{url} was deleted successfully!')
                 return r
             else:
-                log(f'update operation failed: {r.status_code}: {r.text} ({url})', Severity.WARN)
+                logging.warning(f'update operation failed: {r.status_code}: {r.text} ({url})')
                 return None
 
         except ValueError as e:
-            log(f'{e}', Severity.ERROR)
+            logging.error(f'{e}')
             return None
 
     def get_bundles(self, parent=None, uuid=None):
@@ -525,7 +524,7 @@ class DSpaceClient:
                 for resource in resources:
                     bundles.append(Bundle(resource))
         except ValueError as err:
-            log(f'error parsing bundle results: {err}', Severity.ERROR)
+            logging.error(f'error parsing bundle results: {err}')
 
         return bundles
 
@@ -561,7 +560,7 @@ class DSpaceClient:
                 url = bundle.links['bitstreams']['href']
             else:
                 url = f'{self.API_ENDPOINT}core/bundles/{bundle.uuid}/bitstreams'
-                log(f'Cannot find bundle bitstream links, will try to construct manually: {url}')
+                logging.info(f'Cannot find bundle bitstream links, will try to construct manually: {url}')
         # Perform the actual request. By now, our URL and parameter should be properly set
         r_json = self.fetch_resource(url, params={'page': page, 'size': size})
         if '_embedded' in r_json:
@@ -607,23 +606,23 @@ class DSpaceClient:
         r = self.session.send(prepared_req)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
-            log('Updating token to ' + t, Severity.DEBUG)
+            logging.debug('Updating token to ' + t)
             self.session.headers.update({'X-XSRF-Token': t})
             self.session.cookies.update({'X-XSRF-Token': t})
         if r.status_code == 403:
             r_json = r.json()
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    log('Already retried... something must be wrong', Severity.WARN)
+                    logging.warning('Already retried... something must be wrong')
                 else:
-                    log("Retrying request with updated CSRF token", Severity.ERROR)
+                    logging.error("Retrying request with updated CSRF token")
                     return self.create_bitstream(bundle, name, path, mime, metadata, True)
         check_response(r, "creating bitstream")
         if r.status_code == 201 or r.status_code == 200:
             # Success
             return Bitstream(api_resource=parse_json(r))
         else:
-            log(f'Error creating bitstream: {r.status_code}: {r.text}')
+            logging.info(f'Error creating bitstream: {r.status_code}: {r.text}')
             return None
 
     def get_communities(self, uuid=None, page=0, size=20, top=False):
@@ -641,19 +640,19 @@ class DSpaceClient:
             try:
                 # This isn't used, but it'll throw a ValueError if not a valid UUID
                 id_check = UUID(uuid).version
-                log("id_check = " + str(id_check), Severity.DEBUG)
+                logging.debug("id_check = " + str(id_check))
                 # Set URL and parameters
                 url = f'{url}/{uuid}'
                 params = None
             except ValueError:
-                log(f'Invalid community UUID: {uuid}', Severity.ERROR)
+                logging.error(f'Invalid community UUID: {uuid}')
                 return None
 
         if top:
             # Set new URL
             url = f'{url}/search/top'
 
-        log(f'Performing get on {url}')
+        logging.info(f'Performing get on {url}')
         # Perform actual get
         r_json = self.fetch_resource(url, params)
         if '_embedded' in r_json:
@@ -697,12 +696,12 @@ class DSpaceClient:
         if uuid is not None:
             try:
                 id_check = UUID(uuid).version
-                log("id_check = " + str(id_check), Severity.DEBUG)
+                logging.debug("id_check = " + str(id_check))
                 # Update URL and parameters
                 url = f'{url}/{uuid}'
                 params = None
             except ValueError:
-                log(f'Invalid collection UUID: {uuid}', Severity.ERROR)
+                logging.error(f'Invalid collection UUID: {uuid}')
                 return None
 
         if community is not None:
@@ -746,11 +745,11 @@ class DSpaceClient:
         url = f'{self.API_ENDPOINT}core/items'
         try:
             id_check = UUID(uuid).version
-            log("id_check = " + str(id_check), Severity.DEBUG)
+            logging.debug("id_check = " + str(id_check))
             url = f'{url}/{uuid}'
             return self.api_get(url, None, None)
         except ValueError:
-            log(f'Invalid item UUID: {uuid}', Severity.ERROR)
+            logging.error(f'Invalid item UUID: {uuid}')
             return None
 
     def create_item(self, parent, item):
@@ -762,11 +761,11 @@ class DSpaceClient:
         """
         url = f'{self.API_ENDPOINT}core/items'
         if parent is None:
-            log('Need a parent UUID!', Severity.ERROR)
+            logging.error('Need a parent UUID!')
             return None
         params = {'owningCollection': parent}
         if not isinstance(item, Item):
-            log('Need a valid item', Severity.ERROR)
+            logging.error('Need a valid item')
             return None
         return Item(api_resource=parse_json(self.create_dso(url, params=params, data=item.as_dict())))
 
@@ -778,7 +777,7 @@ class DSpaceClient:
         @return:
         """
         if not isinstance(item, Item):
-            log('Need a valid item', Severity.WARN)
+            logging.warning('Need a valid item')
             return None
         return self.update_dso(item, params=None)
 
@@ -796,7 +795,7 @@ class DSpaceClient:
         """
         if dso is None or field is None or value is None or not isinstance(dso, DSpaceObject):
             # TODO: separate these tests, and add better error handling
-            log('Invalid or missing DSpace object, field or value string', Severity.WARN)
+            logging.warning('Invalid or missing DSpace object, field or value string')
             return self
 
         dso_type = type(dso)
@@ -837,7 +836,7 @@ class DSpaceClient:
 
     def delete_user(self, user):
         if not isinstance(user, User):
-            log(f'Must be a valid user')
+            logging.info(f'Must be a valid user')
             return None
         return self.delete_dso(user)
 

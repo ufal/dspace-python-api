@@ -1,11 +1,11 @@
 import unittest
+import logging
 
 import requests
 from bs4 import BeautifulSoup
 
 import const
 from support.item_checking import assure_item_from_file, get_handle, check_com_col, get_test_soup
-from support.logs import log
 
 
 class RedirectTests(unittest.TestCase):
@@ -22,7 +22,7 @@ class RedirectTests(unittest.TestCase):
         uuid = assure_item_from_file("itm.sample")
         handle = get_handle(uuid)
         going_to = const.FE_url + "/handle/" + handle
-        log("Going to" + going_to)
+        logging.info("Going to" + going_to)
         page = requests.get(going_to, headers={"Accept": "cmdi+xml"})
         # print("got to", page.url)
         page_soup = BeautifulSoup(page.text, "html.parser")

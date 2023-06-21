@@ -1,10 +1,7 @@
+import logging
+
 import const
 from support.dspace_interface.client import DSpaceClient
-from support.logs import log
-from support.logs import Severity
-
-ERROR = Severity.ERROR
-
 
 class DspaceRESTProxy:
     """
@@ -18,9 +15,9 @@ class DspaceRESTProxy:
         self.d = DSpaceClient(api_endpoint=const.API_URL, username=const.user, password=const.password)
         authenticated = self.d.authenticate()
         if not authenticated:
-            log(f'Error logging in to dspace REST API at ' + const.API_URL + '! Exiting!', ERROR)
+            logging.error(f'Error logging in to dspace REST API at ' + const.API_URL + '! Exiting!')
             raise ConnectionError("Cannot connect to dspace!")
-        log("Successfully logged in to dspace on " + const.API_URL)
+        logging.info("Successfully logged in to dspace on " + const.API_URL)
 
     def get(self, command, params=None, data=None):
         """
