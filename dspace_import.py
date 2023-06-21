@@ -959,7 +959,18 @@ def import_bitstream():
     if not json_a:
         logging.info("Bitstream JSON is empty.")
         return
+    counter = 0
     for i in json_a:
+        if counter % 500 == 0:
+            # do bitstream checksum
+            # fill the tables: most_recent_checksum and checksum_result based on imported bitstreams
+            try:
+                do_api_post('clarin/import/core/bitstream/checksum', None, None)
+            except Exception as e:
+                json_e = json.loads(e.args[0])
+                logging.error('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
+            counter = 0
+        counter+=1
         json_p = dict()
         metadata_bitstream = get_metadata_value(0, i['bitstream_id'])
         if metadata_bitstream:
@@ -998,13 +1009,6 @@ def import_bitstream():
     add_logo_to_community()
     add_logo_to_collection()
 
-    # do bitstream checksum
-    # fill the tables: most_recent_checksum and checksum_result based on imported bitstreams
-    try:
-        do_api_post('clarin/import/core/bitstream/checksum', None, None)
-    except Exception as e:
-        json_e = json.loads(e.args[0])
-        logging.error('POST request ' + json_e['path'] + ' failed. Status: ' + str(json_e['status']))
     logging.info("Bitstream, bundle2bitstream, most_recent_checksum and checksum_result were successfully imported!")
 
 
