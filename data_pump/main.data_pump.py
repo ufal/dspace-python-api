@@ -56,7 +56,7 @@ if __name__== "__main__":
     import_item(metadata, var.workflowitem_id, var.workspaceitem_id, var.item_id, var.collection_id,
                 var.eperson_id, var.imported_handle, var.handle, var.metadatavalue, var.metadata_field_id,
                 var.statistics)
-    import_tasklistitem(var.workflowitem_id, var.eperson_id, var.statistic)
+    import_tasklistitem(var.workflowitem_id, var.eperson_id, var.statistics)
     import_bitstreamformatregistry(var.bitstreamformat_id, var.unknown_format_id, var.statistics)
     import_bundle(metadata, var.item_id, var.bundle_id, var.primaryBitstream, var.metadatavalue, var.metadata_field_id,
                   var.statistics)
