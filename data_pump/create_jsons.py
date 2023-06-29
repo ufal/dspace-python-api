@@ -4,7 +4,7 @@ import sys
 
 def get_data_as_json(database, host, db_user, db_password):
 
-#create database connection
+    #create database connection
     conn = psycopg2.connect(database=database,
                             host=host,
                             user=db_user,
