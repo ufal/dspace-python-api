@@ -27,4 +27,3 @@ def import_registrationdata(statistics):
                           str(json_e['status']))
     statistics['registrationdata'] = (len(json_a), imported)
     logging.info("Registration data was successfully imported!")
-

@@ -181,7 +181,8 @@ class Item(SimpleDSpaceObject):
         @return: dict of Item for API use
         """
         dso_dict = super(Item, self).as_dict()
-        item_dict = {'inArchive': self.inArchive, 'discoverable': self.discoverable, 'withdrawn': self.withdrawn}
+        item_dict = {'inArchive': self.inArchive,
+                     'discoverable': self.discoverable, 'withdrawn': self.withdrawn}
         return {**dso_dict, **item_dict}
 
     @classmethod

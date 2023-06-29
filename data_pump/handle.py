@@ -38,8 +38,9 @@ class Handle:
             try:
                 response = do_api_post(url, None, json_p)
                 imported_handle += 1
-            except Exception as e:
-                logging.error('POST response ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST response ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
 
         logging.info("Handles with url were successfully imported!")
 
@@ -59,7 +60,8 @@ class Handle:
             json_p = {'handle': i['handle'], 'resourceTypeID': i['resource_type_id']}
             try:
                 response = do_api_post(url, None, json_p)
-            except Exception as e:
-                logging.error('POST response clarin/import/handle failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error(
+                    'POST response clarin/import/handle failed. Status: ' + str(response.status_code))
 
         logging.info("Handles without object were successfully imported!")

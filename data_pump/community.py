@@ -45,13 +45,14 @@ def import_community(metadata, group_id, handle, community_id, community2logo,
         i = json_comm[counter]
         i_id = i['community_id']
         if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[
-            i_id] in community_id.keys():
+                i_id] in community_id.keys():
             # resource_type_id for community is 4
             if (4, i['community_id']) in handle:
                 handle_comm = handle[(4, i['community_id'])][0]
                 json_p['handle'] = handle_comm['handle']
                 imported_handle += 1
-            metadatavalue_comm = metadata.get_metadata_value(metadatavalue, metadata_field_id, 4, i['community_id'])
+            metadatavalue_comm = metadata.get_metadata_value(
+                metadatavalue, metadata_field_id, 4, i['community_id'])
             if metadatavalue_comm:
                 json_p['metadata'] = metadatavalue_comm
             # create community
@@ -63,22 +64,24 @@ def import_community(metadata, group_id, handle, community_id, community2logo,
                 resp_community_id = convert_response_to_json(response)['id']
                 community_id[i['community_id']] = resp_community_id
                 importedComm += 1
-            except Exception as e:
+            except Exception:
                 logging.error('POST request ' + response.url + ' for id: ' + str(i_id) + ' failed. Status: ' +
                               str(response.status_code))
 
             # add to community2logo, if community has logo
-            if i["logo_bitstream_id"] != None:
+            if i['logo_bitstream_id'] is not None:
                 community2logo[i_id] = i["logo_bitstream_id"]
 
             # create admingroup
-            if i['admin'] != None:
+            if i['admin'] is not None:
                 try:
-                    response = do_api_post('core/communities/' + resp_community_id + '/adminGroup', None, {})
+                    response = do_api_post('core/communities/' +
+                                           resp_community_id + '/adminGroup', None, {})
                     group_id[i['admin']] = [convert_response_to_json(response)['id']]
                     importedGroup += 1
-                except Exception as e:
-                    logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+                except Exception:
+                    logging.error('POST request ' + response.url +
+                                  ' failed. Status: ' + str(response.status_code))
             del json_comm[counter]
         else:
             counter += 1

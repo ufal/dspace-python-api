@@ -12,7 +12,7 @@ def import_collection(metadata, group_id, handle, community_id, collection_id,
     json_name_col = 'collection.json'
     json_name_com2col = 'community2collection.json'
     json_name_metadata = 'metadatavalue.json'
-    url_col ='core/collections'
+    url_col = 'core/collections'
     url_step = 'core/collections/'
     importedColl = 0
     importedGroup = 0
@@ -32,7 +32,7 @@ def import_collection(metadata, group_id, handle, community_id, collection_id,
     if metadata_json:
         for i in metadata_json:
             if i['resource_type_id'] == 6 and 'COLLECTION_' in i['text_value'] and '_DEFAULT_READ' in i[
-                'text_value']:
+                    'text_value']:
                 text = i['text_value']
                 positions = [ind for ind, ch in enumerate(text) if ch == '_']
                 coll2group[int(text[positions[0] + 1: positions[1]])] = i['resource_id']
@@ -41,7 +41,8 @@ def import_collection(metadata, group_id, handle, community_id, collection_id,
         return
     for i in json_a:
         json_p = {}
-        metadata_col = metadata.get_metadata_value(metadatavalue, metadata_field_id, 3, i['collection_id'])
+        metadata_col = metadata.get_metadata_value(
+            metadatavalue, metadata_field_id, 3, i['collection_id'])
         if metadata_col:
             json_p['metadata'] = metadata_col
         if (3, i['collection_id']) in handle:
@@ -54,13 +55,13 @@ def import_collection(metadata, group_id, handle, community_id, collection_id,
             coll_id = convert_response_to_json(response)['id']
             collection_id[i['collection_id']] = coll_id
             importedColl += 1
-        except Exception as e:
+        except Exception:
             logging.error(
                 'POST request ' + response.url + ' for id: ' + str(i['collection_id']) + 'failed. Status: ' +
                 str(response.status_code))
 
         # add to collection2logo, if collection has logo
-        if i["logo_bitstream_id"] != None:
+        if i['logo_bitstream_id'] is not None:
             collection2logo[i['collection_id']] = i["logo_bitstream_id"]
 
         # greate group
@@ -68,31 +69,40 @@ def import_collection(metadata, group_id, handle, community_id, collection_id,
         # because they are null in all data
         if i['workflow_step_2']:
             try:
-                response = do_api_post(url_step + coll_id + '/workflowGroups/editor', None, {})
-                group_id[i['workflow_step_2']] = [convert_response_to_json(response)['id']]
+                response = do_api_post(url_step + coll_id +
+                                       '/workflowGroups/editor', None, {})
+                group_id[i['workflow_step_2']] = [
+                    convert_response_to_json(response)['id']]
                 importedGroup += 1
-            except Exception as e:
-                logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST request ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
         if i['submitter']:
             try:
                 response = do_api_post(url_step + coll_id + '/submittersGroup', None, {})
                 group_id[i['submitter']] = [convert_response_to_json(response)['id']]
                 importedGroup += 1
-            except Exception as e:
-                logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST request ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
         if i['collection_id'] in coll2group:
             try:
-                response = do_api_post(url_step + coll_id + '/bitstreamReadGroup', None, {})
-                group_id[coll2group[i['collection_id']]] = [convert_response_to_json(response)['id']]
+                response = do_api_post(url_step + coll_id +
+                                       '/bitstreamReadGroup', None, {})
+                group_id[coll2group[i['collection_id']]] = [
+                    convert_response_to_json(response)['id']]
                 importedGroup += 1
-            except Exception as e:
-                logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST request ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
             try:
                 response = do_api_post(url_step + coll_id + '/itemReadGroup', None, {})
-                group_id[coll2group[i['collection_id']]].append(convert_response_to_json(response)['id'])
+                group_id[coll2group[i['collection_id']]].append(
+                    convert_response_to_json(response)['id'])
                 importedGroup += 1
-            except Exception as e:
-                logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST request ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
 
     statistics['collection'] = (len(json_a), importedColl)
     statistics['epersongroup'] = (0, statistics['epersongroup'][1] + importedGroup)

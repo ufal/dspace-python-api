@@ -41,17 +41,20 @@ def import_bundle(metadata, item_id, bundle_id, primaryBitstream, metadatavalue,
     for item in item2bundle.items():
         for bundle in item[1]:
             json_p = dict()
-            metadata_bundle = metadata.get_metadata_value(metadatavalue, metadata_field_id, 1, bundle)
+            metadata_bundle = metadata.get_metadata_value(
+                metadatavalue, metadata_field_id, 1, bundle)
             if metadata_bundle:
                 json_p['metadata'] = metadata_bundle
                 json_p['name'] = metadata_bundle['dc.title'][0]['value']
 
             try:
-                response = do_api_post(url + str(item_id[item[0]]) + "/bundles", None, json_p)
+                response = do_api_post(
+                    url + str(item_id[item[0]]) + "/bundles", None, json_p)
                 bundle_id[bundle] = convert_response_to_json(response)['uuid']
                 imported += 1
-            except Exception as e:
-                logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
+            except Exception:
+                logging.error('POST request ' + response.url +
+                              ' failed. Status: ' + str(response.status_code))
 
     statistics['item2bundle'] = (statistics['item2bundle'][0], imported)
     logging.info("Bundle and Item2Bundle were successfully imported!")

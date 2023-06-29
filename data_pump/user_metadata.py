@@ -37,17 +37,18 @@ def import_user_metadata(bitstream_id, userRegistration_id, statistics):
         if i['transaction_id'] not in user_allowance:
             continue
         dataUA = user_allowance[i['transaction_id']]
-        json_p = [{'metadataKey': i['metadata_key'], 'metadataValue': i['metadata_value']}]
+        json_p = [{'metadataKey': i['metadata_key'],
+                   'metadataValue': i['metadata_value']}]
         try:
             param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
                      'createdOn': dataUA['created_on'], 'token': dataUA['token'],
                      'userRegistrationId': userRegistration_id[i['eperson_id']]}
             do_api_post('clarin/import/usermetadata', param, json_p)
             imported += 1
-        except Exception as e:
+        except Exception:
             logging.error('POST response clarin/import/usermetadata failed for user registration id: ' + str(
                 i['eperson_id'])
-                          + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
+                + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
 
     statistics['user_metadata'] = (len(json_a), imported)
     logging.info("User metadata successfully imported!")

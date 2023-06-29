@@ -50,7 +50,8 @@ class OpenaireTest(unittest.TestCase):
         uuid = assure_item_from_file("openaire_check")
         handle = get_handle(uuid)
         link = const.OAI_openaire_dc
-        oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
+        oai_response = requests.get(
+            link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
         if oai_response.content is None:
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         if oai_response.status_code == 500:
@@ -81,7 +82,8 @@ class OpenaireTest(unittest.TestCase):
             self.fail("Handles are issued as " + str(actual_handle) +
                       " and not in format http://hdl.handle.net/{handle}")
         handle = get_handle(uuid)
-        link = const.OAI_openaire_datacite + transform_handle_to_oai_set_id(get_handle(const.col_UUID))
+        link = const.OAI_openaire_datacite + \
+            transform_handle_to_oai_set_id(get_handle(const.col_UUID))
         oai_response = requests.get(link)
         fail_mesage = oai_fail_message(handle, link)
         if oai_response.content is None:

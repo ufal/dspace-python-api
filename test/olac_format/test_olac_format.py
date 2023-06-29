@@ -23,7 +23,8 @@ class OLACTest(unittest.TestCase):
         uuid = assure_item_from_file("olac_check")
         handle = get_handle(uuid)
         link = const.OAI_olac
-        oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
+        oai_response = requests.get(
+            link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
 
         check_response(oai_response, "getting olac item")
         # if oai_response.content is None:

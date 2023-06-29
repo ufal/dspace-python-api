@@ -43,7 +43,8 @@ def check_com_col():
         result = rest_proxy.d.create_community(None, community_data)
         const.com_UUID = result.uuid
 
-    colls_inside = rest_proxy.get("core/communities/" + const.com_UUID + "/collections").json()
+    colls_inside = rest_proxy.get(
+        "core/communities/" + const.com_UUID + "/collections").json()
     colls = colls_inside["_embedded"]["collections"]
 
     for cl in colls:
@@ -67,7 +68,7 @@ def import_items():
     we don't need to run those tests fast.
     """
     logging.info("Importing items into OAI-PMH")
-    result = os.system(const.import_command)
+    os.system(const.import_command)
 
 
 def assure_item_with_name_suffix(name):
@@ -80,7 +81,8 @@ def assure_item_with_name_suffix(name):
     logging.info("checking existence of item with suffix " + name)
     itm_uuid = None
     item_exists = False
-    items_inside = rest_proxy.get("discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
+    items_inside = rest_proxy.get(
+        "discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
     items = items_inside["_embedded"]["searchResult"]["_embedded"]["objects"]
     for item in items:
         i = item["_embedded"]["indexableObject"]
@@ -121,6 +123,7 @@ def get_test_soup(filename, suffix="xml", features="xml", find_metadata=True):
     else:
         return bs
 
+
 def get_name_from_file(filename):
     final_filename = filename + ".json"
     if os.path.exists("test/data/" + filename + ".stripped.json"):
@@ -133,6 +136,7 @@ def get_name_from_file(filename):
     name = data["name"]
     return name
 
+
 def assure_item_from_file(filename, postpone=False):
     """
     Assure item from specified file exists.
@@ -144,7 +148,8 @@ def assure_item_from_file(filename, postpone=False):
     logging.info("Checking item from filename " + filename)
     itm_uuid = None
     item_exists = False
-    items_inside = rest_proxy.get("discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
+    items_inside = rest_proxy.get(
+        "discover/search/objects?scope=" + const.col_UUID + "&dsoType=ITEM").json()
     items = items_inside["_embedded"]["searchResult"]["_embedded"]["objects"]
     final_filename = filename + ".json"
     if os.path.exists("test/data/" + filename + ".stripped.json"):
@@ -204,6 +209,7 @@ def oai_fail_message(handle, link):
     return "Did not find expected record in OAI for handle: " + handle \
            + " at link " + link
 
+
 def import_license_label(id, label, title, is_extended):
     url = const.API_URL + '/core/clarinlicenselabels'
     license_label_json = {
@@ -211,7 +217,7 @@ def import_license_label(id, label, title, is_extended):
         'label': label,
         'title': title,
         'extended': is_extended,
-        'icon': [0,1]
+        'icon': [0, 1]
     }
     r = rest_proxy.d.api_post(url, None, license_label_json)
     print(r)
@@ -229,8 +235,6 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'icon': clarin_license_label["icon"]
     }
 
-    
-
     url = const.API_URL + 'core/clarinlicenses'
     license_json = {
         'name': name,
@@ -239,5 +243,5 @@ def import_license(name, definition, label_id, confirmation, required_info):
         'confirmation': confirmation,
         'requiredInfo': required_info
     }
-    r = rest_proxy.d.api_post(url, None, license_json)
+    rest_proxy.d.api_post(url, None, license_json)
     logging.info(definition + " imported")

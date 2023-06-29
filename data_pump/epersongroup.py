@@ -19,7 +19,7 @@ def import_epersongroup(metadata, group_id, metadatavalue, metadata_field_id, st
     try:
         response = do_api_get_all(url_all)
         existing_data = convert_response_to_json(response)['_embedded']['groups']
-    except Exception as e:
+    except Exception:
         logging.error('GET request ' + response.url + ' failed.')
 
     if existing_data:
@@ -40,20 +40,23 @@ def import_epersongroup(metadata, group_id, metadatavalue, metadata_field_id, st
         # group is created with dspace object too
         if id != 0 and id != 1 and id not in group_id:
             # get group metadata
-            metadata_group = metadata.get_metadata_value(metadatavalue, metadata_field_id, 6, i['eperson_group_id'])
+            metadata_group = metadata.get_metadata_value(
+                metadatavalue, metadata_field_id, 6, i['eperson_group_id'])
             name = metadata_group['dc.title'][0]['value']
             del metadata_group['dc.title']
             # the group_metadata contains the name of the group
             json_p = {'name': name, 'metadata': metadata_group}
             try:
                 response = do_api_post(url, None, json_p)
-                group_id[i['eperson_group_id']] = [convert_response_to_json(response)['id']]
+                group_id[i['eperson_group_id']] = [
+                    convert_response_to_json(response)['id']]
                 imported += 1
-            except Exception as e:
+            except Exception:
                 logging.error('POST request ' + response.url + ' for id: ' + str(i['eperson_group_id']) +
                               ' failed. Status: ' + str(response.status_code))
     if 'epersongroup' in statistics:
-        statistics['epersongroup'] = (len(json_a), statistics['epersongroup'][1] + imported)
+        statistics['epersongroup'] = (
+            len(json_a), statistics['epersongroup'][1] + imported)
     else:
         statistics['epersongroup'] = (len(json_a), imported)
     logging.info("Eperson group was successfully imported!")

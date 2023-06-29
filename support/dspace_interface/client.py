@@ -28,6 +28,7 @@ __all__ = ['DSpaceClient']
 
 import logging
 
+
 def parse_json(response):
     """
     Simple static method to handle ValueError if JSON is invalid in response body
@@ -104,7 +105,8 @@ class DSpaceClient:
             self.session.cookies.update({'X-XSRF-Token': t})
 
         # POST Login
-        r = self.session.post(self.LOGIN_URL, data={'user': self.USERNAME, 'password': self.PASSWORD})
+        r = self.session.post(self.LOGIN_URL, data={
+                              'user': self.USERNAME, 'password': self.PASSWORD})
         if 'Authorization' in r.headers:
             self.session.headers.update({'Authorization': r.headers.get('Authorization')})
 
@@ -278,15 +280,17 @@ class DSpaceClient:
         @see https://github.com/DSpace/RestContract/blob/main/metadata-patch.md
         """
         if url is None:
-            logging.info(f'Missing required URL argument')
+            logging.info('Missing required URL argument')
             return None
         if path is None:
-            logging.info(f'Need valid path eg. /withdrawn or /metadata/dc.title/0/language')
+            logging.info(
+                'Need valid path eg. /withdrawn or /metadata/dc.title/0/language')
             return None
         if (operation == self.PatchOperation.ADD or operation == self.PatchOperation.REPLACE
                 or operation == self.PatchOperation.MOVE) and value is None:
             # missing value required for add/replace/move operations
-            logging.info(f'Missing required "value" argument for add/replace/move operations')
+            logging.info(
+                'Missing required "value" argument for add/replace/move operations')
             return None
 
         # compile patch data
@@ -325,7 +329,8 @@ class DSpaceClient:
                     return self.api_patch(url, operation, path, value, True)
         elif r.status_code == 200:
             # 200 Success
-            logging.info(f'successful patch update to {r.json()["type"]} {r.json()["id"]}')
+            logging.info(
+                f'successful patch update to {r.json()["type"]} {r.json()["id"]}')
 
         # Return the raw API response
         return r
@@ -424,8 +429,8 @@ class DSpaceClient:
             return None
         dso_type = type(dso)
         if not isinstance(dso, SimpleDSpaceObject):
-            logging.info(f'Only SimpleDSpaceObject types (eg Item, Collection, Community) '
-                f'are supported by generic update_dso PUT.')
+            logging.info('Only SimpleDSpaceObject types (eg Item, Collection, Community) '
+                         'are supported by generic update_dso PUT.')
             return dso
         try:
             # Get self URI from HAL links
@@ -449,10 +454,12 @@ class DSpaceClient:
             if r.status_code == 200:
                 # 200 OK - success!
                 updated_dso = dso_type(parse_json(r))
-                logging.info(f'{updated_dso.type} {updated_dso.uuid} updated successfully!')
+                logging.info(
+                    f'{updated_dso.type} {updated_dso.uuid} updated successfully!')
                 return updated_dso
             else:
-                logging.error(f'update operation failed: {r.status_code}: {r.text} ({url})')
+                logging.error(
+                    f'update operation failed: {r.status_code}: {r.text} ({url})')
                 return None
 
         except ValueError as e:
@@ -471,12 +478,12 @@ class DSpaceClient:
         """
         if dso is None:
             if url is None:
-                logging.warning(f'Need a DSO or a URL to delete')
+                logging.warning('Need a DSO or a URL to delete')
                 return None
         else:
             if not isinstance(dso, SimpleDSpaceObject):
-                logging.warning(f'Only SimpleDSpaceObject types (eg Item, Collection, Community, EPerson) '
-                    f'are supported by generic update_dso PUT.')
+                logging.warning('Only SimpleDSpaceObject types (eg Item, Collection, Community, EPerson) '
+                                'are supported by generic update_dso PUT.')
                 return dso
             # Get self URI from HAL links
             url = dso.links['self']['href']
@@ -488,7 +495,8 @@ class DSpaceClient:
                 logging.info(f'{url} was deleted successfully!')
                 return r
             else:
-                logging.warning(f'update operation failed: {r.status_code}: {r.text} ({url})')
+                logging.warning(
+                    f'update operation failed: {r.status_code}: {r.text} ({url})')
                 return None
 
         except ValueError as e:
@@ -560,7 +568,8 @@ class DSpaceClient:
                 url = bundle.links['bitstreams']['href']
             else:
                 url = f'{self.API_ENDPOINT}core/bundles/{bundle.uuid}/bitstreams'
-                logging.info(f'Cannot find bundle bitstream links, will try to construct manually: {url}')
+                logging.info(
+                    f'Cannot find bundle bitstream links, will try to construct manually: {url}')
         # Perform the actual request. By now, our URL and parameter should be properly set
         r_json = self.fetch_resource(url, params={'page': page, 'size': size})
         if '_embedded' in r_json:
@@ -836,7 +845,7 @@ class DSpaceClient:
 
     def delete_user(self, user):
         if not isinstance(user, User):
-            logging.info(f'Must be a valid user')
+            logging.info('Must be a valid user')
             return None
         return self.delete_dso(user)
 

@@ -13,7 +13,8 @@ class RedirectTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not const.on_dev_5:
-            raise unittest.SkipTest("Redirects are only implemented on dev-5. Can only run on dev-5. Skipping")
+            raise unittest.SkipTest(
+                "Redirects are only implemented on dev-5. Can only run on dev-5. Skipping")
         check_com_col()
 
     pass

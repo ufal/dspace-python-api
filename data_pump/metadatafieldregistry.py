@@ -15,22 +15,25 @@ def import_metadatafieldregistry(metadata_schema_id, metadata_field_id, statisti
     try:
         response = do_api_get_all(url_get_all)
         existing_data = convert_response_to_json(response)['_embedded']['metadatafields']
-    except Exception as e:
-        logging.error('GET request ' + response.url + ' failed. Status: ' + str(response.status_code))
+    except Exception:
+        logging.error('GET request ' + response.url +
+                      ' failed. Status: ' + str(response.status_code))
 
     json_a = read_json(json_name)
     if not json_a:
         logging.info("Metadatafieldregistry JSON is empty.")
         return
     for i in json_a:
-        json_p = {'element': i['element'], 'qualifier': i['qualifier'], 'scopeNote': i['scope_note']}
+        json_p = {'element': i['element'],
+                  'qualifier': i['qualifier'], 'scopeNote': i['scope_note']}
         param = {'schemaId': metadata_schema_id[i['metadata_schema_id']]}
         # element and qualifier have to be unique
         try:
             response = do_api_post(url, param, json_p)
-            metadata_field_id[i['metadata_field_id']] = convert_response_to_json(response)['id']
+            metadata_field_id[i['metadata_field_id']] = convert_response_to_json(response)[
+                'id']
             imported += 1
-        except Exception as e:
+        except Exception:
             found = False
             if not existing_data:
                 logging.error('POST request ' + response.url + ' for id: ' + str(
@@ -40,7 +43,8 @@ def import_metadatafieldregistry(metadata_schema_id, metadata_field_id, statisti
                 if j['element'] != i['element'] or j['qualifier'] != i['qualifier']:
                     continue
                 metadata_field_id[i['metadata_field_id']] = j['id']
-                logging.info('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
+                logging.info('Metadatafieldregistry with element: ' +
+                             i['element'] + ' already exists in database!')
                 found = True
                 imported += 1
                 break

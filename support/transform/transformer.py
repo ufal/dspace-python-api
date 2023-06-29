@@ -37,7 +37,7 @@ x.close()
 
 metadata_list = {}
 for val in value_list:
-    if not (val.md in metadata_list):
+    if val.md not in metadata_list:
         metadata_list[val.md] = []
     spec = {"value": val.vl,
             "language": None,

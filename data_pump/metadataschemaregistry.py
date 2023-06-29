@@ -16,7 +16,7 @@ def import_metadataschemaregistry(metadata_schema_id, statistics):
     try:
         response = do_api_get_all(url_get_all)
         existing_data = convert_response_to_json(response)['_embedded']['metadataschemas']
-    except Exception as e:
+    except Exception:
         logging.error('GET request ' + response.url + ' failed.')
 
     json_a = read_json(json_name)
@@ -28,9 +28,10 @@ def import_metadataschemaregistry(metadata_schema_id, statistics):
         # prefix has to be unique
         try:
             response = do_api_post(url, None, json_p)
-            metadata_schema_id[i['metadata_schema_id']] = convert_response_to_json(response)['id']
+            metadata_schema_id[i['metadata_schema_id']] = convert_response_to_json(response)[
+                'id']
             imported += 1
-        except Exception as e:
+        except Exception:
             found = False
             if not existing_data:
                 logging.error('POST request ' + response.url + ' for id: ' + str(
@@ -52,4 +53,3 @@ def import_metadataschemaregistry(metadata_schema_id, statistics):
 
     statistics['metadataschemaregistry'] = (len(json_a), imported)
     logging.info("MetadataSchemaRegistry was successfully imported!")
-

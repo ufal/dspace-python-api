@@ -21,7 +21,8 @@ class OLACTest(unittest.TestCase):
 
     def setUp(self):
         if const.on_dev_5:
-            raise unittest.SkipTest("local.hiddenButHarvestable not yet supported on dev-5.")
+            raise unittest.SkipTest(
+                "local.hiddenButHarvestable not yet supported on dev-5.")
 
     def test_hidden_but_harvestable(self):
         data_filename = "non-harv"
@@ -30,10 +31,11 @@ class OLACTest(unittest.TestCase):
         item = rest_proxy.d.get_item(uuid)
         if metadatum not in item.json()["metadata"]:
             response = rest_proxy.d.api_patch(const.BE_url + "api/core/items/" + str(uuid),
-                                          "add", "/metadata/" + metadatum, "hidden")
+                                              "add", "/metadata/" + metadatum, "hidden")
             check_response(response, "patching; adding local.hiddenButHarvestable")
         name_of_item = get_name_from_file(data_filename)
-        anon_req = requests.get(const.API_URL + "discover/search/objects?query=" + name_of_item)
+        anon_req = requests.get(
+            const.API_URL + "discover/search/objects?query=" + name_of_item)
         items_found = anon_req.json()["_embedded"]["searchResult"]["_embedded"]["objects"]
         found_count = len(items_found)
         do_import = False
@@ -44,7 +46,8 @@ class OLACTest(unittest.TestCase):
             logging.warning("Found items!")
             logging.warning(str(items))
             do_import = True
-        self.assertEqual(found_count, 0, "Found items but expected hidden! They are not hidden all too well!")
+        self.assertEqual(
+            found_count, 0, "Found items but expected hidden! They are not hidden all too well!")
 
         # upload CMDI file
         bundle = None
@@ -72,7 +75,8 @@ class OLACTest(unittest.TestCase):
 
         handle = get_handle(uuid)
         link = const.OAI_cmdi
-        oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
+        oai_response = requests.get(
+            link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
 
         check_response(oai_response, "getting cmdi format of item " + name_of_item)
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
@@ -86,4 +90,5 @@ class OLACTest(unittest.TestCase):
                 the_one = record.find("metadata")
         if the_one is None:
             self.fail(oai_fail_message(handle, link))
-        self.assertEqual(oai_original.contents[0], the_one.contents[0], "Returns wrong cmdi")
+        self.assertEqual(oai_original.contents[0],
+                         the_one.contents[0], "Returns wrong cmdi")

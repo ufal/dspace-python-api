@@ -25,9 +25,10 @@ def import_user_registration(email2epersonId, eperson_id, userRegistration_id, s
             json_p['ePersonID'] = None
         try:
             response = do_api_post(url, None, json_p)
-            userRegistration_id[i['eperson_id']] = convert_response_to_json(response)['id']
+            userRegistration_id[i['eperson_id']] = convert_response_to_json(response)[
+                'id']
             imported += 1
-        except Exception as e:
+        except Exception:
             logging.error('POST request clarin/import/userregistration for id: ' + str(i['eperson_id']) +
                           ' failed. Status: ' + str(response.status_code))
     statistics['user_registration'] = (len(json_a), imported)

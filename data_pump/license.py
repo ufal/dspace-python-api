@@ -19,7 +19,8 @@ def import_license_label(labels, statistics):
         logging.info("License_label JSON is empty.")
         return
     for i in json_a:
-        json_p = {'label': i['label'], 'title': i['title'], 'extended': i['is_extended'], 'icon': None}
+        json_p = {'label': i['label'], 'title': i['title'],
+                  'extended': i['is_extended'], 'icon': None}
         # find image with label name
         try:
             image_path = ICON_PATH + i['label'].lower() + ".png"
@@ -37,8 +38,9 @@ def import_license_label(labels, statistics):
             del created_label['license']
             del created_label['_links']
             labels[i['label_id']] = created_label
-        except Exception as e:
-            logging.error('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+        except Exception:
+            logging.error('POST request ' + response.url +
+                          ' failed. Status code ' + str(response.status_code))
     statistics['license_label'] = (len(json_a), imported)
 
 
@@ -76,7 +78,9 @@ def import_license_definition(labels, eperson_id, statistics):
         try:
             response = do_api_post(url, param, json_p)
             imported += 1
-        except Exception as e:
-            logging.error('POST request ' + response.url + ' failed. Status code ' + str(response.status_code))
+        except Exception:
+            logging.error('POST request ' + response.url +
+                          ' failed. Status code ' + str(response.status_code))
     statistics['license_definition'] = (len(json_a), imported)
-    logging.info("License_label, Extended_mapping, License_definitions were successfully imported!")
+    logging.info(
+        "License_label, Extended_mapping, License_definitions were successfully imported!")

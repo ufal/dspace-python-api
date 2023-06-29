@@ -27,10 +27,11 @@ def at_the_end_of_import(imported_handle, statistics):
     # write statistic into log
     logging.info("Statistics:")
     for key, value in statistics.items():
-        logging.info(key + ": " + str(value[0]) + " expected and imported " + str(value[1]))
+        logging.info(key + ": " + str(value[0]) +
+                     " expected and imported " + str(value[1]))
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     handle_obj = Handle(var.handle)
     metadata = Metadata(var.metadatavalue)
 
@@ -38,18 +39,21 @@ if __name__== "__main__":
     handle_obj.import_handle_without_object(var.handle)
     handle_obj.import_handle_with_url(var.handle, var.imported_handle)
     import_metadataschemaregistry(var.metadata_schema_id, var.statistics)
-    import_metadatafieldregistry(var.metadata_schema_id, var.metadata_field_id, var.statistics)
+    import_metadatafieldregistry(var.metadata_schema_id,
+                                 var.metadata_field_id, var.statistics)
     import_community(metadata, var.group_id, var.handle, var.community_id, var.community2logo,
                      var.imported_handle, var.metadatavalue, var.metadata_field_id, var.statistics)
     import_collection(metadata, var.group_id, var.handle, var.community_id, var.collection_id,
                       var.collection2logo, var.imported_handle, var.metadatavalue, var.metadata_field_id,
                       var.statistics)
     import_registrationdata(var.statistics)
-    import_epersongroup(metadata, var.group_id, var.metadatavalue, var.metadata_field_id, var.statistics)
+    import_epersongroup(metadata, var.group_id, var.metadatavalue,
+                        var.metadata_field_id, var.statistics)
     import_group2group(var.group_id, var.statistics)
     import_eperson(metadata, var.eperson_id, var.email2epersonId, var.metadatavalue, var.metadata_field_id,
                    var.statistics)
-    import_user_registration(var.email2epersonId, var.eperson_id, var.userRegistration_id, var.statistics)
+    import_user_registration(var.email2epersonId, var.eperson_id,
+                             var.userRegistration_id, var.statistics)
     import_group2eperson(var.eperson_id, var.group_id, var.statistics)
     import_license_label(var.labels, var.statistics)
     import_license_definition(var.labels, var.eperson_id, var.statistics)
@@ -57,7 +61,8 @@ if __name__== "__main__":
                 var.eperson_id, var.imported_handle, var.handle, var.metadatavalue, var.metadata_field_id,
                 var.statistics)
     import_tasklistitem(var.workflowitem_id, var.eperson_id, var.statistics)
-    import_bitstreamformatregistry(var.bitstreamformat_id, var.unknown_format_id, var.statistics)
+    import_bitstreamformatregistry(
+        var.bitstreamformat_id, var.unknown_format_id, var.statistics)
     import_bundle(metadata, var.item_id, var.bundle_id, var.primaryBitstream, var.metadatavalue, var.metadata_field_id,
                   var.statistics)
     import_bitstream(metadata, var.bitstreamformat_id, var.primaryBitstream, var.bitstream2bundle, var.bundle_id,

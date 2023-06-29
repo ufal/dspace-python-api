@@ -3,6 +3,7 @@ import logging
 import const
 from support.dspace_interface.client import DSpaceClient
 
+
 class DspaceRESTProxy:
     """
     Serves as proxy to Dspace REST API.
@@ -12,10 +13,12 @@ class DspaceRESTProxy:
 
     def __init__(self):
         self.response = None
-        self.d = DSpaceClient(api_endpoint=const.API_URL, username=const.user, password=const.password)
+        self.d = DSpaceClient(api_endpoint=const.API_URL,
+                              username=const.user, password=const.password)
         authenticated = self.d.authenticate()
         if not authenticated:
-            logging.error(f'Error logging in to dspace REST API at ' + const.API_URL + '! Exiting!')
+            logging.error('Error logging in to dspace REST API at ' +
+                          const.API_URL + '! Exiting!')
             raise ConnectionError("Cannot connect to dspace!")
         logging.info("Successfully logged in to dspace on " + const.API_URL)
 

@@ -34,8 +34,8 @@ def import_item(metadata, workflowitem_id, workspaceitem_id, item_id, collection
         for i in json_a:
             item = items[i['item_id']]
             import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'],
-                                      i['multiple_files'], i['stage_reached'], i['page_reached'], metadata,
-                                      workspaceitem_id, item_id, collection_id, eperson_id, imported_handle, handle,
+                                 i['multiple_files'], i['stage_reached'], i['page_reached'], metadata,
+                                 workspaceitem_id, item_id, collection_id, eperson_id, imported_handle, handle,
                                  metadatavalue, metadata_field_id)
             imported += 1
             del items[i['item_id']]
@@ -54,15 +54,16 @@ def import_item(metadata, workflowitem_id, workspaceitem_id, item_id, collection
         for i in json_a:
             item = items[i['item_id']]
             import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'],
-                                      i['multiple_files'], -1, -1, metadata, workspaceitem_id, item_id, collection_id,
-                                      eperson_id, imported_handle, handle, metadatavalue, metadata_field_id)
+                                 i['multiple_files'], -1, -
+                                 1, metadata, workspaceitem_id, item_id, collection_id,
+                                 eperson_id, imported_handle, handle, metadatavalue, metadata_field_id)
             # create workflowitem from created workspaceitem
             params = {'id': str(workspaceitem_id[i['item_id']])}
             try:
                 response = do_api_post(url_workflow, params, None)
                 workflowitem_id[i['workflow_id']] = response.headers['workflowitem_id']
                 imported += 1
-            except Exception as e:
+            except Exception:
                 logging.error('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: '
                               + str(response.status_code))
             del items[i['item_id']]
@@ -77,7 +78,8 @@ def import_item(metadata, workflowitem_id, workspaceitem_id, item_id, collection
     for i in items.values():
         json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
                   'lastModified': i['last_modified'], 'withdrawn': i['withdrawn']}
-        metadata_item = metadata.get_metadata_value(metadatavalue, metadata_field_id, 2, i['item_id'])
+        metadata_item = metadata.get_metadata_value(
+            metadatavalue, metadata_field_id, 2, i['item_id'])
         if metadata_item:
             json_p['metadata'] = metadata_item
         if (2, i['item_id']) in handle:
@@ -90,7 +92,7 @@ def import_item(metadata, workflowitem_id, workspaceitem_id, item_id, collection
             response_json = convert_response_to_json(response)
             item_id[i['item_id']] = response_json['id']
             importedItem += 1
-        except Exception as e:
+        except Exception:
             logging.error('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: ' +
                           str(response.status_code))
 
@@ -109,7 +111,8 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
     url_workspace = 'clarin/import/workspaceitem'
     json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
               'lastModified': item['last_modified'], 'withdrawn': item['withdrawn']}
-    metadata_item = metadata.get_metadata_value(metadatavalue, metadata_field_id, 2, item['item_id'])
+    metadata_item = metadata.get_metadata_value(
+        metadatavalue, metadata_field_id, 2, item['item_id'])
     if metadata_item:
         json_p['metadata'] = metadata_item
     if (2, item['item_id']) in handle:
@@ -127,10 +130,12 @@ def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore,
         id = convert_response_to_json(response)['id']
         workspaceitem_id[item['item_id']] = id
         try:
-            response = rest_proxy.d.api_get(API_URL + 'clarin/import/' + str(id) + "/item", None, None)
+            response = rest_proxy.d.api_get(
+                API_URL + 'clarin/import/' + str(id) + "/item", None, None)
             item_id[item['item_id']] = convert_response_to_json(response)['id']
-        except Exception as e:
-            logging.error('POST request ' + response.url + ' failed. Status: ' + str(response.status_code))
-    except Exception as e:
+        except Exception:
+            logging.error('POST request ' + response.url +
+                          ' failed. Status: ' + str(response.status_code))
+    except Exception:
         logging.error('POST request ' + response.url + ' for id: ' + str(item['item_id']) +
                       ' failed. Status: ' + str(response.status_code))

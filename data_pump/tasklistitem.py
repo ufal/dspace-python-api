@@ -19,9 +19,9 @@ def import_tasklistitem(workflowitem_id, eperson_id, statistics):
         try:
             params = {'epersonUUID': eperson_id[i['eperson_id']],
                       'workflowitem_id': workflowitem_id[i['workflow_id']]}
-            response = do_api_post(url, params, None)
+            do_api_post(url, params, None)
             imported += 1
-        except Exception as e:
+        except Exception:
             logging.error('POST request clarin/eperson/groups/tasklistitem failed.')
     statistics['tasklistitem'] = (len(json_a), imported)
     logging.info("Tasklistitem was sucessfully imported!")

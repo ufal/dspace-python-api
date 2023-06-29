@@ -10,6 +10,7 @@ from support.dspace_proxy import rest_proxy
 from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
     assure_item_from_file, import_items, oai_fail_message, get_test_soup
 
+
 class CMDIFormatTest(unittest.TestCase):
 
     @classmethod
@@ -25,7 +26,8 @@ class CMDIFormatTest(unittest.TestCase):
         self.remove_additional_date(uuid)
         handle = get_handle(uuid)
         link = const.OAI_cmdi
-        oai_response = requests.get(link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
+        oai_response = requests.get(
+            link + transform_handle_to_oai_set_id(get_handle(const.col_UUID)))
         if oai_response.content is None:
             self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
         if oai_response.status_code == 500:
@@ -64,9 +66,11 @@ class CMDIFormatTest(unittest.TestCase):
         itm = rest_proxy.d.get_item(uuid)
         check_response(itm, "receiving item from dspace for check")
         update = False
-        do_update = self.remove_most_alphabetical_recent_value_if_contains_more("dc.date.available", uuid, itm.json())
+        do_update = self.remove_most_alphabetical_recent_value_if_contains_more(
+            "dc.date.available", uuid, itm.json())
         update = update or do_update
-        do_update = self.remove_most_alphabetical_recent_value_if_contains_more("dc.date.accessioned", uuid, itm.json())
+        do_update = self.remove_most_alphabetical_recent_value_if_contains_more(
+            "dc.date.accessioned", uuid, itm.json())
         update = update or do_update
         if update:
             import_items()
