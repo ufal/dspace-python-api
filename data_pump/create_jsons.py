@@ -15,7 +15,8 @@ def get_data_as_json(database, host, db_user, db_password):
 
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT table_name FROM information_schema.tables WHERE is_insertable_into = 'YES' AND table_schema = 'public'")
+        "SELECT table_name FROM information_schema.tables WHERE is_insertable_into = "
+        "'YES' AND table_schema = 'public'")
     # list of tuples
     table_name = cursor.fetchall()
     logging.info("Processing...")

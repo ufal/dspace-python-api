@@ -14,15 +14,6 @@ repos:
         - -i
         - --max-line-length=90
         - --ignore=E402
--   repo: https://github.com/crate-ci/typos
-    rev: v1.13.26
-    hooks:
-    -   id: typos
-        types_or: [python]
-        exclude: '^(src/libs)'
-        args:
-        - --write-changes
-        - --config=.typos.toml 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
   rev: 'v0.0.257'
   hooks:

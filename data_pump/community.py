@@ -3,92 +3,96 @@ import logging
 from utils import read_json, convert_response_to_json, do_api_post
 
 
-def import_community(metadata, group_id, handle, community_id, community2logo,
-                     imported_handle, metadatavalue, metadata_field_id, statistics):
+def import_community(metadata_class, handle_class, group_id_dict, community_id_dict,
+                     community2logo_dict, statistics_dict):
     """
     Import data into database.
     Mapped tables: community, community2community, metadatavalue, handle
     """
-    json_name_com = 'community.json'
-    json_name_com2com = 'community2community.json'
-    url = 'core/communities'
-    importedComm = 0
-    importedGroup = 0
-    json_comm = read_json(json_name_com)
-    json_comm2comm = read_json(json_name_com2com)
-    parent = dict()
-    child = dict()
-    if json_comm2comm:
-        for i in json_comm2comm:
+    community_json_name = 'community.json'
+    comm2comm_json_name = 'community2community.json'
+    community_url = 'core/communities'
+    imported_comm = 0
+    imported_group = 0
+    community_json_a = read_json(community_json_name)
+    comm2comm_json_a = read_json(comm2comm_json_name)
+    parent_dict = dict()
+    child_dict = dict()
+    if comm2comm_json_a:
+        for i in comm2comm_json_a:
             parent_id = i['parent_comm_id']
             child_id = i['child_comm_id']
-            if parent_id in parent.keys():
-                parent[parent_id].append(child_id)
+            if parent_id in parent_dict.keys():
+                parent_dict[parent_id].append(child_id)
             else:
-                parent[parent_id] = [child_id]
-            if child_id in child.keys():
-                child[child_id].append(parent_id)
+                parent_dict[parent_id] = [child_id]
+            if child_id in child_dict.keys():
+                child_dict[child_id].append(parent_id)
             else:
-                child[child_id] = parent_id
-        statistics['community'] = (len(json_comm), 0)
-    if not json_comm:
+                child_dict[child_id] = parent_id
+        statistics_dict['community'] = (len(community_json_a), 0)
+    if not community_json_a:
         logging.info("Community JSON is empty.")
         return
     counter = 0
-    while json_comm:
-        json_p = {}
+    while community_json_a:
+        community_json_p = {}
         # process community only when:
         # comm is not parent and child
         # comm is parent and not child
         # parent comm exists
         # else process it later
-        i = json_comm[counter]
+        i = community_json_a[counter]
         i_id = i['community_id']
-        if (i_id not in parent.keys() and i_id not in child.keys()) or i_id not in child.keys() or child[
-                i_id] in community_id.keys():
+        if (i_id not in parent_dict.keys() and i_id not in child_dict.keys()) or\
+                i_id not in child_dict.keys() or \
+                child_dict[i_id] in community_id_dict.keys():
             # resource_type_id for community is 4
-            if (4, i['community_id']) in handle:
-                handle_comm = handle[(4, i['community_id'])][0]
-                json_p['handle'] = handle_comm['handle']
-                imported_handle += 1
-            metadatavalue_comm = metadata.get_metadata_value(
-                metadatavalue, metadata_field_id, 4, i['community_id'])
-            if metadatavalue_comm:
-                json_p['metadata'] = metadatavalue_comm
+            handle_comm = handle_class.get_handle(4, i['community_id'])
+            if handle_comm:
+                community_json_p['handle'] = handle_comm
+            metadatavalue_comm_dict = metadata_class.get_metadata_value(4,
+                                                                        i['community_id'])
+            if metadatavalue_comm_dict:
+                community_json_p['metadata'] = metadatavalue_comm_dict
             # create community
             parent_id = None
-            if i_id in child:
-                parent_id = {'parent': community_id[child[i_id]]}
+            if i_id in child_dict:
+                parent_id = {'parent': community_id_dict[child_dict[i_id]]}
             try:
-                response = do_api_post(url, parent_id, json_p)
-                resp_community_id = convert_response_to_json(response)['id']
-                community_id[i['community_id']] = resp_community_id
-                importedComm += 1
+                response = do_api_post(community_url, parent_id, community_json_p)
+                response_comm_id = convert_response_to_json(response)['id']
+                community_id_dict[i['community_id']] = response_comm_id
+                imported_comm += 1
             except Exception:
-                logging.error('POST request ' + response.url + ' for id: ' + str(i_id) + ' failed. Status: ' +
-                              str(response.status_code))
+                logging.error('POST request ' + response.url + ' for id: ' + str(i_id)
+                              + ' failed. Status: ' + str(response.status_code))
 
             # add to community2logo, if community has logo
             if i['logo_bitstream_id'] is not None:
-                community2logo[i_id] = i["logo_bitstream_id"]
+                community2logo_dict[i_id] = i["logo_bitstream_id"]
 
             # create admingroup
             if i['admin'] is not None:
                 try:
                     response = do_api_post('core/communities/' +
-                                           resp_community_id + '/adminGroup', None, {})
-                    group_id[i['admin']] = [convert_response_to_json(response)['id']]
-                    importedGroup += 1
+                                           response_comm_id + '/adminGroup', None, {})
+                    group_id_dict[i['admin']] = [convert_response_to_json(
+                        response)['id']]
+                    imported_group += 1
                 except Exception:
                     logging.error('POST request ' + response.url +
                                   ' failed. Status: ' + str(response.status_code))
-            del json_comm[counter]
+            del community_json_a[counter]
         else:
             counter += 1
-        if counter == len(json_comm):
+        if counter == len(community_json_a):
             counter = 0
 
-    if 'community' in statistics:
-        statistics['community'] = (statistics['community'][0], importedComm)
-    statistics['epersongroup'] = (0, importedGroup)
+    if 'community' in statistics_dict:
+        statistics_val = (statistics_dict['community'][0], imported_comm)
+        statistics_dict['community'] = statistics_val
+
+    statistics_val = (0, imported_group)
+    statistics_dict['epersongroup'] = statistics_val
     logging.info("Community and Community2Community were successfully imported!")

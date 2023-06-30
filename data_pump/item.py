@@ -5,137 +5,149 @@ from support.dspace_proxy import rest_proxy
 from const import API_URL
 
 
-def import_item(metadata, workflowitem_id, workspaceitem_id, item_id, collection_id,
-                eperson_id, imported_handle, handle, metadatavalue, metadata_field_id, statistics):
+def import_item(metadata_class, handle_class, workflowitem_id_dict, item_id_dict,
+                collection_id_dict, eperson_id_dict, statistics_dict):
     """
     Import data into database.
-    Mapped tables: item, collection2item,workspaceitem, cwf_workflowitem, metadata, handle
+    Mapped tables: item, collection2item, workspaceitem, cwf_workflowitem,
+    metadata, handle
     """
-    json_name_item = "item.json"
-    url_item = 'clarin/import/item'
-    json_name_workspace = "workspaceitem.json"
-    json_name_workflow = 'workflowitem.json'
-    url_workflow = 'clarin/import/workflowitem'
-    imported = 0
-    importedItem = 0
+    item_json_name = "item.json"
+    workspaceitem_json_name = "workspaceitem.json"
+    workflowitem_json_name = 'workflowitem.json'
+    item_url = 'clarin/import/item'
+    workflowitem_url = 'clarin/import/workflowitem'
+    imported_workspaceitem = 0
+    imported_workflowitem = 0
+    imported_item = 0
+    workspaceitem_id_dict = dict()
     # create dict from items by item id
-    json_a = read_json(json_name_item)
-    items = dict()
-    if not json_a:
+    item_json_a = read_json(item_json_name)
+    items_dict = dict()
+    if not item_json_a:
         logging.info("Item JSON is empty.")
         return
-    for i in json_a:
-        items[i['item_id']] = i
-    statistics['item'] = (len(json_a), 0)
+    for i in item_json_a:
+        items_dict[i['item_id']] = i
+    statistics_dict['item'] = (len(item_json_a), 0)
 
     # create item and workspaceitem
-    json_a = read_json(json_name_workspace)
-    if json_a:
-        for i in json_a:
-            item = items[i['item_id']]
-            import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'],
-                                 i['multiple_files'], i['stage_reached'], i['page_reached'], metadata,
-                                 workspaceitem_id, item_id, collection_id, eperson_id, imported_handle, handle,
-                                 metadatavalue, metadata_field_id)
-            imported += 1
-            del items[i['item_id']]
+    workspaceitem_json_a = read_json(workspaceitem_json_name)
+    if workspaceitem_json_a:
+        for i in workspaceitem_json_a:
+            item = items_dict[i['item_id']]
+            import_workspaceitem(item, i['collection_id'], i['multiple_titles'],
+                                 i['published_before'], i['multiple_files'],
+                                 i['stage_reached'], i['page_reached'], metadata_class,
+                                 handle_class, workspaceitem_id_dict, item_id_dict,
+                                 collection_id_dict, eperson_id_dict)
+            imported_workspaceitem += 1
+            del items_dict[i['item_id']]
 
-        statistics['workspaceitem'] = (len(json_a), imported)
-        importedItem += imported
+        statistics_dict['workspaceitem'] = (len(workspaceitem_json_a),
+                                            imported_workspaceitem)
+        imported_item += imported_workspaceitem
         logging.info("Workspaceitem was successfully imported!")
     else:
         logging.info("Workspaceitem JSON is empty.")
     # create workflowitem
     # workflowitem is created from workspaceitem
     # -1, because the workflowitem doesn't contain this attribute
-    imported = 0
-    json_a = read_json(json_name_workflow)
-    if json_a:
-        for i in json_a:
-            item = items[i['item_id']]
-            import_workspaceitem(item, i['collection_id'], i['multiple_titles'], i['published_before'],
-                                 i['multiple_files'], -1, -
-                                 1, metadata, workspaceitem_id, item_id, collection_id,
-                                 eperson_id, imported_handle, handle, metadatavalue, metadata_field_id)
+    workflowitem_json_a = read_json(workflowitem_json_name)
+    if workflowitem_json_a:
+        for i in workflowitem_json_a:
+            item = items_dict[i['item_id']]
+            import_workspaceitem(item, i['collection_id'], i['multiple_titles'],
+                                 i['published_before'], i['multiple_files'], -1, -1,
+                                 metadata_class, handle_class, workspaceitem_id_dict,
+                                 item_id_dict, collection_id_dict, eperson_id_dict)
             # create workflowitem from created workspaceitem
-            params = {'id': str(workspaceitem_id[i['item_id']])}
+            params = {'id': str(workspaceitem_id_dict[i['item_id']])}
             try:
-                response = do_api_post(url_workflow, params, None)
-                workflowitem_id[i['workflow_id']] = response.headers['workflowitem_id']
-                imported += 1
+                response = do_api_post(workflowitem_url, params, None)
+                workflowitem_id_dict[i['workflow_id']] = \
+                    response.headers['workflowitem_id']
+                imported_workflowitem += 1
             except Exception:
-                logging.error('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: '
+                logging.error('POST request ' + response.url + ' for id: ' +
+                              str(i['item_id']) + ' failed. Status: '
                               + str(response.status_code))
-            del items[i['item_id']]
+            del items_dict[i['item_id']]
 
-        statistics['workflowitem'] = (len(json_a), imported)
-        importedItem += imported
+        statistics_val = (len(workflowitem_json_a), imported_workflowitem)
+        statistics_dict['workflowitem'] = statistics_val
+        imported_item += imported_workflowitem
         logging.info("Cwf_workflowitem was successfully imported!")
     else:
         logging.info("Workflowitem JSON is empty.")
 
     # create other items
-    for i in items.values():
-        json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
-                  'lastModified': i['last_modified'], 'withdrawn': i['withdrawn']}
-        metadata_item = metadata.get_metadata_value(
-            metadatavalue, metadata_field_id, 2, i['item_id'])
-        if metadata_item:
-            json_p['metadata'] = metadata_item
-        if (2, i['item_id']) in handle:
-            json_p['handle'] = handle[(2, i['item_id'])][0]['handle']
-            imported_handle += 1
-        params = {'owningCollection': collection_id[i['owning_collection']],
-                  'epersonUUID': eperson_id[i['submitter_id']]}
+    for i in items_dict.values():
+        item_json_p = {'discoverable': i['discoverable'], 'inArchive': i['in_archive'],
+                       'lastModified': i['last_modified'], 'withdrawn': i['withdrawn']}
+        metadatvalue_item_dict = metadata_class.get_metadata_value(2, i['item_id'])
+        if metadatvalue_item_dict:
+            item_json_p['metadata'] = metadatvalue_item_dict
+        handle_item = handle_class.get_handle(2, i['item_id'])
+        if handle_item:
+            item_json_p['handle'] = handle_item
+        params = {'owningCollection': collection_id_dict[i['owning_collection']],
+                  'epersonUUID': eperson_id_dict[i['submitter_id']]}
         try:
-            response = do_api_post(url_item, params, json_p)
+            response = do_api_post(item_url, params, item_json_p)
             response_json = convert_response_to_json(response)
-            item_id[i['item_id']] = response_json['id']
-            importedItem += 1
+            item_id_dict[i['item_id']] = response_json['id']
+            imported_item += 1
         except Exception:
-            logging.error('POST request ' + response.url + ' for id: ' + str(i['item_id']) + ' failed. Status: ' +
+            logging.error('POST request ' + response.url + ' for id: ' +
+                          str(i['item_id']) + ' failed. Status: ' +
                           str(response.status_code))
 
-    statistics['item'] = (statistics['item'][0], importedItem)
+    statistics_val = (statistics_dict['item'][0], imported_item)
+    statistics_dict['item'] = statistics_val
     logging.info("Item and Collection2item were successfully imported!")
 
 
-def import_workspaceitem(item, owningCollectin, multipleTitles, publishedBefore, multipleFiles, stagereached,
-                         pageReached, metadata, workspaceitem_id, item_id, collection_id,
-                         eperson_id, imported_handle, handle, metadatavalue, metadata_field_id):
+def import_workspaceitem(item, owning_collectin_id, multiple_titles,
+                         published_before, multiple_files, stagereached,
+                         page_reached, metadata_class, handle_class,
+                         workspaceitem_id_dict, item_id_dict, collection_id_dict,
+                         eperson_id_dict):
     """
     Auxiliary method for import item.
     Import data into database.
     Mapped tables: workspaceitem, metadata, handle
     """
-    url_workspace = 'clarin/import/workspaceitem'
-    json_p = {'discoverable': item['discoverable'], 'inArchive': item['in_archive'],
-              'lastModified': item['last_modified'], 'withdrawn': item['withdrawn']}
-    metadata_item = metadata.get_metadata_value(
-        metadatavalue, metadata_field_id, 2, item['item_id'])
-    if metadata_item:
-        json_p['metadata'] = metadata_item
-    if (2, item['item_id']) in handle:
-        json_p['handle'] = handle[(2, item['item_id'])][0]['handle']
-        imported_handle += 1
+    workspaceitem_url = 'clarin/import/workspaceitem'
+    workspaceitem_json_p = {'discoverable': item['discoverable'],
+                            'inArchive': item['in_archive'],
+                            'lastModified': item['last_modified'],
+                            'withdrawn': item['withdrawn']}
+    metadatavalue_item_dict = metadata_class.get_metadata_value(2, item['item_id'])
+    if metadatavalue_item_dict:
+        workspaceitem_json_p['metadata'] = metadatavalue_item_dict
+    handle_workspaceitem = handle_class.get_handle(2, item['item_id'])
+    if handle_workspaceitem:
+        workspaceitem_json_p['handle'] = handle_workspaceitem
     # the params are workspaceitem attributes
-    params = {'owningCollection': collection_id[owningCollectin],
-              'multipleTitles': multipleTitles,
-              'publishedBefore': publishedBefore,
-              'multipleFiles': multipleFiles, 'stageReached': stagereached,
-              'pageReached': pageReached,
-              'epersonUUID': eperson_id[item['submitter_id']]}
+    params = {'owningCollection': collection_id_dict[owning_collectin_id],
+              'multipleTitles': multiple_titles,
+              'publishedBefore': published_before,
+              'multipleFiles': multiple_files, 'stageReached': stagereached,
+              'pageReached': page_reached,
+              'epersonUUID': eperson_id_dict[item['submitter_id']]}
     try:
-        response = do_api_post(url_workspace, params, json_p)
+        response = do_api_post(workspaceitem_url, params, workspaceitem_json_p)
         id = convert_response_to_json(response)['id']
-        workspaceitem_id[item['item_id']] = id
+        workspaceitem_id_dict[item['item_id']] = id
         try:
-            response = rest_proxy.d.api_get(
-                API_URL + 'clarin/import/' + str(id) + "/item", None, None)
-            item_id[item['item_id']] = convert_response_to_json(response)['id']
+            item_url = API_URL + 'clarin/import/' + str(id) + "/item"
+            response = rest_proxy.d.api_get(item_url, None, None)
+            item_id_dict[item['item_id']] = convert_response_to_json(response)['id']
         except Exception:
             logging.error('POST request ' + response.url +
                           ' failed. Status: ' + str(response.status_code))
     except Exception:
-        logging.error('POST request ' + response.url + ' for id: ' + str(item['item_id']) +
+        logging.error('POST request ' + response.url + ' for id: ' +
+                      str(item['item_id']) +
                       ' failed. Status: ' + str(response.status_code))

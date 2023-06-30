@@ -1,4 +1,6 @@
 import json
+import os
+import requests
 
 from support.dspace_proxy import rest_proxy
 from migration_const import DATA_PATH
@@ -11,12 +13,14 @@ def read_json(file_name, path=DATA_PATH):
     @param file_name: file name
     @return: data as json
     """
-    with open(path + file_name) as f:
+    f_path = os.path.join(path, file_name)
+    assert os.path.exist(f_path)
+    with open(f_path, mode='r', encoding='utf-8') as f:
         json_p = json.load(f)
     return json_p
 
 
-def convert_response_to_json(response):
+def convert_response_to_json(response: requests.models.Response):
     """
     Convert response to json.
     @param response: response from api call
@@ -25,16 +29,16 @@ def convert_response_to_json(response):
     return json.loads(response.content.decode('utf-8'))
 
 
-def do_api_post(url, param, json_p):
+def do_api_post(url, params: dict, json_p):
     """
-    Insert data into database by api if they are not None.
+    Insert data into database by api.
     @param url: url for api post
-    @param param: parameters for api post
+    @param params: parameters for api post
     @param json_p: posted data
     @return: response from api post
     """
     url = API_URL + url
-    response = rest_proxy.d.api_post(url, param, json_p)
+    response = rest_proxy.d.api_post(url, params, json_p)
     return response
 
 
@@ -57,6 +61,9 @@ def do_api_get_all(url):
     @return: response from api get
     """
     url = API_URL + url
-    param = {'size': 1000}
-    response = rest_proxy.d.api_get(url, param, None)
+    # is the default value of how many items you get when you want all data from a table
+    # need to increase this value, or you won't get all data
+    # you increase this value by param 'size'
+    params = {'size': 1000}
+    response = rest_proxy.d.api_get(url, params, None)
     return response

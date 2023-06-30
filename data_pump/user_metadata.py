@@ -2,53 +2,58 @@ import logging
 from utils import read_json, do_api_post
 
 
-def import_user_metadata(bitstream_id, userRegistration_id, statistics):
+def import_user_metadata(bitstream_id_dict, userRegistration_id_dict, statistics_dict):
     """
         Import data into database.
         Mapped tables: user_metadata, license_resource_user_allowance
         """
-    imported = 0
+    user_met_url = 'clarin/import/usermetadata'
+    imported_user_met = 0
     # read license_resource_user_allowance
     # mapping transaction_id to mapping_id
-    user_allowance = dict()
-    json_a = read_json("license_resource_user_allowance.json")
-    if not json_a:
+    user_allowance_dict = dict()
+    user_allowance_json_a = read_json("license_resource_user_allowance.json")
+    if not user_allowance_json_a:
         logging.info("License_resource_user_allowance JSON is empty.")
         return
-    for i in json_a:
-        user_allowance[i['transaction_id']] = i
+    for i in user_allowance_json_a:
+        user_allowance_dict[i['transaction_id']] = i
 
     # read license_resource_mapping
     # mapping bitstream_id to mapping_id
-    resource_mapping = read_json('license_resource_mapping.json')
-    mappings = dict()
-    if not resource_mapping:
+    resource_mapping_json_a = read_json('license_resource_mapping.json')
+    mappings_dict = dict()
+    if not resource_mapping_json_a:
         logging.info("License_resource_mapping JSON is empty.")
         return
-    for i in resource_mapping:
-        mappings[i['mapping_id']] = i['bitstream_id']
+    for i in resource_mapping_json_a:
+        mappings_dict[i['mapping_id']] = i['bitstream_id']
 
     # read user_metadata
-    json_a = read_json("user_metadata.json")
-    if not json_a:
+    user_met_json_a = read_json()
+    if not user_met_json_a:
         logging.info("User_metadata JSON is empty.")
         return
-    for i in json_a:
-        if i['transaction_id'] not in user_allowance:
+    for i in user_met_json_a:
+        if i['transaction_id'] not in user_allowance_dict:
             continue
-        dataUA = user_allowance[i['transaction_id']]
-        json_p = [{'metadataKey': i['metadata_key'],
-                   'metadataValue': i['metadata_value']}]
+        data_user_all_dict = user_allowance_dict[i['transaction_id']]
+        user_met_json_p = [{'metadataKey': i['metadata_key'],
+                            'metadataValue': i['metadata_value']}]
         try:
-            param = {'bitstreamUUID': bitstream_id[mappings[dataUA['mapping_id']]],
-                     'createdOn': dataUA['created_on'], 'token': dataUA['token'],
-                     'userRegistrationId': userRegistration_id[i['eperson_id']]}
-            do_api_post('clarin/import/usermetadata', param, json_p)
-            imported += 1
+            params = {'bitstreamUUID': bitstream_id_dict[mappings_dict[
+                data_user_all_dict['mapping_id']]],
+                'createdOn': data_user_all_dict['created_on'],
+                'token': data_user_all_dict['token'],
+                'userRegistrationId': userRegistration_id_dict[i['eperson_id']]}
+            do_api_post(user_met_url, params, user_met_json_p)
+            imported_user_met += 1
         except Exception:
-            logging.error('POST response clarin/import/usermetadata failed for user registration id: ' + str(
-                i['eperson_id'])
-                + ' and bitstream id: ' + str(mappings[dataUA['mapping_id']]))
+            logging.error('POST response ' + user_met_url +
+                          ' failed for user registration id: ' + str(i['eperson_id']) +
+                          ' and bitstream id: ' +
+                          str(mappings_dict[data_user_all_dict['mapping_id']]))
 
-    statistics['user_metadata'] = (len(json_a), imported)
+    statistics_val = (len(user_met_json_a), imported_user_met)
+    statistics_dict['user_metadata'] = statistics_val
     logging.info("User metadata successfully imported!")

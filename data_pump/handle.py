@@ -4,64 +4,88 @@ from utils import do_api_post, read_json
 
 
 class Handle:
-    def __init__(self, handle):
+    def __init__(self):
+        self.handle_dict = dict()
+        self.imported_handle = 0
+        self.read_handle()
+        self.import_handle_with_url()
+        self.import_handle_without_object()
+
+    def read_handle(self):
         """
-        Read handle as json and convert it to dictionary wth tuple key: resource_type_id and resource_type,
+        Read handle as json and convert it to dictionary wth tuple key:
+        resource_type_id and resource_type,
         where value is list of jsons.
         """
-        json_name = 'handle.json'
-        handle_json = read_json(json_name)
-        if not handle_json:
+        handle_json_name = 'handle.json'
+        handle_json_a = read_json(handle_json_name)
+        if not handle_json_a:
             logging.info('Handle JSON is empty.')
             return
-        for i in handle_json:
+        for i in handle_json_a:
             key = (i['resource_type_id'], i['resource_id'])
-            if key in handle.keys():
-                handle[key].append(i)
+            if key in self.handle_dict.keys():
+                self.handle_dict[key].append(i)
             else:
-                handle[key] = [i]
+                self.handle_dict[key] = [i]
 
-    def import_handle_with_url(self, handle, imported_handle):
+    def import_handle_with_url(self):
         """
         Import handles into database with url.
         Other handles are imported by dspace objects.
         Mapped table: handles
         """
-        url = 'core/handles'
+        handle_url = 'core/handles'
         # handle with defined url has key (None, None)
-        if (None, None) not in handle:
+        if (None, None) not in self.handle_dict:
             logging.info("Handles with url don't exist.")
             return
-        handles_url = handle[(None, None)]
-        for i in handles_url:
-            json_p = {'handle': i['handle'], 'url': i['url']}
+        handles_a = self.handle_dict[(None, None)]
+        for i in handles_a:
+            handle_json_p = {'handle': i['handle'], 'url': i['url']}
             try:
-                response = do_api_post(url, None, json_p)
-                imported_handle += 1
+                response = do_api_post(handle_url, None, handle_json_p)
+                self.imported_handle += 1
             except Exception:
                 logging.error('POST response ' + response.url +
                               ' failed. Status: ' + str(response.status_code))
 
         logging.info("Handles with url were successfully imported!")
 
-    def import_handle_without_object(self, handle):
+    def import_handle_without_object(self):
         """
         Import handles which have not objects into database.
         Other handles are imported by dspace objects.
         Mapped table: handles
         """
-        url = 'clarin/import/handle'
-        if (2, None) not in handle:
+        handle_url = 'clarin/import/handle'
+        if (2, None) not in self.handle_dict:
             logging.info("Handles without objects don't exist.")
             return
 
-        handles = handle[(2, None)]
-        for i in handles:
-            json_p = {'handle': i['handle'], 'resourceTypeID': i['resource_type_id']}
+        handles_a = self.handle_dict[(2, None)]
+        for i in handles_a:
+            handle_json_p = {'handle': i['handle'],
+                             'resourceTypeID': i['resource_type_id']}
             try:
-                response = do_api_post(url, None, json_p)
+                response = do_api_post(handle_url, None, handle_json_p)
+                self.imported_handle += 1
             except Exception:
                 logging.error(
-                    'POST response clarin/import/handle failed. Status: ' + str(response.status_code))
+                    'POST response clarin/import/handle failed. Status: ' +
+                    str(response.status_code))
 
         logging.info("Handles without object were successfully imported!")
+
+    def get_handle(self, obj_type_int, obj_id):
+        """
+        Get handle based on object type and its id.
+        """
+        if (obj_type_int, obj_id) in self.handle_dict:
+            self.imported_handle += 1
+            return self.handle_dict[(obj_type_int, obj_id)][0]['handle']
+        else:
+            return None
+
+    def get_imported_handle(self):
+        return self.imported_handle

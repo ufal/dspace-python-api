@@ -3,25 +3,27 @@ import logging
 from utils import read_json, do_api_post
 
 
-def import_tasklistitem(workflowitem_id, eperson_id, statistics):
+def import_tasklistitem(workflowitem_id_dict, eperson_id_dict, statistics_dict):
     """
      Import data into database.
      Mapped table: tasklistitem
      """
-    json_name = "tasklistitem.json"
-    url = 'clarin/eperson/groups/tasklistitem'
-    imported = 0
-    json_a = read_json(json_name)
-    if not json_a:
+    tasklistitem_json_name = "tasklistitem.json"
+    tasklistitem_url = 'clarin/eperson/groups/tasklistitem'
+    imported_tasklistitem = 0
+    tasklistitem_json_a = read_json(tasklistitem_json_name)
+    if not tasklistitem_json_a:
         logging.info("Tasklistitem JSON is empty.")
         return
-    for i in json_a:
+    for i in tasklistitem_json_a:
         try:
-            params = {'epersonUUID': eperson_id[i['eperson_id']],
-                      'workflowitem_id': workflowitem_id[i['workflow_id']]}
-            do_api_post(url, params, None)
-            imported += 1
+            params = {'epersonUUID': eperson_id_dict[i['eperson_id']],
+                      'workflowitem_id': workflowitem_id_dict[i['workflow_id']]}
+            do_api_post(tasklistitem_url, params, None)
+            imported_tasklistitem += 1
         except Exception:
             logging.error('POST request clarin/eperson/groups/tasklistitem failed.')
-    statistics['tasklistitem'] = (len(json_a), imported)
+
+    statistics_val = (len(tasklistitem_json_a), imported_tasklistitem)
+    statistics_dict['tasklistitem'] = statistics_val
     logging.info("Tasklistitem was sucessfully imported!")

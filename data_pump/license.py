@@ -5,82 +5,87 @@ from migration_const import ICON_PATH
 from utils import read_json, do_api_post, convert_response_to_json
 
 
-def import_license_label(labels, statistics):
+def import_license(eperson_id_dict, statistics_dict):
     """
     Import data into database.
     Mapped tables: license_label, extended_mapping, license_definitions
     """
-    json_name = 'license_label.json'
-    url = 'core/clarinlicenselabels'
-    imported = 0
+    # import license label
+    label_json_name = 'license_label.json'
+    label_url = 'core/clarinlicenselabels'
+    imported_label = 0
+    labels_dict = dict()
     # import license_label
-    json_a = read_json(json_name)
-    if not json_a:
+    label_json_a = read_json(label_json_name)
+    if not label_json_a:
         logging.info("License_label JSON is empty.")
         return
-    for i in json_a:
-        json_p = {'label': i['label'], 'title': i['title'],
-                  'extended': i['is_extended'], 'icon': None}
+    for i in label_json_a:
+        label_json_p = {'label': i['label'], 'title': i['title'],
+                        'extended': i['is_extended'], 'icon': None}
         # find image with label name
         try:
             image_path = ICON_PATH + i['label'].lower() + ".png"
             if os.path.exists(image_path):
                 with open(image_path, "rb") as image:
-                    file = image.read()
-                    json_p['icon'] = list(file)
+                    f = image.read()
+                    label_json_p['icon'] = list(f)
         except Exception as e:
             logging.error(
-                "Exception while reading label image with name: " + i['label'].lower() + ".png occurred: " + e)
+                "Exception while reading label image with name: " + i[
+                    'label'].lower() + ".png occurred: " + e)
         try:
-            response = do_api_post(url, None, json_p)
+            response = do_api_post(label_url, None, label_json_p)
             created_label = convert_response_to_json(response)
-            imported += 1
+            imported_label += 1
             del created_label['license']
             del created_label['_links']
-            labels[i['label_id']] = created_label
+            labels_dict[i['label_id']] = created_label
         except Exception:
             logging.error('POST request ' + response.url +
                           ' failed. Status code ' + str(response.status_code))
-    statistics['license_label'] = (len(json_a), imported)
 
+    statistics_val = (len(label_json_a), imported_label)
+    statistics_dict['license_label'] = statistics_val
 
-def import_license_definition(labels, eperson_id, statistics):
-    """
-    Import data into database.
-    Mapped tables: extended_mapping, license_definitions
-    """
-    json_name = 'license_definition.json'
-    url = 'clarin/import/license'
-    json_name_ext_map = 'license_label_extended_mapping.json'
+    # import license definition and exteended mapping
+    license_json_name = 'license_definition.json'
+    license_url = 'clarin/import/license'
+    ext_map_json_name = 'license_label_extended_mapping.json'
     # read license label extended mapping
-    extended_label = dict()
-    json_a = read_json(json_name_ext_map)
-    if not json_a:
+    ext_map_dict = dict()
+    ext_map_json_a = read_json(ext_map_json_name)
+    if not ext_map_json_a:
         logging.info("Extended_mapping JSON is empty.")
         return
-    for i in json_a:
-        if i['license_id'] in extended_label.keys():
-            extended_label[i['license_id']].append(labels[i['label_id']])
+    for i in ext_map_json_a:
+        if i['license_id'] in ext_map_dict.keys():
+            ext_map_dict[i['license_id']].append(labels_dict[i['label_id']])
         else:
-            extended_label[i['license_id']] = [labels[i['label_id']]]
+            ext_map_dict[i['license_id']] = [labels_dict[i['label_id']]]
     # import license_definition
-    imported = 0
-    json_a = read_json(json_name)
-    if not json_a:
+    imported_license = 0
+    license_json_a = read_json(license_json_name)
+    if not license_json_a:
         logging.info("License_definitions JSON is empty.")
         return
-    for i in json_a:
-        json_p = {'name': i['name'], 'definition': i['definition'], 'confirmation': i['confirmation'],
-                  'requiredInfo': i['required_info'], 'clarinLicenseLabel': labels[i['label_id']]}
-        if i['license_id'] in extended_label:
-            json_p['extendedClarinLicenseLabels'] = extended_label[i['license_id']]
-        param = {'eperson': eperson_id[i['eperson_id']]}
+    for i in license_json_a:
+        license_json_p = {'name': i['name'], 'definition': i['definition'],
+                          'confirmation': i['confirmation'],
+                          'requiredInfo': i['required_info'],
+                          'clarinLicenseLabel': labels_dict[i['label_id']]}
+        if i['license_id'] in ext_map_dict:
+            license_json_p['extendedClarinLicenseLabels'] = \
+                ext_map_dict[i['license_id']]
+        params = {'eperson': eperson_id_dict[i['eperson_id']]}
         try:
-            response = do_api_post(url, param, json_p)
-            imported += 1
+            response = do_api_post(license_url, params, license_json_p)
+            imported_license += 1
         except Exception:
             logging.error('POST request ' + response.url +
                           ' failed. Status code ' + str(response.status_code))
-    statistics['license_definition'] = (len(json_a), imported)
-    logging.info(
-        "License_label, Extended_mapping, License_definitions were successfully imported!")
+
+    statistics_val = (len(license_json_p), imported_license)
+    statistics_dict['license_definition'] = statistics_val
+    logging.info("License_label, Extended_mapping, License_definitions "
+                 "were successfully imported!")
