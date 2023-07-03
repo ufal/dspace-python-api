@@ -1232,9 +1232,12 @@ def at_the_end_of_import():
     for key, value in statistics.items():
         logging.info(key + ": " + str(value[0]) + " expected and imported " + str(value[1]))
 
-# replace `local.sponsor` data sequence from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>;<EU_IDENTIFIER>`
-# to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>;<EU_IDENTIFIER>`
+
 def fix_local_sponsor_sequence(wrong_sequence):
+    """
+    Replace `local.sponsor` data sequence from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>;<EU_IDENTIFIER>`
+    to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>;<EU_IDENTIFIER>`
+    """
     separator = ';'
     sponsor_list_max_length = 5
 
