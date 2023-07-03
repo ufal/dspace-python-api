@@ -1,7 +1,5 @@
 import enum
-import sys
 import logging
-import expected
 
 user = "test@test.edu"
 password = "dspace"
