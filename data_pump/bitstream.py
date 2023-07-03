@@ -4,10 +4,17 @@ import json
 from utils import read_json, convert_response_to_json, do_api_post
 
 
-def import_bitstream(metadata_class, bitstreamformat_id_dict, primary_bitstream_dict,
-                     bitstream2bundle_dict, bundle_id_dict,
-                     community2logo_dict, collection2logo_dict, bitstream_id_dict,
-                     community_id_dict, collection_id_dict, unknown_format_id_val,
+def import_bitstream(metadata_class,
+                     bitstreamformat_id_dict,
+                     primary_bitstream_dict,
+                     bitstream2bundle_dict,
+                     bundle_id_dict,
+                     community2logo_dict,
+                     collection2logo_dict,
+                     bitstream_id_dict,
+                     community_id_dict,
+                     collection_id_dict,
+                     unknown_format_id_val,
                      statistics_dict):
     """
     Import data into database.
@@ -23,8 +30,9 @@ def import_bitstream(metadata_class, bitstreamformat_id_dict, primary_bitstream_
     # load bundle2bitstream
     bundle2bitstream_json_a = read_json(bundle2bitstream_json_name)
     if bundle2bitstream_json_a:
-        for i in bundle2bitstream_json_a:
-            bitstream2bundle_dict[i['bitstream_id']] = i['bundle_id']
+        for bundle2bitstream in bundle2bitstream_json_a:
+            bitstream2bundle_dict[bundle2bitstream['bitstream_id']] = \
+                bundle2bitstream['bundle_id']
 
     # load and import bitstreams
     bitstream_json_a = read_json(bitstream_json_name)
@@ -32,7 +40,7 @@ def import_bitstream(metadata_class, bitstreamformat_id_dict, primary_bitstream_
         logging.info("Bitstream JSON is empty.")
         return
     counter = 0
-    for i in bitstream_json_a:
+    for bitstream in bitstream_json_a:
         if counter % 500 == 0:
             # do bitstream checksum
             # do this after every 500 imported bitstreams,
@@ -48,52 +56,55 @@ def import_bitstream(metadata_class, bitstreamformat_id_dict, primary_bitstream_
                               str(e_json['status']))
             counter = 0
         counter += 1
-        bitstream_json_p = dict()
-        metadata_bitstream_dict = metadata_class.get_metadata_value(0,
-                                                                    i['bitstream_id'])
-        if metadata_bitstream_dict:
+        bitstream_json_p = {}
+        metadata_bitstream_dict = \
+            metadata_class.get_metadata_value(0, bitstream['bitstream_id'])
+        if metadata_bitstream_dict is not None:
             bitstream_json_p['metadata'] = metadata_bitstream_dict
-            # i['size_bytes']
+            # bitstream['size_bytes']
         bitstream_json_p['sizeBytes'] = 1748
-        # i['checksum']
-        bitstream_json_p['checkSum'] = {'checkSumAlgorithm':
-                                        i['checksum_algorithm'],
-                                        'value': '8a4605be74aa9ea9d79846c1fba20a33'}
-        if not i['bitstream_format_id']:
+        # bitstream['checksum']
+        bitstream_json_p['checkSum'] = {
+            'checkSumAlgorithm': bitstream['checksum_algorithm'],
+            'value': '8a4605be74aa9ea9d79846c1fba20a33'
+        }
+        if not bitstream['bitstream_format_id']:
             logging.info(
-                f'Bitstream {i["bitstream_id"]} does not have a bitstream_format_id. '
+                f'Bitstream {bitstream["bitstream_id"]} '
+                f'does not have a bitstream_format_id. '
                 f'Using {unknown_format_id_val} instead.')
-            i['bitstream_format_id'] = unknown_format_id_val
-            # i['internal_id']
+            bitstream['bitstream_format_id'] = unknown_format_id_val
+            # bitstream['internal_id']
         params = {'internal_id': '77893754617268908529226218097860272513',
-                  'storeNumber': i['store_number'],
-                  'bitstreamFormat': bitstreamformat_id_dict[i['bitstream_format_id']],
-                  'deleted': i['deleted'],
-                  'sequenceId': i['sequence_id'],
+                  'storeNumber': bitstream['store_number'],
+                  'bitstreamFormat': bitstreamformat_id_dict[
+                      bitstream['bitstream_format_id']],
+                  'deleted': bitstream['deleted'],
+                  'sequenceId': bitstream['sequence_id'],
                   'bundle_id': None,
                   'primaryBundle_id': None}
 
         # if bitstream has bundle, set bundle_id from None to id
-        if i['bitstream_id'] in bitstream2bundle_dict:
+        if bitstream['bitstream_id'] in bitstream2bundle_dict:
             params['bundle_id'] = \
-                bundle_id_dict[bitstream2bundle_dict[i['bitstream_id']]]
+                bundle_id_dict[bitstream2bundle_dict[bitstream['bitstream_id']]]
 
         # if bitstream is primary bitstream of some bundle,
         # set primaryBundle_id from None to id
-        if i['bitstream_id'] in primary_bitstream_dict:
+        if bitstream['bitstream_id'] in primary_bitstream_dict:
             params['primaryBundle_id'] = \
-                bundle_id_dict[primary_bitstream_dict[i['bitstream_id']]]
+                bundle_id_dict[primary_bitstream_dict[bitstream['bitstream_id']]]
         try:
             logging.info('Going to process Bitstream with internal_id: ' +
-                         str(i['internal_id']))
+                         str(bitstream['internal_id']))
             response = do_api_post(bitstream_url, params, bitstream_json_p)
-            bitstream_id_dict[i['bitstream_id']] = \
+            bitstream_id_dict[bitstream['bitstream_id']] = \
                 convert_response_to_json(response)['id']
             imported += 1
         except Exception:
             logging.error(
-                'POST request ' + response.url + ' for id: ' + str(i['bitstream_id'])
-                + ' failed. Status: ' +
+                'POST request ' + response.url + ' for id: ' +
+                str(bitstream['bitstream_id']) + ' failed. Status: ' +
                 str(response.status_code))
 
     statistics_val = (len(bitstream_json_a), imported)
@@ -119,8 +130,10 @@ def add_logo_to_community(community2logo_dict, bitstream_id_dict, community_id_d
     for key, value in community2logo_dict.items():
         if key not in community_id_dict or value not in bitstream_id_dict:
             continue
-        params = {'community_id': community_id_dict[key],
-                  'bitstream_id': bitstream_id_dict[value]}
+        params = {
+            'community_id': community_id_dict[key],
+            'bitstream_id': bitstream_id_dict[value]
+        }
         try:
             response = do_api_post(logo_comm_url, params, None)
         except Exception:

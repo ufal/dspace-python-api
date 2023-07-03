@@ -31,41 +31,72 @@ def at_the_end_of_import(handle_class, statistics_dict):
 
 
 if __name__ == "__main__":
-    handle_class = Handle(var.handle)
-    metadata_class = Metadata(var.metadatavalue)
+    handle_class = Handle()
+    metadata_class = Metadata(var.statistics_dict)
 
     logging.info("Data migration started!")
-    import_community(metadata_class, handle_class, var.group_id_dict,
-                     var.community_id_dict, var.community2logo_dict,
+    import_community(metadata_class,
+                     handle_class,
+                     var.group_id_dict,
+                     var.community_id_dict,
+                     var.community2logo_dict,
                      var.statistics_dict)
-    import_collection(metadata_class, handle_class, var.group_id_dict,
-                      var.community_id_dict, var.collection_id_dict,
-                      var.collection2logo_dict, var.statistics_dict)
+    import_collection(metadata_class,
+                      handle_class,
+                      var.group_id_dict,
+                      var.community_id_dict,
+                      var.collection_id_dict,
+                      var.collection2logo_dict,
+                      var.statistics_dict)
     import_registrationdata(var.statistics_dict)
-    import_epersongroup(metadata_class, var.group_id_dict, var.statistics_dict)
+    import_epersongroup(metadata_class,
+                        var.group_id_dict,
+                        var.statistics_dict)
     import_group2group(var.group_id_dict, var.statistics_dict)
-    import_eperson(metadata_class, var.eperson_id_dict, var.email2epersonId_dict,
+    import_eperson(metadata_class,
+                   var.eperson_id_dict,
+                   var.email2epersonId_dict,
                    var.statistics_dict)
-    import_user_registration(var.email2epersonId_dict, var.eperson_id_dict,
-                             var.userRegistration_id_dict, var.statistics_dict)
-    import_group2eperson(var.eperson_id_dict, var.group_id_dict, var.statistics_dict)
+    import_user_registration(var.email2epersonId_dict,
+                             var.eperson_id_dict,
+                             var.user_registration_id_dict,
+                             var.statistics_dict)
+    import_group2eperson(var.eperson_id_dict,
+                         var.group_id_dict,
+                         var.statistics_dict)
     import_license(var.eperson_id_dict, var.statistics_dict)
-    import_item(metadata_class, handle_class, var.workflowitem_id_dict,
-                var.item_id_dict, var.collection_id_dict, var.eperson_id_dict,
+    import_item(metadata_class,
+                handle_class,
+                var.workflowitem_id_dict,
+                var.item_id_dict,
+                var.collection_id_dict,
+                var.eperson_id_dict,
                 var.statistics_dict)
-    import_tasklistitem(var.workflowitem_id_dict, var.eperson_id_dict,
+    import_tasklistitem(var.workflowitem_id_dict,
+                        var.eperson_id_dict,
                         var.statistics_dict)
     import_bitstreamformatregistry(var.bitstreamformat_id_dict,
-                                   var.unknown_format_id_val, var.statistics_dict)
-    import_bundle(metadata_class, var.item_id_dict, var.bundle_id_dict,
-                  var.primaryBitstream_dict, var.statistics_dict)
-    import_bitstream(metadata_class, var.primaryBitstream_dict,
-                     var.bitstream2bundle_dict, var.bundle_id_dict,
-                     var.community2logo_dict, var.collection2logo_dict,
-                     var.bitstream_id_dict, var.community_id_dict,
-                     var.collection_id_dict, var.unknown_format_id_val,
+                                   var.unknown_format_id_val,
+                                   var.statistics_dict)
+    import_bundle(metadata_class,
+                  var.item_id_dict,
+                  var.bundle_id_dict,
+                  var.primaryBitstream_dict,
+                  var.statistics_dict)
+    import_bitstream(metadata_class,
+                     var.bitstreamformat_id_dict,
+                     var.primaryBitstream_dict,
+                     var.bitstream2bundle_dict,
+                     var.bundle_id_dict,
+                     var.community2logo_dict,
+                     var.collection2logo_dict,
+                     var.bitstream_id_dict,
+                     var.community_id_dict,
+                     var.collection_id_dict,
+                     var.unknown_format_id_val,
                      var.statistics_dict)
-    import_user_metadata(var.bitstream_id_dict, var.userRegistration_id_dict,
+    import_user_metadata(var.bitstream_id_dict,
+                         var.user_registration_id_dict,
                          var.statistics_dict)
     at_the_end_of_import(handle_class, var.statistics_dict)
     logging.info("Data migration is completed!")

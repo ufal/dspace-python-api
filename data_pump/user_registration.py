@@ -3,8 +3,10 @@ import logging
 from utils import read_json, convert_response_to_json, do_api_post
 
 
-def import_user_registration(email2epersonId_dict, eperson_id_dict,
-                             userRegistration_id_dict, statistics_dict):
+def import_user_registration(email2epersonId_dict,
+                             eperson_id_dict,
+                             userRegistration_id_dict,
+                             statistics_dict):
     """
     Import data into database.
     Mapped tables: user_registration
@@ -17,22 +19,25 @@ def import_user_registration(email2epersonId_dict, eperson_id_dict,
     if not user_reg_json_a:
         logging.info("User_registration JSON is empty.")
         return
-    for i in user_reg_json_a:
-        user_reg_json_p = {'email': i['email'], 'organization': i['organization'],
-                           'confirmation': i['confirmation']}
-        if i['email'] in email2epersonId_dict:
+    for user_reg_json in user_reg_json_a:
+        user_reg_json_p = {
+            'email': user_reg_json['email'],
+            'organization': user_reg_json['organization'],
+            'confirmation': user_reg_json['confirmation']
+        }
+        if user_reg_json['email'] in email2epersonId_dict:
             user_reg_json_p['ePersonID'] = \
-                eperson_id_dict[email2epersonId_dict[i['email']]]
+                eperson_id_dict[email2epersonId_dict[user_reg_json['email']]]
         else:
             user_reg_json_p['ePersonID'] = None
         try:
             response = do_api_post(user_reg_url, None, user_reg_json_p)
-            userRegistration_id_dict[i['eperson_id']] = \
+            userRegistration_id_dict[user_reg_json['eperson_id']] = \
                 convert_response_to_json(response)['id']
             imported_user_reg += 1
         except Exception:
             logging.error('POST request ' + user_reg_url + ' for id: ' +
-                          str(i['eperson_id']) +
+                          str(user_reg_json['eperson_id']) +
                           ' failed. Status: ' + str(response.status_code))
 
     statistics_val = (len(user_reg_json_a), imported_user_reg)

@@ -14,25 +14,29 @@ def import_license(eperson_id_dict, statistics_dict):
     label_json_name = 'license_label.json'
     label_url = 'core/clarinlicenselabels'
     imported_label = 0
-    labels_dict = dict()
+    labels_dict = {}
     # import license_label
     label_json_a = read_json(label_json_name)
     if not label_json_a:
         logging.info("License_label JSON is empty.")
         return
-    for i in label_json_a:
-        label_json_p = {'label': i['label'], 'title': i['title'],
-                        'extended': i['is_extended'], 'icon': None}
+    for label in label_json_a:
+        label_json_p = {
+            'label': label['label'],
+            'title': label['title'],
+            'extended': label['is_extended'],
+            'icon': None
+        }
         # find image with label name
         try:
-            image_path = ICON_PATH + i['label'].lower() + ".png"
+            image_path = ICON_PATH + label['label'].lower() + ".png"
             if os.path.exists(image_path):
                 with open(image_path, "rb") as image:
                     f = image.read()
                     label_json_p['icon'] = list(f)
         except Exception as e:
             logging.error(
-                "Exception while reading label image with name: " + i[
+                "Exception while reading label image with name: " + label[
                     'label'].lower() + ".png occurred: " + e)
         try:
             response = do_api_post(label_url, None, label_json_p)
@@ -40,7 +44,7 @@ def import_license(eperson_id_dict, statistics_dict):
             imported_label += 1
             del created_label['license']
             del created_label['_links']
-            labels_dict[i['label_id']] = created_label
+            labels_dict[label['label_id']] = created_label
         except Exception:
             logging.error('POST request ' + response.url +
                           ' failed. Status code ' + str(response.status_code))
@@ -53,31 +57,34 @@ def import_license(eperson_id_dict, statistics_dict):
     license_url = 'clarin/import/license'
     ext_map_json_name = 'license_label_extended_mapping.json'
     # read license label extended mapping
-    ext_map_dict = dict()
+    ext_map_dict = {}
     ext_map_json_a = read_json(ext_map_json_name)
     if not ext_map_json_a:
         logging.info("Extended_mapping JSON is empty.")
         return
-    for i in ext_map_json_a:
-        if i['license_id'] in ext_map_dict.keys():
-            ext_map_dict[i['license_id']].append(labels_dict[i['label_id']])
+    for ext_map in ext_map_json_a:
+        if ext_map['license_id'] in ext_map_dict.keys():
+            ext_map_dict[ext_map['license_id']].append(labels_dict[ext_map['label_id']])
         else:
-            ext_map_dict[i['license_id']] = [labels_dict[i['label_id']]]
+            ext_map_dict[ext_map['license_id']] = [labels_dict[ext_map['label_id']]]
     # import license_definition
     imported_license = 0
     license_json_a = read_json(license_json_name)
     if not license_json_a:
         logging.info("License_definitions JSON is empty.")
         return
-    for i in license_json_a:
-        license_json_p = {'name': i['name'], 'definition': i['definition'],
-                          'confirmation': i['confirmation'],
-                          'requiredInfo': i['required_info'],
-                          'clarinLicenseLabel': labels_dict[i['label_id']]}
-        if i['license_id'] in ext_map_dict:
+    for license in license_json_a:
+        license_json_p = {
+            'name': license['name'],
+            'definition': license['definition'],
+            'confirmation': license['confirmation'],
+            'requiredInfo': license['required_info'],
+            'clarinLicenseLabel': labels_dict[license['label_id']]
+        }
+        if license['license_id'] in ext_map_dict:
             license_json_p['extendedClarinLicenseLabels'] = \
-                ext_map_dict[i['license_id']]
-        params = {'eperson': eperson_id_dict[i['eperson_id']]}
+                ext_map_dict[license['license_id']]
+        params = {'eperson': eperson_id_dict[license['eperson_id']]}
         try:
             response = do_api_post(license_url, params, license_json_p)
             imported_license += 1

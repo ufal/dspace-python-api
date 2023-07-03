@@ -5,7 +5,7 @@ from utils import do_api_post, read_json
 
 class Handle:
     def __init__(self):
-        self.handle_dict = dict()
+        self.handle_dict = {}
         self.imported_handle = 0
         self.read_handle()
         self.import_handle_with_url()
@@ -22,12 +22,12 @@ class Handle:
         if not handle_json_a:
             logging.info('Handle JSON is empty.')
             return
-        for i in handle_json_a:
-            key = (i['resource_type_id'], i['resource_id'])
+        for handle in handle_json_a:
+            key = (handle['resource_type_id'], handle['resource_id'])
             if key in self.handle_dict.keys():
-                self.handle_dict[key].append(i)
+                self.handle_dict[key].append(handle)
             else:
-                self.handle_dict[key] = [i]
+                self.handle_dict[key] = [handle]
 
     def import_handle_with_url(self):
         """
@@ -41,13 +41,16 @@ class Handle:
             logging.info("Handles with url don't exist.")
             return
         handles_a = self.handle_dict[(None, None)]
-        for i in handles_a:
-            handle_json_p = {'handle': i['handle'], 'url': i['url']}
+        for handle in handles_a:
+            handle_json_p = {
+                'handle': handle['handle'],
+                'url': handle['url']
+            }
             try:
                 response = do_api_post(handle_url, None, handle_json_p)
                 self.imported_handle += 1
             except Exception:
-                logging.error('POST response ' + response.url +
+                logging.error('POST response ' + handle_url +
                               ' failed. Status: ' + str(response.status_code))
 
         logging.info("Handles with url were successfully imported!")
@@ -64,9 +67,11 @@ class Handle:
             return
 
         handles_a = self.handle_dict[(2, None)]
-        for i in handles_a:
-            handle_json_p = {'handle': i['handle'],
-                             'resourceTypeID': i['resource_type_id']}
+        for handle in handles_a:
+            handle_json_p = {
+                'handle': handle['handle'],
+                'resourceTypeID': handle['resource_type_id']
+            }
             try:
                 response = do_api_post(handle_url, None, handle_json_p)
                 self.imported_handle += 1

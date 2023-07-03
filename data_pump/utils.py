@@ -14,7 +14,7 @@ def read_json(file_name, path=DATA_PATH):
     @return: data as json
     """
     f_path = os.path.join(path, file_name)
-    assert os.path.exist(f_path)
+    assert os.path.exists(f_path)
     with open(f_path, mode='r', encoding='utf-8') as f:
         json_p = json.load(f)
     return json_p

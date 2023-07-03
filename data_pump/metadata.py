@@ -11,9 +11,9 @@ class Metadata:
         Read metadatavalue as json and
         convert it to dictionary with tuple key: resource_type_id and resource_id.
         """
-        self.metadatavalue_dict = dict()
-        self.metadataschema_id_dict = dict()
-        self.metadatafield_id_dict = dict()
+        self.metadatavalue_dict = {}
+        self.metadataschema_id_dict = {}
+        self.metadatafield_id_dict = {}
         # import all metadata
         self.read_metadata()
         self.import_metadataschemaregistry(statistics_dict)
@@ -25,14 +25,14 @@ class Metadata:
         if not metadatavalue_json:
             logging.info('Metadatavalue JSON is empty.')
             return
-        for i in metadatavalue_json:
-            key = (i['resource_type_id'], i['resource_id'])
+        for metadatavalue in metadatavalue_json:
+            key = (metadatavalue['resource_type_id'], metadatavalue['resource_id'])
             # replace separator @@ by ;
-            i['text_value'] = i['text_value'].replace("@@", ";")
+            metadatavalue['text_value'] = metadatavalue['text_value'].replace("@@", ";")
             if key in self.metadatavalue_dict.keys():
-                self.metadatavalue_dict[key].append(i)
+                self.metadatavalue_dict[key].append(metadatavalue)
             else:
-                self.metadatavalue_dict[key] = [i]
+                self.metadatavalue_dict[key] = [metadatavalue]
 
     def import_metadataschemaregistry(self, statistics_dict):
         """
@@ -54,36 +54,40 @@ class Metadata:
         if not metadataschema_json_a:
             logging.info("Metadataschemaregistry JSON is empty.")
             return
-        for i in metadataschema_json_a:
-            metadataschema_json_p = {'namespace': i['namespace'],
-                                     'prefix': i['short_id']}
+        for metadataschema in metadataschema_json_a:
+            metadataschema_json_p = {
+                'namespace': metadataschema['namespace'],
+                'prefix': metadataschema['short_id']
+            }
             # prefix has to be unique
             try:
                 response = do_api_post(metadataschema_url, None, metadataschema_json_p)
-                self.metadataschema_id_dict[i['metadata_schema_id']] = \
+                self.metadataschema_id_dict[metadataschema['metadata_schema_id']] = \
                     convert_response_to_json(response)['id']
                 imported += 1
             except Exception:
                 found = False
                 if not existing_data_dict:
                     logging.error('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_schema_id']) + ' failed. Status: ' + str(
-                        response.status_code))
+                        metadataschema['metadata_schema_id']) + ' failed. Status: ' +
+                        str(response.status_code))
                     continue
-                for j in existing_data_dict:
-                    if j['prefix'] != i['short_id']:
+                for existing_data in existing_data_dict:
+                    if existing_data['prefix'] != metadataschema['short_id']:
                         continue
-                    self.metadataschema_id_dict[i['metadata_schema_id']] = j['id']
+                    self.metadataschema_id_dict[metadataschema
+                                                ['metadata_schema_id']] = \
+                        existing_data['id']
                     logging.info('Metadataschemaregistry '
-                                 ' prefix: ' + i['short_id']
+                                 ' prefix: ' + metadataschema['short_id']
                                  + 'already exists in database!')
                     found = True
                     imported += 1
                     break
                 if not found:
                     logging.error('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_schema_id']) + ' failed. Status: ' + str(
-                        response.status_code))
+                        metadataschema['metadata_schema_id']) + ' failed. Status: ' +
+                        str(response.status_code))
 
         statistics_val = (len(metadataschema_json_a), imported)
         statistics_dict['metadataschemaregistry'] = statistics_val
@@ -109,36 +113,42 @@ class Metadata:
         if not metadatafield_json_a:
             logging.info("Metadatafieldregistry JSON is empty.")
             return
-        for i in metadatafield_json_a:
-            metadatafield_json_p = {'element': i['element'],
-                                    'qualifier': i['qualifier'],
-                                    'scopeNote': i['scope_note']}
-            params = {'schemaId': self.metadataschema_id_dict[i['metadata_schema_id']]}
+        for metadatafield in metadatafield_json_a:
+            metadatafield_json_p = {
+                'element': metadatafield['element'],
+                'qualifier': metadatafield['qualifier'],
+                'scopeNote': metadatafield['scope_note']
+            }
+            params = {'schemaId': self.metadataschema_id_dict[
+                metadatafield['metadata_schema_id']]}
             # element and qualifier have to be unique
             try:
                 response = do_api_post(metadatafield_url, params, metadatafield_json_p)
-                self.metadatafield_id_dict[i['metadata_field_id']] = \
+                self.metadatafield_id_dict[metadatafield['metadata_field_id']] = \
                     convert_response_to_json(response)['id']
                 imported += 1
             except Exception:
                 found = False
                 if not existing_data_dict:
-                    logging.error('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_field_id']) + ' failed. Status: ' + str(
-                        response.status_code))
+                    logging.error('POST request ' + response.url + ' for id: ' +
+                                  str(metadatafield['metadata_field_id']) +
+                                  ' failed. Status: ' + str(response.status_code))
                     continue
-                for j in existing_data_dict:
-                    if j['element'] != i['element'] or j['qualifier'] != i['qualifier']:
+                for existing_data in existing_data_dict:
+                    if existing_data['element'] != metadatafield['element'] or \
+                            existing_data['qualifier'] != metadatafield['qualifier']:
                         continue
-                    self.metadatafield_id_dict[i['metadata_field_id']] = j['id']
+                    self.metadatafield_id_dict[metadatafield['metadata_field_id']] = \
+                        existing_data['id']
                     logging.info('Metadatafieldregistry with element: ' +
-                                 i['element'] + ' already exists in database!')
+                                 metadatafield['element'] +
+                                 ' already exists in database!')
                     found = True
                     imported += 1
                     break
                 if not found:
                     logging.error('POST request ' + response.url + ' for id: ' + str(
-                        i['metadata_field_id']) + ' failed. Status: ' + str(
+                        metadatafield['metadata_field_id']) + ' failed. Status: ' + str(
                         response.status_code))
 
         statistics_val = (len(metadatafield_json_a), imported)
@@ -151,7 +161,7 @@ class Metadata:
         """
         url_metadatafield = 'core/metadatafields'
         url_metadataschema = 'core/metadataschemas'
-        result = dict()
+        result_dict = {}
         # get all metadatavalue for object
         if (old_resource_type_id, old_resource_id) not in self.metadatavalue_dict:
             logging.info('Metadatavalue for resource_type_id: ' +
@@ -161,13 +171,13 @@ class Metadata:
         metadatavalue_obj = self.metadatavalue_dict[(
             old_resource_type_id, old_resource_id)]
         # create list of object metadata
-        for i in metadatavalue_obj:
-            if i['metadata_field_id'] not in self.metadatafield_id_dict:
+        for metadatavalue in metadatavalue_obj:
+            if metadatavalue['metadata_field_id'] not in self.metadatafield_id_dict:
                 continue
             try:
                 response = do_api_get_one(
                     url_metadatafield,
-                    self.metadatafield_id_dict[i['metadata_field_id']])
+                    self.metadatafield_id_dict[metadatavalue['metadata_field_id']])
                 metadatafield_json = convert_response_to_json(response)
             except Exception:
                 logging.error('GET request' + response.url +
@@ -184,13 +194,17 @@ class Metadata:
                 continue
             # define and insert key and value of dict
             key = metadataschema_json['prefix'] + '.' + metadatafield_json['element']
-            value = {'value': i['text_value'], 'language': i['text_lang'],
-                     'authority': i['authority'], 'confidence': i['confidence'],
-                     'place': i['place']}
+            value = {
+                'value': metadatavalue['text_value'],
+                'language': metadatavalue['text_lang'],
+                'authority': metadatavalue['authority'],
+                'confidence': metadatavalue['confidence'],
+                'place': metadatavalue['place']
+            }
             if metadatafield_json['qualifier']:
                 key += '.' + metadatafield_json['qualifier']
-            if key in result.keys():
-                result[key].append(value)
+            if key in result_dict.keys():
+                result_dict[key].append(value)
             else:
-                result[key] = [value]
-        return result
+                result_dict[key] = [value]
+        return result_dict
