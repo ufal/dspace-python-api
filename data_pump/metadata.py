@@ -111,6 +111,7 @@ class Metadata:
         metadatafield_json_name = 'metadatafieldregistry.json'
         metadatafield_url = 'core/metadatafields'
         imported = 0
+        existing_data_dict = None
         try:
             response = do_api_get_all(metadatafield_url)
             existing_data_dict = convert_response_to_json(response)['_embedded'][
@@ -190,7 +191,7 @@ class Metadata:
                     self.metadatafield_id_dict[metadatavalue['metadata_field_id']])
                 metadatafield_json = convert_response_to_json(response)
             except Exception as e:
-                logging.error('GET request' + response.url +
+                logging.error('GET request' + metadatafield_url +
                               ' failed. Exception: ' + str(e))
                 continue
             # get metadataschema

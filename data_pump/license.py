@@ -73,20 +73,20 @@ def import_license(eperson_id_dict, statistics_dict):
     if not license_json_a:
         logging.info("License_definitions JSON is empty.")
         return
-    for license in license_json_a:
+    for license_ in license_json_a:
         license_json_p = {
-            'name': license['name'],
-            'definition': license['definition'],
-            'confirmation': license['confirmation'],
-            'requiredInfo': license['required_info'],
-            'clarinLicenseLabel': labels_dict[license['label_id']]
+            'name': license_['name'],
+            'definition': license_['definition'],
+            'confirmation': license_['confirmation'],
+            'requiredInfo': license_['required_info'],
+            'clarinLicenseLabel': labels_dict[license_['label_id']]
         }
-        if license['license_id'] in ext_map_dict:
+        if license_['license_id'] in ext_map_dict:
             license_json_p['extendedClarinLicenseLabels'] = \
-                ext_map_dict[license['license_id']]
-        params = {'eperson': eperson_id_dict[license['eperson_id']]}
+                ext_map_dict[license_['license_id']]
+        params = {'eperson': eperson_id_dict[license_['eperson_id']]}
         try:
-            response = do_api_post(license_url, params, license_json_p)
+            do_api_post(license_url, params, license_json_p)
             imported_license += 1
         except Exception as e:
             logging.error('POST request ' + license_url +

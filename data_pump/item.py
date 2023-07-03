@@ -175,10 +175,10 @@ def import_workspaceitem(item,
     }
     try:
         response = do_api_post(workspaceitem_url, params, workspaceitem_json_p)
-        id = convert_response_to_json(response)['id']
-        workspaceitem_id_dict[item['item_id']] = id
+        workspaceitem_id = convert_response_to_json(response)['id']
+        workspaceitem_id_dict[item['item_id']] = workspaceitem_id
+        item_url = API_URL + 'clarin/import/' + str(workspaceitem_id) + "/item"
         try:
-            item_url = API_URL + 'clarin/import/' + str(id) + "/item"
             response = rest_proxy.d.api_get(item_url, None, None)
             item_id_dict[item['item_id']] = convert_response_to_json(response)['id']
         except Exception as e:

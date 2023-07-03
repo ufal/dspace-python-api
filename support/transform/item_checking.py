@@ -213,10 +213,10 @@ def oai_fail_message(handle, link):
            + " at link " + link
 
 
-def import_license_label(id, label, title, is_extended):
+def import_license_label(license_id, label, title, is_extended):
     url = const.API_URL + '/core/clarinlicenselabels'
     license_label_json = {
-        'id': id,
+        'id': license_id,
         'label': label,
         'title': title,
         'extended': is_extended,

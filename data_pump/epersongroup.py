@@ -31,15 +31,15 @@ def import_epersongroup(metadata_class,
         logging.info("Epersongroup JSON is empty.")
         return
     for group in group_json_a:
-        id = group['eperson_group_id']
+        group_id = group['eperson_group_id']
         # group Administrator and Anonymous already exist
         # group is created with dspace object too
-        if id not in (0, 1) and id not in group_id_dict:
+        if group_id not in (0, 1) and group_id not in group_id_dict:
             # get group metadata
             metadatavalue_group_dict = \
                 metadata_class.get_metadata_value(6, group['eperson_group_id'])
             if 'dc.title' not in metadatavalue_group_dict:
-                logging.error('Metadata for group ' + str(id) +
+                logging.error('Metadata for group ' + str(group_id) +
                               ' does not contain title!')
                 continue
             name = metadatavalue_group_dict['dc.title'][0]['value']
@@ -47,7 +47,7 @@ def import_epersongroup(metadata_class,
             # the group_metadata contains the name of the group
             json_p = {'name': name, 'metadata': metadatavalue_group_dict}
             try:
-                response = do_api_post(group_url, None, json_p)
+                response = do_api_post(group_url, {}, json_p)
                 group_id_dict[group['eperson_group_id']] = [
                     convert_response_to_json(response)['id']]
                 imported += 1

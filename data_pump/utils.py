@@ -7,13 +7,13 @@ from migration_const import DATA_PATH
 from const import API_URL
 
 
-def read_json(file_name, path=DATA_PATH):
+def read_json(file_name, file_path=DATA_PATH):
     """
     Read data from file as json.
     @param file_name: file name
     @return: data as json
     """
-    f_path = os.path.join(path, file_name)
+    f_path = os.path.join(file_path, file_name)
     assert os.path.exists(f_path)
     with open(f_path, mode='r', encoding='utf-8') as f:
         json_p = json.load(f)
@@ -42,14 +42,14 @@ def do_api_post(url, params: dict, json_p):
     return response
 
 
-def do_api_get_one(url, id):
+def do_api_get_one(url, object_id):
     """
     Get data with id from table.
     @param url: url for api get
     @param id: id of object
     @return: response from api get
     """
-    url = API_URL + url + '/' + str(id)
+    url = API_URL + url + '/' + str(object_id)
     response = rest_proxy.d.api_get(url, {}, None)
     return response
 
