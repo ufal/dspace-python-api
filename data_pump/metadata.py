@@ -43,7 +43,7 @@ class Metadata:
         metadataschema_url = 'core/metadataschemas'
         imported = 0
         # get all existing data from database table
-        existing_data_dict = self.get_imported_metadataschemaregistry(
+        existing_data_dict = Metadata.get_imported_metadataschemaregistry(
             metadataschema_url)
 
         metadataschema_json_a = read_json(metadataschema_json_name)
@@ -89,7 +89,8 @@ class Metadata:
         statistics_dict['metadataschemaregistry'] = statistics_val
         logging.info("MetadataSchemaRegistry was successfully imported!")
 
-    def get_imported_metadataschemaregistry(self, metadataschema_url):
+    @staticmethod
+    def get_imported_metadataschemaregistry(metadataschema_url):
         """
         Gel all existing data from table metadataschemaregistry.
         """

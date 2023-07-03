@@ -46,7 +46,7 @@ def do_api_get_one(url, object_id):
     """
     Get data with id from table.
     @param url: url for api get
-    @param id: id of object
+    @param object_id: id of object
     @return: response from api get
     """
     url = API_URL + url + '/' + str(object_id)
