@@ -97,13 +97,33 @@ def read_metadata():
     """
     global metadatavalue
     metadatavalue_json = read_json('metadatavalue.json')
+    metadatafield_json = read_json('metadatafieldregistry.json')
+    sponsor_field_id = -1
+
     if not metadatavalue_json:
         logging.info('Metadatavalue JSON is empty.')
         return
+    if not metadatafield_json:
+        logging.info('Metadatafield JSON is empty.')
+        return
+
+    # Find out which field is `local.sponsor`, check only `sponsor` string
+    for i in metadatafield_json:
+        element = i['element']
+        if element != 'sponsor':
+            continue
+        sponsor_field_id = i['metadata_field_id']
+
     for i in metadatavalue_json:
         key = (i['resource_type_id'], i['resource_id'])
         # replace separator @@ by ;
         i['text_value'] = i['text_value'].replace("@@", ";")
+
+        # replace `local.sponsor` data sequence from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>`
+        # to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>`
+        if i['metadata_field_id'] == sponsor_field_id:
+            i['text_value'] = fix_local_sponsor_sequence(i['text_value'])
+
         if key in metadatavalue.keys():
             metadatavalue[key].append(i)
         else:
@@ -1211,6 +1231,29 @@ def at_the_end_of_import():
     logging.info("Statistics:")
     for key, value in statistics.items():
         logging.info(key + ": " + str(value[0]) + " expected and imported " + str(value[1]))
+
+
+def fix_local_sponsor_sequence(wrong_sequence):
+    """
+    Replace `local.sponsor` data sequence from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>;<EU_IDENTIFIER>`
+    to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>;<EU_IDENTIFIER>`
+    """
+    separator = ';'
+    sponsor_list_max_length = 5
+
+    # sponsor list could have length 4 or 5
+    sponsor_list = wrong_sequence.split(separator)
+    org = sponsor_list[0]
+    project_code = sponsor_list[1]
+    project_name = sponsor_list[2]
+    project_type = sponsor_list[3]
+    eu_identifier = ''
+    if len(sponsor_list) == sponsor_list_max_length:
+        # has eu_identifier value
+        eu_identifier = sponsor_list[4]
+
+    # compose the `local.sponsor` sequence in the right way
+    return separator.join([project_type, project_code, org, project_name, eu_identifier])
 
 # call
 logging.info("Data migraton started!")
