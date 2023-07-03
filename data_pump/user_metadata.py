@@ -44,11 +44,13 @@ def import_user_metadata(bitstream_id_dict,
         user_met_json_p = [{'metadataKey': user_met['metadata_key'],
                             'metadataValue': user_met['metadata_value']}]
         try:
-            params = {'bitstreamUUID': bitstream_id_dict[mappings_dict[
-                data_user_all_dict['mapping_id']]],
+            params = {
+                'bitstreamUUID': bitstream_id_dict[mappings_dict[
+                    data_user_all_dict['mapping_id']]],
                 'createdOn': data_user_all_dict['created_on'],
                 'token': data_user_all_dict['token'],
-                'userRegistrationId': user_registration_id_dict[user_met['eperson_id']]}
+                'userRegistrationId': user_registration_id_dict[user_met['eperson_id']]
+            }
             response = do_api_post(user_met_url, params, user_met_json_p)
             if response.ok:
                 imported_user_met += 1
