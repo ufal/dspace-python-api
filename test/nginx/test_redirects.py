@@ -5,7 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 
 import const
-from support.item_checking import assure_item_from_file, get_handle, check_com_col, get_test_soup
+from support.item_checking import assure_item_from_file, get_handle, check_com_col, \
+    get_test_soup
 
 
 class RedirectTests(unittest.TestCase):
@@ -14,7 +15,8 @@ class RedirectTests(unittest.TestCase):
     def setUpClass(cls):
         if not const.on_dev_5:
             raise unittest.SkipTest(
-                "Redirects are only implemented on dev-5. Can only run on dev-5. Skipping")
+                "Redirects are only implemented on dev-5. Can only run on dev-5. "
+                "Skipping")
         check_com_col()
 
     pass

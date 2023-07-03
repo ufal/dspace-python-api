@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 import const
 from support.dspace_interface.response_map import check_response
 from support.dspace_proxy import rest_proxy
-from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, import_items, oai_fail_message, get_test_soup
+from support.item_checking import check_com_col, transform_handle_to_oai_set_id, \
+    get_handle, assure_item_from_file, import_items, oai_fail_message, get_test_soup
 
 
 class CMDIFormatTest(unittest.TestCase):
@@ -39,15 +39,17 @@ class CMDIFormatTest(unittest.TestCase):
             self.fail("Did not find any records for " + const.OAI_cmdi)
         the_one = None
         oai_original = get_test_soup("cmdi_check")
-        for id_element in oai_original.find("cmd:Resources").find("cmd:ResourceProxyList") \
-                .find_all("cmd:ResourceProxy", attrs={"id": "lp_"}):
+        for id_element in oai_original.find("cmd:Resources")\
+                .find("cmd:ResourceProxyList").find_all("cmd:ResourceProxy",
+                                                        attrs={"id": "lp_"}):
             id_element.find("cmd:ResourceRef").string.replace_with(
                 str(const.FE_url).replace("http://", "https://") + "/handle/" + handle)
         for id_element in oai_original.find_all("cmd:identifier"):
             id_element.string.replace_with(const.FE_url + "/handle/" + handle)
         for id_element in oai_original.find_all("cmd:MdSelfLink"):
             id_element.string.replace_with(
-                str(const.FE_url).replace("http://", "https://") + "/handle/" + handle + "@format=cmdi")
+                str(const.FE_url).replace("http://", "https://") + "/handle/" + handle
+                + "@format=cmdi")
         for record in records:
             if record.find("identifier", recursive=True).text.split(":")[-1] == handle:
                 the_one = record.find("metadata")
@@ -76,7 +78,8 @@ class CMDIFormatTest(unittest.TestCase):
             import_items()
 
     @staticmethod
-    def remove_most_alphabetical_recent_value_if_contains_more(metadatum, uuid, new_itm):
+    def remove_most_alphabetical_recent_value_if_contains_more(metadatum, uuid,
+                                                               new_itm):
         old = new_itm["metadata"][metadatum]
         values = []
         for x in old:
@@ -88,6 +91,7 @@ class CMDIFormatTest(unittest.TestCase):
         idx = old_values.index(values[-1])
 
         response = rest_proxy.d.api_patch(const.BE_url + "api/core/items/" + str(uuid),
-                                          "remove", "/metadata/" + metadatum + "/" + str(idx), None)
+                                          "remove", "/metadata/" + metadatum + "/" +
+                                          str(idx), None)
         logging.info(response)
         return True

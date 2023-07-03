@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 
 import const
 from support.dspace_interface.response_map import check_response
-from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, oai_fail_message, get_test_soup
+from support.item_checking import check_com_col, transform_handle_to_oai_set_id, \
+    get_handle, assure_item_from_file, oai_fail_message, get_test_soup
 
 
 class OLACTest(unittest.TestCase):
@@ -28,10 +28,12 @@ class OLACTest(unittest.TestCase):
 
         check_response(oai_response, "getting olac item")
         # if oai_response.content is None:
-        #     self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
+        #     self.fail("Failed to get records for handle " +
+        #     get_handle(const.col_UUID))
         # if oai_response.status_code == 500:
         #     log(oai_response.content, Severity.WARN)
-        #     self.fail("Failed to get records for handle " + get_handle(const.col_UUID))
+        #     self.fail("Failed to get records for handle " +
+        #     get_handle(const.col_UUID))
         parsed_oai_response = BeautifulSoup(oai_response.content, features="xml")
         records = parsed_oai_response.findAll("record", recursive=True)
         if not records:

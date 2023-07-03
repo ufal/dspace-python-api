@@ -6,4 +6,5 @@ exp_host = "dev-5.pc"
 exp_FE_port = None
 exp_BE_port = None
 exp_SSL = False
-exp_import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > /dev/null 2> /dev/null"
+exp_import_command = "docker exec -it dspace /dspace/bin/dspace oai import -c > " \
+                     "/dev/null 2> /dev/null"

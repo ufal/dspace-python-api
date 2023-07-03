@@ -9,8 +9,9 @@ import const
 from support.dspace_interface.models import Item
 from support.dspace_interface.response_map import check_response
 from support.dspace_proxy import rest_proxy
-from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, oai_fail_message, get_test_soup, import_items, get_name_from_file
+from support.item_checking import check_com_col, transform_handle_to_oai_set_id, \
+    get_handle, assure_item_from_file, oai_fail_message, get_test_soup, import_items, \
+    get_name_from_file
 
 
 class OLACTest(unittest.TestCase):
@@ -30,13 +31,15 @@ class OLACTest(unittest.TestCase):
         metadatum = "local.hiddenButHarvestable"
         item = rest_proxy.d.get_item(uuid)
         if metadatum not in item.json()["metadata"]:
-            response = rest_proxy.d.api_patch(const.BE_url + "api/core/items/" + str(uuid),
+            response = rest_proxy.d.api_patch(const.BE_url + "api/core/items/" +
+                                              str(uuid),
                                               "add", "/metadata/" + metadatum, "hidden")
             check_response(response, "patching; adding local.hiddenButHarvestable")
         name_of_item = get_name_from_file(data_filename)
         anon_req = requests.get(
             const.API_URL + "discover/search/objects?query=" + name_of_item)
-        items_found = anon_req.json()["_embedded"]["searchResult"]["_embedded"]["objects"]
+        items_found = anon_req.json()["_embedded"]["searchResult"]["_embedded"]
+        ["objects"]
         found_count = len(items_found)
         do_import = False
         if found_count != 0:
@@ -47,7 +50,8 @@ class OLACTest(unittest.TestCase):
             logging.warning(str(items))
             do_import = True
         self.assertEqual(
-            found_count, 0, "Found items but expected hidden! They are not hidden all too well!")
+            found_count, 0, "Found items but expected hidden! "
+                            "They are not hidden all too well!")
 
         # upload CMDI file
         bundle = None

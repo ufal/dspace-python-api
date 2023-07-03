@@ -43,8 +43,10 @@ class ExampleTest(unittest.TestCase):
         item_tile_from_metadata = item_json["metadata"]["dc.title"][0]["value"]
         logging.info("Example_test item with title: " + item_tile_from_metadata)
 
-        # In order to compare xml objects, BeautifulSoup objects can be constructed and compared:
-        # Use function to obtain soup (soup is name of library, also used as name for objects
+        # In order to compare xml objects, BeautifulSoup objects can
+        # be constructed and compared:
+        # Use function to obtain soup (soup is name of library,
+        # also used as name for objects
         # representing xml document
         dummy = get_test_soup("bundle_check")
         dummy_two = get_test_soup("cmdi")

@@ -8,8 +8,9 @@ from bs4 import BeautifulSoup
 import const
 from support.dspace_interface.models import Item
 from support.dspace_proxy import rest_proxy
-from support.item_checking import check_com_col, transform_handle_to_oai_set_id, get_handle, \
-    assure_item_from_file, import_items, oai_fail_message, get_test_soup
+from support.item_checking import check_com_col, \
+    transform_handle_to_oai_set_id, get_handle, assure_item_from_file, import_items, \
+    oai_fail_message, get_test_soup
 
 
 class CMDIBundleTest(unittest.TestCase):

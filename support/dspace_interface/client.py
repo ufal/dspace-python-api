@@ -3,14 +3,19 @@
 # and described in the LICENSE.txt file in the root of this project
 
 """
-DSpace REST API client library. Intended to make interacting with DSpace in Python 3 easier, particularly
+DSpace REST API client library. Intended to make interacting with DSpace in
+Python 3 easier, particularly
 when creating, updating, retrieving and deleting DSpace Objects.
-This client library is a work in progress and currently only implements the most basic functionality.
-It was originally created to assist with a migration of container structure, items and bitstreams from a non-DSpace
+This client library is a work in progress and
+currently only implements the most basic functionality.
+It was originally created to assist with a migration of container structure,
+items and bitstreams from a non-DSpace
 system to a new DSpace 7 repository.
 
-It needs a lot of expansion: resource policies and permissions, validation of prepared objects and responses,
-better abstracting and handling of HAL-like API responses, plus just all the other endpoints and operations implemented.
+It needs a lot of expansion: resource policies and permissions,
+validation of prepared objects and responses,
+better abstracting and handling of HAL-like API responses,
+plus just all the other endpoints and operations implemented.
 
 @author Kim Shepherd <kim@shepherd.nz>
 """
@@ -22,7 +27,8 @@ import requests
 from requests import Request
 
 from support.dspace_interface.response_map import check_response
-from .models import *
+from .models import DSpaceObject, SimpleDSpaceObject, Bundle, Bitstream, Community, \
+    Collection, User, Item, Group
 
 __all__ = ['DSpaceClient']
 
@@ -46,11 +52,14 @@ def parse_json(response):
 
 class DSpaceClient:
     """
-    Main class of the API client itself. This client uses request sessions to connect and authenticate to
+    Main class of the API client itself. This client uses request
+    sessions to connect and authenticate to
     the REST API, maintain XSRF tokens, and all GET, POST, PUT, PATCH operations.
-    Low-level api_get, api_post, api_put, api_delete, api_patch functions are defined to handle the requests and do
+    Low-level api_get, api_post, api_put, api_delete, api_patch functions are defined
+    to handle the requests and do
     retries / XSRF refreshes where necessary.
-    Higher level get, create, update, partial_update (patch) functions are implemented for each DSO type
+    Higher level get, create, update, partial_update (patch) functions are implemented
+    for each DSO type
     """
     # Set up basic environment, variables
     session = None
@@ -78,9 +87,12 @@ class DSpaceClient:
 
     def __init__(self, api_endpoint=API_ENDPOINT, username=USERNAME, password=PASSWORD):
         """
-        Accept optional API endpoint, username, password arguments using the OS environment variables as defaults
-        :param api_endpoint:    base path to DSpace REST API, eg. http://localhost:8080/server/api
-        :param username:        username with appropriate privileges to perform operations on REST API
+        Accept optional API endpoint, username, password arguments using
+        the OS environment variables as defaults
+        :param api_endpoint:    base path to DSpace REST API,
+                                eg. http://localhost:8080/server/api
+        :param username:        username with appropriate privileges to perform
+                                operations on REST API
         :param password:        password for the above username
         """
         self.session = requests.Session()
@@ -91,8 +103,10 @@ class DSpaceClient:
 
     def authenticate(self):
         """
-        Authenticate with the DSpace REST API. As with other operations, perform XSRF refreshes when necessary.
-        After POST, check /authn/status and log success if the authenticated json property is true
+        Authenticate with the DSpace REST API. As with other operations,
+        perform XSRF refreshes when necessary.
+        After POST, check /authn/status and log success
+        if the authenticated json property is true
         @return: response object
         """
         # Get CSRF token
@@ -106,9 +120,10 @@ class DSpaceClient:
 
         # POST Login
         r = self.session.post(self.LOGIN_URL, data={
-                              'user': self.USERNAME, 'password': self.PASSWORD})
+            'user': self.USERNAME, 'password': self.PASSWORD})
         if 'Authorization' in r.headers:
-            self.session.headers.update({'Authorization': r.headers.get('Authorization')})
+            self.session.headers.update(
+                {'Authorization': r.headers.get('Authorization')})
 
         # Get and check authentication status
         r = self.session.get(f'{self.API_ENDPOINT}authn/status')
@@ -124,7 +139,8 @@ class DSpaceClient:
 
     def refresh_token(self):
         """
-        If the DSPACE-XSRF-TOKEN appears, we need to update our local stored token and re-send our API request
+        If the DSPACE-XSRF-TOKEN appears, we need to update our
+        local stored token and re-send our API request
         @return: None
         """
         r = self.api_post(self.LOGIN_URL, None, None)
@@ -157,8 +173,10 @@ class DSpaceClient:
         POSTs are typically used to create objects.
         @param url:     DSpace REST API URL
         @param params:  Any parameters to include (eg ?parent=abbc-....)
-        @param json_p:    Data in json-ready form (dict) to send as POST body (eg. item.as_dict())
-        @param retry:   Has this method already been retried? Used if we need to refresh XSRF.
+        @param json_p:  Data in json-ready form (dict) to send as
+                        POST body (eg. item.as_dict())
+        @param retry:   Has this method already been retried?
+                        Used if we need to refresh XSRF.
         @return:        Response from API
         """
         h = {'Content-type': 'application/json'}
@@ -173,31 +191,37 @@ class DSpaceClient:
             self.exception401Counter = 0
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
-            # After speaking in #dev it seems that these do need occasional refreshes but I suspect
+            # After speaking in #dev it seems
+            # that these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
             r_json = r.json()
             if 'message' in r_json and 'CSRF token' in r_json['message']:
                 if retry:
-                    logging.error('API Post: Already retried... something must be wrong')
+                    logging.error(
+                        'API Post: Already retried... something must be wrong')
                 else:
                     logging.info("API Post: Retrying request with updated CSRF token")
                     return self.api_post(url, params=params, json_p=json_p, retry=True)
         elif r.status_code == 401:
             r_json = r.json()
-            if 'message' in r_json and 'Authentication is required' in r_json['message']:
+            if 'message' in r_json and 'Authentication is required' in r_json[
+                    'message']:
                 if retry:
-                    logging.error('API Post: Already retried... something must be wrong')
+                    logging.error(
+                        'API Post: Already retried... something must be wrong')
                     self.exception401Counter = 0
                 else:
                     logging.info("API Post: Retrying request with updated CSRF token")
                     # try to authenticate
                     self.authenticate()
-                    # Try to authenticate and repeat the request 3 times - if it won't happen log error
+                    # Try to authenticate and repeat the request 3 times -
+                    # if it won't happen log error
                     self.exception401Counter = self.exception401Counter + 1
                     retry_value = False
                     if self.exception401Counter > 3:
                         retry_value = True
-                    return self.api_post(url, params=params, json_p=json_p, retry=retry_value)
+                    return self.api_post(url, params=params, json_p=json_p,
+                                         retry=retry_value)
 
         check_response(r, "api post")
         return r
@@ -208,8 +232,10 @@ class DSpaceClient:
         PUTs are typically used to update objects.
         @param url:     DSpace REST API URL
         @param params:  Any parameters to include (eg ?parent=abbc-....)
-        @param json_p:    Data in json-ready form (dict) to send as PUT body (eg. item.as_dict())
-        @param retry:   Has this method already been retried? Used if we need to refresh XSRF.
+        @param json_p:  Data in json-ready form (dict) to send as PUT body
+                        (eg. item.as_dict())
+        @param retry:   Has this method already been retried?
+                        Used if we need to refresh XSRF.
         @return:        Response from API
         """
         h = {'Content-type': 'application/json'}
@@ -223,7 +249,8 @@ class DSpaceClient:
         if r.status_code == 403:
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
-            # After speaking in #dev it seems that these do need occasional refreshes but I suspect
+            # After speaking in #dev it seems that these
+            # do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
             logging.error(r.text)
             r_json = r.json()
@@ -242,7 +269,8 @@ class DSpaceClient:
         DELETES are typically used to update objects.
         @param url:     DSpace REST API URL
         @param params:  Any parameters to include (eg ?parent=abbc-....)
-        @param retry:   Has this method already been retried? Used if we need to refresh XSRF.
+        @param retry:   Has this method already been retried?
+                        Used if we need to refresh XSRF.
         @return:        Response from API
         """
         h = {'Content-type': 'application/json'}
@@ -256,7 +284,8 @@ class DSpaceClient:
         if r.status_code == 403:
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
-            # After speaking in #dev it seems that these do need occasional refreshes but I suspect
+            # After speaking in #dev it seems that
+            # these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
             logging.error(r.text)
             r_json = r.json()
@@ -272,10 +301,13 @@ class DSpaceClient:
     def api_patch(self, url, operation, path, value, retry=False):
         """
         @param url: DSpace REST API URL
-        @param operation: 'add', 'remove', 'replace', or 'move' (see PatchOperation enumeration)
+        @param operation: 'add', 'remove', 'replace', or 'move'
+                        (see PatchOperation enumeration)
         @param path: path to perform operation - eg, metadata, withdrawn, etc.
-        @param value: new value for add or replace operations, or 'original' path for move operations
-        @param retry:   Has this method already been retried? Used if we need to refresh XSRF.
+        @param value: new value for add or replace operations,
+                        or 'original' path for move operations
+        @param retry:   Has this method already been retried?
+                        Used if we need to refresh XSRF.
         @return:
         @see https://github.com/DSpace/RestContract/blob/main/metadata-patch.md
         """
@@ -286,7 +318,9 @@ class DSpaceClient:
             logging.info(
                 'Need valid path eg. /withdrawn or /metadata/dc.title/0/language')
             return None
-        if (operation == self.PatchOperation.ADD or operation == self.PatchOperation.REPLACE
+        if (
+                operation == self.PatchOperation.ADD or
+                operation == self.PatchOperation.REPLACE
                 or operation == self.PatchOperation.MOVE) and value is None:
             # missing value required for add/replace/move operations
             logging.info(
@@ -317,7 +351,8 @@ class DSpaceClient:
         if r.status_code == 403:
             # 403 Forbidden
             # If we had a CSRF failure, retry the request with the updated token
-            # After speaking in #dev it seems that these do need occasional refreshes but I suspect
+            # After speaking in #dev it seems that
+            # these do need occasional refreshes but I suspect
             # it's happening too often for me, so check for accidentally triggering it
             logging.error(r.text)
             r_json = parse_json(r)
@@ -337,9 +372,11 @@ class DSpaceClient:
 
     def search_objects(self, query=None, filters=None, dso_type=None):
         """
-        Do a basic search with optional query, filters and dsoType params. TODO: pagination
+        Do a basic search with optional query, filters and dsoType params.
+        TODO: pagination
         @param query:   query string
-        @param filters: discovery filters as dict eg. {'f.entityType': 'Publication,equals', ... }
+        @param filters: discovery filters as dict eg. {'f.entityType':
+                        'Publication,equals', ... }
         @param dso_type: DSO type to further filter results
         @return:        list of DspaceObject objects constructed from API resources
         """
@@ -355,7 +392,8 @@ class DSpaceClient:
 
         r_json = self.fetch_resource(url=url, params=params)
 
-        # instead lots of 'does this key exist, etc etc' checks, just go for it and wrap in a try?
+        # instead lots of 'does this key exist, etc etc' checks,
+        # just go for it and wrap in a try?
         try:
             results = r_json['_embedded']['searchResult']['_embedded']['objects']
             for result in results:
@@ -385,7 +423,8 @@ class DSpaceClient:
     def get_dso(self, url, uuid):
         """
         Base 'get DSpace Object' function.
-        Uses fetch_resource which itself calls parse_json on the raw response before returning.
+        Uses fetch_resource which itself calls parse_json
+        on the raw response before returning.
         @param url:     DSpace REST API URL
         @param uuid:    UUID of object to retrieve
         @return:        Parsed JSON response from fetch_resource
@@ -405,9 +444,13 @@ class DSpaceClient:
         Base 'create DSpace Object' function.
         Takes JSON data and some POST parameters and returns the response.
         @param url:     DSpace REST API URL
-        @param params:  Any parameters to pass in the request, eg. parentCollection for a new item
+        @param params:  Any parameters to pass in the request,
+                        eg. parentCollection for a new item
         @param data:    JSON data expected by the REST API to create the new resource
-        @return:        Raw API response. New DSO *could* be returned but for error checking purposes, raw response
+        @return:        Raw API response. New DSO *could* be returned but
+
+
+                        for error checking purposes, raw response
                         is nice too and can always be parsed from this response later.
         """
         r = self.api_post(url, params, data)
@@ -418,7 +461,8 @@ class DSpaceClient:
 
     def update_dso(self, dso, params=None):
         """
-        Update DSpaceObject. Takes a DSpaceObject and any optional parameters. Will send a PUT update to the remote
+        Update DSpaceObject. Takes a DSpaceObject and any optional parameters.
+        Will send a PUT update to the remote
         object and return the updated object, typed correctly.
         :param dso:     DSpaceObject with locally updated data, to send in PUT request
         :param params:  Optional parameters
@@ -429,13 +473,15 @@ class DSpaceClient:
             return None
         dso_type = type(dso)
         if not isinstance(dso, SimpleDSpaceObject):
-            logging.info('Only SimpleDSpaceObject types (eg Item, Collection, Community) '
-                         'are supported by generic update_dso PUT.')
+            logging.info(
+                'Only SimpleDSpaceObject types (eg Item, Collection, Community) '
+                'are supported by generic update_dso PUT.')
             return dso
         try:
             # Get self URI from HAL links
             url = dso.links['self']['href']
-            # Get and clean data - there are some unalterable fields that could cause errors
+            # Get and clean data - there are some unalterable fields
+            # that could cause errors
             data = dso.as_dict()
 
             if 'lastModified' in data:
@@ -468,7 +514,8 @@ class DSpaceClient:
 
     def delete_dso(self, dso=None, url=None, params=None):
         """
-        Delete DSpaceObject. Takes a DSpaceObject and any optional parameters. Will send a PUT update to the remote
+        Delete DSpaceObject. Takes a DSpaceObject and any optional parameters.
+        Will send a PUT update to the remote
         object and return the updated object, typed correctly.
         :param dso:     DSpaceObject from which to parse self link
         :param params:  Optional parameters
@@ -482,8 +529,10 @@ class DSpaceClient:
                 return None
         else:
             if not isinstance(dso, SimpleDSpaceObject):
-                logging.warning('Only SimpleDSpaceObject types (eg Item, Collection, Community, EPerson) '
-                                'are supported by generic update_dso PUT.')
+                logging.warning(
+                    'Only SimpleDSpaceObject types '
+                    '(eg Item, Collection, Community, EPerson) '
+                    'are supported by generic update_dso PUT.')
                 return dso
             # Get self URI from HAL links
             url = dso.links['self']['href']
@@ -506,12 +555,17 @@ class DSpaceClient:
     def get_bundles(self, parent=None, uuid=None):
         """
         Get bundles for an item
-        @param parent:  python Item object, from which the UUID will be referenced in the URL.
-                        This is mutually exclusive to the 'uuid' argument, returning all bundles for the item.
-        @param uuid:    Bundle UUID. This is mutually exclusive to the 'parent' argument, returning just this bundle
-        @return:        List of bundles (single UUID bundle result is wrapped in a list before returning)
+        @param parent:  python Item object, from which the UUID
+        will be referenced in the URL.
+                        This is mutually exclusive to the 'uuid' argument,
+                        returning all bundles for the item.
+        @param uuid:    Bundle UUID. This is mutually exclusive to the 'parent'
+                        argument, returning just this bundle
+        @return:        List of bundles (single UUID bundle result
+                        is wrapped in a list before returning)
         """
-        # TODO: It is probably wise to allow the parent UUID to be simply passed as an alternative to having the full
+        # TODO: It is probably wise to allow the parent UUID to be simply passed as an
+        #  alternative to having the full
         #  python object as constructed by this REST client, for more flexible usage.
         bundles = list()
         single_result = False
@@ -538,18 +592,20 @@ class DSpaceClient:
 
     def create_bundle(self, parent=None, name='ORIGINAL'):
         """
-        Create new bundle in the specified item
-        @param parent:  Parent python Item, the UUID of which will be used in the URL path
-        @param name:    Name of the bundle. Default: ORIGINAL
-        @return:        constructed python Bundle object from the response JSON
-                        (note: this is a bit inconsistent with create_dso usage where the raw response is returned)
+        Create new bundle in the specified item @param parent:  Parent python Item,
+        the UUID of which will be used in the URL path @param name:    Name of the
+        bundle. Default: ORIGINAL @return:        constructed python Bundle object
+        from the response JSON (note: this is a bit inconsistent with create_dso
+        usage where the raw response is returned)
         """
-        # TODO: It is probably wise to allow the parent UUID to be simply passed as an alternative to having the full
-        #  python object as constructed by this REST client, for more flexible usage.
+        # TODO: It is probably wise to allow the parent UUID to be simply passed as
+        #  an alternative to having the full python object as constructed by this
+        #  REST client, for more flexible usage.
         if parent is None:
             return None
         url = f'{self.API_ENDPOINT}core/items/{parent.uuid}/bundles'
-        return Bundle(api_resource=parse_json(self.api_post(url, params=None, json_p={'name': name, 'metadata': {}})))
+        return Bundle(api_resource=parse_json(
+            self.api_post(url, params=None, json_p={'name': name, 'metadata': {}})))
 
     def get_bitstreams(self, uuid=None, bundle=None, page=0, size=20):
         """
@@ -569,8 +625,10 @@ class DSpaceClient:
             else:
                 url = f'{self.API_ENDPOINT}core/bundles/{bundle.uuid}/bitstreams'
                 logging.info(
-                    f'Cannot find bundle bitstream links, will try to construct manually: {url}')
-        # Perform the actual request. By now, our URL and parameter should be properly set
+                    f'Cannot find bundle bitstream links, will try to construct '
+                    f'manually: {url}')
+        # Perform the actual request. By now, our URL and parameter should be
+        # properly set
         r_json = self.fetch_resource(url, params={'page': page, 'size': size})
         if '_embedded' in r_json:
             if 'bitstreams' in r_json['_embedded']:
@@ -579,26 +637,28 @@ class DSpaceClient:
                     bitstreams.append(Bitstream(bitstream_resource))
                 return bitstreams
 
-    def create_bitstream(self, bundle=None, name=None, path=None, mime=None, metadata=None, retry=False):
+    def create_bitstream(self, bundle=None, name=None, path=None, mime=None,
+                         metadata=None, retry=False):
         """
-        Upload a file and create a bitstream for a specified parent bundle, from the uploaded file and
-        the supplied metadata.
-        This create method is a bit different to the others, it does not use create_dso or the api_post lower level
-        methods, instead it has to use a prepared session POST request which will allow the multi-part upload to work
-        successfully with the correct byte size and persist the session data.
-        This is also why it directly implements the 'retry' functionality instead of relying on api_post.
-        @param bundle:      python Bundle object
-        @param name:        Bitstream name
-        @param path:        Local filesystem path to the file that will be uploaded
-        @param mime:        MIME string of the uploaded file
-        @param metadata:    Full metadata JSON
-        @param retry:       A 'retried' indicator. If the first attempt fails due to an expired or missing auth
-                            token, the request will retry once, after the token is refreshed. (default: False)
-        @return:            constructed Bitstream object from the API response, or None if the operation failed.
+        Upload a file and create a bitstream for a specified parent bundle, from the
+        uploaded file and the supplied metadata. This create method is a bit
+        different to the others, it does not use create_dso or the api_post lower
+        level methods, instead it has to use a prepared session POST request which
+        will allow the multi-part upload to work successfully with the correct byte
+        size and persist the session data. This is also why it directly implements
+        the 'retry' functionality instead of relying on api_post. @param bundle:
+        python Bundle object @param name:        Bitstream name @param path:
+        Local filesystem path to the file that will be uploaded @param mime:
+        MIME string of the uploaded file @param metadata:    Full metadata JSON
+        @param retry:       A 'retried' indicator. If the first attempt fails due to
+        an expired or missing auth token, the request will retry once, after the
+        token is refreshed. (default: False) @return:            constructed
+        Bitstream object from the API response, or None if the operation failed.
         """
-        # TODO: It is probably wise to allow the bundle UUID to be simply passed as an alternative to having the full
-        #  python object as constructed by this REST client, for more flexible usage.
-        # TODO: Better error detection and handling for file reading
+        # TODO: It is probably wise to allow the bundle UUID to be simply passed as
+        #  an alternative to having the full python object as constructed by this
+        #  REST client, for more flexible usage. TODO: Better error detection and
+        #   handling for file reading
         if metadata is None:
             metadata = {}
         url = f'{self.API_ENDPOINT}core/bundles/{bundle.uuid}/bitstreams'
@@ -625,7 +685,8 @@ class DSpaceClient:
                     logging.warning('Already retried... something must be wrong')
                 else:
                     logging.error("Retrying request with updated CSRF token")
-                    return self.create_bitstream(bundle, name, path, mime, metadata, True)
+                    return self.create_bitstream(bundle, name, path, mime, metadata,
+                                                 True)
         check_response(r, "creating bitstream")
         if r.status_code == 201 or r.status_code == 200:
             # Success
@@ -636,12 +697,11 @@ class DSpaceClient:
 
     def get_communities(self, uuid=None, page=0, size=20, top=False):
         """
-        Get communities - either all, for single UUID, or all top-level (ie no sub-communities)
-        @param uuid:    string UUID if getting single community
-        @param page:    integer page (default: 0)
-        @param size:    integer size (default: 20)
-        @param top:     whether to restrict search to top communities (default: false)
-        @return:        list of communities, or None if error
+        Get communities - either all, for single UUID, or all top-level (ie no
+        sub-communities) @param uuid:    string UUID if getting single community
+        @param page:    integer page (default: 0) @param size:    integer size (
+        default: 20) @param top:     whether to restrict search to top communities (
+        default: false) @return:        list of communities, or None if error
         """
         url = f'{self.API_ENDPOINT}core/communities'
         params = {'page': page, 'size': size}
@@ -681,8 +741,8 @@ class DSpaceClient:
         @param data:    Full JSON data for the new community
         @return:        python Community object constructed from the API response
         """
-        # TODO: To be consistent with other create methods, this should probably also allow a Community object
-        #  to be passed instead of just the UUID as a string
+        # TODO: To be consistent with other create methods, this should probably also
+        #  allow a Community object to be passed instead of just the UUID as a string
         url = f'{self.API_ENDPOINT}core/communities'
         params = None
         if parent is not None:
@@ -691,17 +751,19 @@ class DSpaceClient:
 
     def get_collections(self, uuid=None, community=None, page=0, size=20):
         """
-        Get collections - all, or single UUID, or for a specific community
-        @param uuid:        UUID string. If present, just a single collection is returned (overrides community arg)
-        @param community:   Community object. If present (and no uuid present), collections for a community
-        @param page:        Integer for page / offset of results. Default: 0
-        @param size:        Integer for page size. Default: 20 (same as REST API default)
-        @return:            list of Collection objects, or None if there was an error
-                            for consistency of handling results, even the uuid search will be a list of one
+        Get collections - all, or single UUID, or for a specific community @param
+        uuid:        UUID string. If present, just a single collection is returned (
+        overrides community arg) @param community:   Community object. If present (
+        and no uuid present), collections for a community @param page:        Integer
+        for page / offset of results. Default: 0 @param size:        Integer for page
+        size. Default: 20 (same as REST API default) @return:            list of
+        Collection objects, or None if there was an error for consistency of handling
+        results, even the uuid search will be a list of one
         """
         url = f'{self.API_ENDPOINT}core/collections'
         params = {'page': page, 'size': size}
-        # First, handle case of UUID. It overrides the other arguments as it is a request for a single collection
+        # First, handle case of UUID. It overrides the other arguments as it is a
+        # request for a single collection
         if uuid is not None:
             try:
                 id_check = UUID(uuid).version
@@ -714,11 +776,13 @@ class DSpaceClient:
                 return None
 
         if community is not None:
-            if 'collections' in community.links and 'href' in community.links['collections']:
+            if 'collections' in community.links and 'href' in \
+                    community.links['collections']:
                 # Update URL
                 url = community.links['collections']['href']
 
-        # Perform the actual request. By now, our URL and parameter should be properly set
+        # Perform the actual request. By now, our URL and parameter should be
+        # properly set
         r_json = self.fetch_resource(url, params=params)
         if '_embedded' in r_json:
             if 'collections' in r_json['_embedded']:
@@ -736,8 +800,8 @@ class DSpaceClient:
         @param data:    Full JSON data for the new collection
         @return:        python Collection object constructed from the API response
         """
-        # TODO: To be consistent with other create methods, this should probably also allow a Community object
-        #  to be passed instead of just the UUID as a string
+        # TODO: To be consistent with other create methods, this should probably also
+        #  allow a Community object to be passed instead of just the UUID as a string
         url = f'{self.API_ENDPOINT}core/collections'
         params = None
         if parent is not None:
@@ -763,9 +827,9 @@ class DSpaceClient:
 
     def create_item(self, parent, item):
         """
-        Create an item beneath the given parent collection
-        @param parent:  UUID of parent collection to pass as a parameter to create_dso
-        @param item:    python Item object containing all the data and links expected by the REST API
+        Create an item beneath the given parent collection @param parent:  UUID of
+        parent collection to pass as a parameter to create_dso @param item:    python
+        Item object containing all the data and links expected by the REST API
         @return:        Item object constructed from the API response
         """
         url = f'{self.API_ENDPOINT}core/items'
@@ -776,23 +840,26 @@ class DSpaceClient:
         if not isinstance(item, Item):
             logging.error('Need a valid item')
             return None
-        return Item(api_resource=parse_json(self.create_dso(url, params=params, data=item.as_dict())))
+        return Item(api_resource=parse_json(
+            self.create_dso(url, params=params, data=item.as_dict())))
 
     def update_item(self, item):
         """
-        Update item. The Item passed to this method contains all the data, identifiers, links necessary to
-        perform the update to the API. Note this is a full update, not a patch / partial update operation.
-        @param item: python Item object
-        @return:
+        Update item. The Item passed to this method contains all the data,
+        identifiers, links necessary to perform the update to the API. Note this is a
+        full update, not a patch / partial update operation. @param item: python Item
+        object @return:
         """
         if not isinstance(item, Item):
             logging.warning('Need a valid item')
             return None
         return self.update_dso(item, params=None)
 
-    def add_metadata(self, dso, field, value, language=None, authority=None, confidence=-1, place=''):
+    def add_metadata(self, dso, field, value, language=None, authority=None,
+                     confidence=-1, place=''):
         """
-        Add metadata to a DSO using the api_patch method (PUT, with path and operation and value)
+        Add metadata to a DSO using the api_patch method
+        (PUT, with path and operation and value)
         :param dso:
         :param field:
         :param value:
@@ -802,7 +869,8 @@ class DSpaceClient:
         :param place:
         :return:
         """
-        if dso is None or field is None or value is None or not isinstance(dso, DSpaceObject):
+        if dso is None or field is None or value is None or not \
+                isinstance(dso, DSpaceObject):
             # TODO: separate these tests, and add better error handling
             logging.warning('Invalid or missing DSpace object, field or value string')
             return self
@@ -828,20 +896,24 @@ class DSpaceClient:
     def create_user(self, user, token=None):
         """
         Create a user
-        @param user:    python User object or Python dict containing all the data and links expected by the REST API
-        @param token:   Token if creating new user (optional) from the link in a registration email
+        @param user:    python User object or Python dict containing
+                        all the data and links expected by the REST API
+        @param token:   Token if creating new user (optional) from
+                        the link in a registration email
         @return:        User object constructed from the API response
         """
         url = f'{self.API_ENDPOINT}eperson/epersons'
         data = user
         if isinstance(user, User):
             data = user.as_dict()
-            # TODO: Validation. Note, at least here I will just allow a dict instead of the pointless cast<->cast
+            # TODO: Validation. Note, at least here I will just allow
+            #  a dict instead of the pointless cast<->cast
             # that you see for other DSO types - still figuring out the best way
         params = None
         if token is not None:
             params = {'token': token}
-        return User(api_resource=parse_json(self.create_dso(url, params=params, data=data)))
+        return User(
+            api_resource=parse_json(self.create_dso(url, params=params, data=data)))
 
     def delete_user(self, user):
         if not isinstance(user, User):
@@ -862,14 +934,16 @@ class DSpaceClient:
 
     def create_group(self, group):
         """
-        Create a group
-        @param group:    python Group object or Python dict containing all the data and links expected by the REST API
-        @return:         User object constructed from the API response
+        Create a group @param group:    python Group object or Python dict containing
+        all the data and links expected by the REST API @return:         User object
+        constructed from the API response
         """
         url = f'{self.API_ENDPOINT}eperson/groups'
         data = group
         if isinstance(group, Group):
             data = group.as_dict()
-            # TODO: Validation. Note, at least here I will just allow a dict instead of the pointless cast<->cast
-            # that you see for other DSO types - still figuring out the best way
-        return Group(api_resource=parse_json(self.create_dso(url, params=None, data=data)))
+            # TODO: Validation. Note, at least here I will just allow a dict instead
+            #  of the pointless cast<->cast that you see for other DSO types - still
+            #  figuring out the best way
+        return Group(
+            api_resource=parse_json(self.create_dso(url, params=None, data=data)))
