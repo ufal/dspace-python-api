@@ -1,6 +1,5 @@
 import argparse
 import logging
-
 import psycopg2
 import json
 
@@ -27,7 +26,8 @@ def get_data_as_json(database, host, db_user, db_password):
         with open(j_name, 'w', encoding='utf-8') as j:
             cursor.execute("SELECT json_agg(row_to_json(t)) FROM \"{}\" t".format(name))
             # access to 0. position, because the fetchone returns tuple
-            j.write((json.dumps(cursor.fetchone()[0])))
+            created_json = json.dumps(cursor.fetchone()[0])
+            j.write(created_json)
     logging.info("Data was successfully exported!")
     conn.close()
     logging.info("Disconnect from database!")

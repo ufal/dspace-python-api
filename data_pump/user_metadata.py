@@ -51,12 +51,13 @@ def import_user_metadata(bitstream_id_dict,
                 'userRegistrationId': user_registration_id_dict[user_met['eperson_id']]}
             do_api_post(user_met_url, params, user_met_json_p)
             imported_user_met += 1
-        except Exception:
+        except Exception as e:
             logging.error('POST response ' + user_met_url +
                           ' failed for user registration id: ' +
                           str(user_met['eperson_id']) +
                           ' and bitstream id: ' +
-                          str(mappings_dict[data_user_all_dict['mapping_id']]))
+                          str(mappings_dict[data_user_all_dict['mapping_id']]) +
+                          '. Exception: ' + str(e))
 
     statistics_val = (len(user_met_json_a), imported_user_met)
     statistics_dict['user_metadata'] = statistics_val

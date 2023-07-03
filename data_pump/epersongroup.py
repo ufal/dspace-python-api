@@ -17,12 +17,7 @@ def import_epersongroup(metadata_class,
     group_json_a = read_json(group_json_name)
     # group Administrator and Anonymous already exist
     # we need to remember their id
-    try:
-        response = do_api_get_all(group_url)
-        existing_data_dict = convert_response_to_json(response)['_embedded']['groups']
-    except Exception:
-        logging.error('GET request ' + response.url + ' failed.')
-
+    existing_data_dict = get_existing_epersongroups(group_url)
     if existing_data_dict is not None:
         for existing_data in existing_data_dict:
             if existing_data['name'] == 'Anonymous':
@@ -56,10 +51,10 @@ def import_epersongroup(metadata_class,
                 group_id_dict[group['eperson_group_id']] = [
                     convert_response_to_json(response)['id']]
                 imported += 1
-            except Exception:
-                logging.error('POST request ' + response.url + ' for id: ' +
+            except Exception as e:
+                logging.error('POST request ' + group_url + ' for id: ' +
                               str(group['eperson_group_id']) +
-                              ' failed. Status: ' + str(response.status_code))
+                              ' failed. Exception: ' + str(e))
     if 'epersongroup' in statistics_dict:
         statistics_val = (len(group_json_a), statistics_dict['epersongroup'][1] +
                           imported)
@@ -68,6 +63,19 @@ def import_epersongroup(metadata_class,
         statistics_val = (len(group_json_a), imported)
         statistics_dict['epersongroup'] = statistics_val
     logging.info("Eperson group was successfully imported!")
+
+
+def get_existing_epersongroups(group_url):
+    """
+    Get all existing eperson groups from database.
+    """
+    existing_data_dict = None
+    try:
+        response = do_api_get_all(group_url)
+        existing_data_dict = convert_response_to_json(response)['_embedded']['groups']
+    except Exception as e:
+        logging.error('GET request ' + group_url + ' failed. Exception: ' + str(e))
+    return existing_data_dict
 
 
 def import_group2group(group_id_dict,
@@ -83,25 +91,20 @@ def import_group2group(group_id_dict,
     if not group2group_json_a:
         logging.info("Group2group JSON is empty.")
         return
+
     for group2group in group2group_json_a:
         parents_a = group_id_dict[group2group['parent_id']]
         childs_a = group_id_dict[group2group['child_id']]
         for parent in parents_a:
             for child in childs_a:
+                parent_url = group2group_url + parent + '/subgroups'
                 try:
-                    parent_url = group2group_url + parent + '/subgroups'
                     child_url = API_URL + 'eperson/groups/' + child
-                    response = do_api_post(parent_url, None, child_url)
+                    do_api_post(parent_url, {}, child_url)
                     imported += 1
                 except Exception as e:
-                    # Sometimes the Exception `e` is type of `int`
-                    if isinstance(e, int):
-                        logging.error('POST request ' + group2group_url + parent +
-                                      '/subgroups' + ' failed.')
-                    else:
-                        logging.error('POST request ' + response.url + ' for id: ' +
-                                      str(parent) + ' failed. Status: ' +
-                                      str(response.status_code))
+                    logging.error('POST request ' + parent_url + ' for id: ' +
+                                  str(parent) + ' failed. Exception: ' + str(e))
 
     statistics_val = (len(group2group_json_a), imported)
     statistics_dict['group2group'] = statistics_val

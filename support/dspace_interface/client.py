@@ -434,7 +434,7 @@ class DSpaceClient:
             id_of_uuid = UUID(uuid).version
             logging.info("dso id is " + str(id_of_uuid))
             url = f'{url}/{uuid}'
-            return self.api_get(url, None, None)
+            return self.api_get(url, {}, None)
         except ValueError:
             logging.info(f'Invalid DSO UUID: {uuid}')
             return None
@@ -820,7 +820,7 @@ class DSpaceClient:
             id_check = UUID(uuid).version
             logging.debug("id_check = " + str(id_check))
             url = f'{url}/{uuid}'
-            return self.api_get(url, None, None)
+            return self.api_get(url, {}, None)
         except ValueError:
             logging.error(f'Invalid item UUID: {uuid}')
             return None

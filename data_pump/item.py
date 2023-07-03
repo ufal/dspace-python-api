@@ -88,10 +88,10 @@ def import_item(metadata_class,
                 workflowitem_id_dict[workflowitem['workflow_id']] = \
                     response.headers['workflowitem_id']
                 imported_workflowitem += 1
-            except Exception:
-                logging.error('POST request ' + response.url + ' for id: ' +
-                              str(workflowitem['item_id']) + ' failed. Status: '
-                              + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + workflowitem_url + ' for id: ' +
+                              str(workflowitem['item_id']) + ' failed. Exception: ' +
+                              str(e))
             del items_dict[workflowitem['item_id']]
 
         statistics_val = (len(workflowitem_json_a), imported_workflowitem)
@@ -106,7 +106,7 @@ def import_item(metadata_class,
         item_json_p = {
             'discoverable': item['discoverable'],
             'inArchive': item['in_archive'],
-            'lastModified': ['last_modified'],
+            'lastModified': item['last_modified'],
             'withdrawn': item['withdrawn']
         }
         metadatvalue_item_dict = metadata_class.get_metadata_value(2, item['item_id'])
@@ -124,10 +124,9 @@ def import_item(metadata_class,
             response_json = convert_response_to_json(response)
             item_id_dict[item['item_id']] = response_json['id']
             imported_item += 1
-        except Exception:
-            logging.error('POST request ' + response.url + ' for id: ' +
-                          str(item['item_id']) + ' failed. Status: ' +
-                          str(response.status_code))
+        except Exception as e:
+            logging.error('POST request ' + item_url + ' for id: ' +
+                          str(item['item_id']) + ' failed. Exception: ' + str(e))
 
     statistics_val = (statistics_dict['item'][0], imported_item)
     statistics_dict['item'] = statistics_val
@@ -182,10 +181,10 @@ def import_workspaceitem(item,
             item_url = API_URL + 'clarin/import/' + str(id) + "/item"
             response = rest_proxy.d.api_get(item_url, None, None)
             item_id_dict[item['item_id']] = convert_response_to_json(response)['id']
-        except Exception:
-            logging.error('POST request ' + response.url +
-                          ' failed. Status: ' + str(response.status_code))
-    except Exception:
-        logging.error('POST request ' + response.url + ' for id: ' +
+        except Exception as e:
+            logging.error('POST request ' + item_url +
+                          ' failed. Exception: ' + str(e))
+    except Exception as e:
+        logging.error('POST request ' + workspaceitem_url + ' for id: ' +
                       str(item['item_id']) +
-                      ' failed. Status: ' + str(response.status_code))
+                      ' failed. Exception: ' + str(e))

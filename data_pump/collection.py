@@ -23,6 +23,7 @@ def import_collection(metadata_class,
     collection_json_a = read_json(collection_json_name)
     comm2coll_json_a = read_json(com2col_json_name)
     coll2comm_dict = {}
+
     if not comm2coll_json_a:
         logging.info("Community2collection JSON is empty.")
         return
@@ -62,11 +63,11 @@ def import_collection(metadata_class,
             coll_id = convert_response_to_json(response)['id']
             collection_id_dict[collection['collection_id']] = coll_id
             imported_coll += 1
-        except Exception:
+        except Exception as e:
             logging.error(
-                'POST request ' + response.url + ' for id: ' +
-                str(collection['collection_id']) + 'failed. Status: ' +
-                str(response.status_code))
+                'POST request ' + collection_url + ' for id: ' +
+                str(collection['collection_id']) + 'failed. Exception: ' + str(e))
+            continue
 
         # add to collection2logo, if collection has logo
         if collection['logo_bitstream_id'] is not None:
@@ -77,44 +78,44 @@ def import_collection(metadata_class,
         # template_item_id, workflow_step_1, workflow_step_3, admin are not implemented,
         # because they are null in all data
         if collection['workflow_step_2']:
+            workflowGroups_url = collection_url + coll_id + '/workflowGroups/editor'
             try:
-                response = do_api_post(collection_url + coll_id +
-                                       '/workflowGroups/editor', None, {})
+                response = do_api_post(workflowGroups_url, {}, {})
                 group_id_dict[collection['workflow_step_2']] = [
                     convert_response_to_json(response)['id']]
                 imported_group += 1
-            except Exception:
-                logging.error('POST request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + workflowGroups_url +
+                              ' failed. Exception: ' + str(e))
         if collection['submitter']:
+            submittersGroup_url = collection_url + coll_id + '/submittersGroup'
             try:
-                response = do_api_post(collection_url + coll_id + '/submittersGroup',
-                                       None, {})
+                response = do_api_post(submittersGroup_url, {}, {})
                 group_id_dict[collection['submitter']] = \
                     [convert_response_to_json(response)['id']]
                 imported_group += 1
-            except Exception:
-                logging.error('POST request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + submittersGroup_url +
+                              ' failed. Exception: ' + str(e))
         if collection['collection_id'] in coll2group_dict:
+            bitstreamReadGroup_url = collection_url + coll_id + '/bitstreamReadGroup'
             try:
-                response = do_api_post(collection_url + coll_id +
-                                       '/bitstreamReadGroup', None, {})
+                response = do_api_post(bitstreamReadGroup_url, {}, {})
                 group_id_dict[coll2group_dict[collection['collection_id']]] = [
                     convert_response_to_json(response)['id']]
                 imported_group += 1
-            except Exception:
-                logging.error('POST request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + bitstreamReadGroup_url +
+                              ' failed. Exception: ' + str(e))
+            itemReadGroup_url = collection_url + coll_id + '/itemReadGroup'
             try:
-                response = do_api_post(collection_url + coll_id +
-                                       '/itemReadGroup', None, {})
+                response = do_api_post(itemReadGroup_url, {}, {})
                 group_id_dict[coll2group_dict[collection['collection_id']]].append(
                     convert_response_to_json(response)['id'])
                 imported_group += 1
-            except Exception:
-                logging.error('POST request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + itemReadGroup_url
+                              + ' failed. Exception: ' + str(e))
 
     statistics_val = (len(collection_json_a), imported_coll)
     statistics_dict['collection'] = statistics_val

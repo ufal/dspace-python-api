@@ -69,9 +69,10 @@ def import_community(metadata_class,
                 response_comm_id = convert_response_to_json(response)['id']
                 community_id_dict[community['community_id']] = response_comm_id
                 imported_comm += 1
-            except Exception:
+            except Exception as e:
                 logging.error('POST request ' + community_url + ' for id: ' + str(i_id)
-                              + ' failed. Status: ' + str(response.status_code))
+                              + ' failed. Exception: ' + str(e))
+                continue
 
             # add to community2logo, if community has logo
             if community['logo_bitstream_id'] is not None:
@@ -79,15 +80,15 @@ def import_community(metadata_class,
 
             # create admingroup
             if community['admin'] is not None:
+                admin_url = community_url + response_comm_id + '/adminGroup'
                 try:
-                    admin_url = community_url + response_comm_id + '/adminGroup'
-                    response = do_api_post(admin_url, None, {})
+                    response = do_api_post(admin_url, {}, {})
                     group_id_dict[community['admin']] = [convert_response_to_json(
                         response)['id']]
                     imported_group += 1
-                except Exception:
-                    logging.error('POST request ' + response.url +
-                                  ' failed. Status: ' + str(response.status_code))
+                except Exception as e:
+                    logging.error('POST request ' + admin_url +
+                                  ' failed. Exception: ' + str(e))
             del community_json_a[counter]
         else:
             counter += 1

@@ -30,6 +30,7 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
         if not bitstreamformat_json_a:
             logging.info("Bitstreamformatregistry JSON is empty.")
             return
+
         for bitstreamformat in bitstreamformat_json_a:
             level = bitstreamformat['support_level']
             if level == 0:
@@ -50,12 +51,12 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
                 'internal': bitstreamformat['internal']
             }
             try:
-                response = do_api_post(bitstreamformat_url, None,
+                response = do_api_post(bitstreamformat_url, {},
                                        bitstreamformat_json_p)
                 bitstreamformat_id_dict[bitstreamformat['bitstream_format_id']] = \
                     convert_response_to_json(response)['id']
                 imported += 1
-            except Exception:
+            except Exception as e:
                 if response.status_code == 200 or response.status_code == 201:
                     bitstreamformat_id_dict[bitstreamformat['bitstream_format_id']] = \
                         shortDesc2Id_dict[bitstreamformat['short_description']]
@@ -63,13 +64,13 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
                                  bitstreamformat['short_description'] +
                                  ' already exists in database!')
                 else:
-                    logging.error('POST request ' + response.url + ' for id: ' +
+                    logging.error('POST request ' + bitstreamformat_url + ' for id: ' +
                                   str(bitstreamformat['bitstream_format_id']) +
-                                  ' failed. Status: ' + str(response.status_code))
+                                  ' failed. Exception: ' + str(e))
         statistics_val = (len(bitstreamformat_json_a), imported)
         statistics_dict['bitstreamformatregistry'] = statistics_val
-    except Exception:
-        logging.error('GET request ' + response.url +
-                      ' failed. Status: ' + str(response.status_code))
+    except Exception as e:
+        logging.error('GET request ' + bitstreamformat_url +
+                      ' failed. Exception: ' + str(e))
 
     logging.info("Bitstream format registry was successfully imported!")

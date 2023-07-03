@@ -51,14 +51,15 @@ def import_bundle(metadata_class,
                 bundle_json_p['metadata'] = metadata_bundle_dict
                 bundle_json_p['name'] = metadata_bundle_dict['dc.title'][0]['value']
 
+            bundle_url = item_url
             try:
-                response = do_api_post(item_url + str(item_id_dict[item[0]]) +
-                                       "/bundles", None, bundle_json_p)
+                bundle_url += str(item_id_dict[item[0]]) + "/bundles"
+                response = do_api_post(bundle_url, {}, bundle_json_p)
                 bundle_id_dict[bundle] = convert_response_to_json(response)['uuid']
                 imported += 1
-            except Exception:
-                logging.error('POST request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('POST request ' + bundle_url +
+                              ' failed. Exception: ' + str(e))
 
     statistics_val = (statistics_dict['item2bundle'][0], imported)
     statistics_dict['item2bundle'] = statistics_val

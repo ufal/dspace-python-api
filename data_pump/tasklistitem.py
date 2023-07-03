@@ -25,8 +25,9 @@ def import_tasklistitem(workflowitem_id_dict,
             }
             do_api_post(tasklistitem_url, params, None)
             imported_tasklistitem += 1
-        except Exception:
-            logging.error('POST request ' + tasklistitem_url + ' failed.')
+        except Exception as e:
+            logging.error('POST request ' + tasklistitem_url + ' failed. Exception: ' +
+                          str(e))
 
     statistics_val = (len(tasklistitem_json_a), imported_tasklistitem)
     statistics_dict['tasklistitem'] = statistics_val

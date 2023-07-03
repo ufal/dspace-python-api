@@ -43,12 +43,8 @@ class Metadata:
         metadataschema_url = 'core/metadataschemas'
         imported = 0
         # get all existing data from database table
-        try:
-            response = do_api_get_all(metadataschema_url)
-            existing_data_dict = convert_response_to_json(response)['_embedded'][
-                'metadataschemas']
-        except Exception:
-            logging.error('GET request ' + response.url + ' failed.')
+        existing_data_dict = self.get_imported_metadataschemaregistry(
+            metadataschema_url)
 
         metadataschema_json_a = read_json(metadataschema_json_name)
         if not metadataschema_json_a:
@@ -61,16 +57,16 @@ class Metadata:
             }
             # prefix has to be unique
             try:
-                response = do_api_post(metadataschema_url, None, metadataschema_json_p)
+                response = do_api_post(metadataschema_url, {}, metadataschema_json_p)
                 self.metadataschema_id_dict[metadataschema['metadata_schema_id']] = \
                     convert_response_to_json(response)['id']
                 imported += 1
-            except Exception:
+            except Exception as e:
                 found = False
                 if not existing_data_dict:
-                    logging.error('POST request ' + response.url + ' for id: ' + str(
-                        metadataschema['metadata_schema_id']) + ' failed. Status: ' +
-                        str(response.status_code))
+                    logging.error('POST request ' + metadataschema_url + ' for id: ' +
+                                  str(metadataschema['metadata_schema_id']) +
+                                  ' failed. Exception: ' + str(e))
                     continue
                 for existing_data in existing_data_dict:
                     if existing_data['prefix'] != metadataschema['short_id']:
@@ -85,13 +81,27 @@ class Metadata:
                     imported += 1
                     break
                 if not found:
-                    logging.error('POST request ' + response.url + ' for id: ' + str(
-                        metadataschema['metadata_schema_id']) + ' failed. Status: ' +
-                        str(response.status_code))
+                    logging.error('POST request ' + metadataschema_url + ' for id: ' +
+                                  str(metadataschema['metadata_schema_id']) +
+                                  ' failed. Exception: ' + str(e))
 
         statistics_val = (len(metadataschema_json_a), imported)
         statistics_dict['metadataschemaregistry'] = statistics_val
         logging.info("MetadataSchemaRegistry was successfully imported!")
+
+    def get_imported_metadataschemaregistry(self, metadataschema_url):
+        """
+        Gel all existing data from table metadataschemaregistry.
+        """
+        existing_data_dict = None
+        try:
+            response = do_api_get_all(metadataschema_url)
+            existing_data_dict = convert_response_to_json(response)['_embedded'][
+                'metadataschemas']
+        except Exception as e:
+            logging.error('GET request ' + metadataschema_url + ' failed. Exception: '
+                          + str(e))
+        return existing_data_dict
 
     def import_metadatafieldregistry(self, statistics_dict):
         """
@@ -105,9 +115,9 @@ class Metadata:
             response = do_api_get_all(metadatafield_url)
             existing_data_dict = convert_response_to_json(response)['_embedded'][
                 'metadatafields']
-        except Exception:
-            logging.error('GET request ' + response.url +
-                          ' failed. Status: ' + str(response.status_code))
+        except Exception as e:
+            logging.error('GET request ' + metadatafield_url +
+                          ' failed. Exception: ' + str(e))
 
         metadatafield_json_a = read_json(metadatafield_json_name)
         if not metadatafield_json_a:
@@ -127,12 +137,12 @@ class Metadata:
                 self.metadatafield_id_dict[metadatafield['metadata_field_id']] = \
                     convert_response_to_json(response)['id']
                 imported += 1
-            except Exception:
+            except Exception as e:
                 found = False
                 if not existing_data_dict:
-                    logging.error('POST request ' + response.url + ' for id: ' +
+                    logging.error('POST request ' + metadatafield_url + ' for id: ' +
                                   str(metadatafield['metadata_field_id']) +
-                                  ' failed. Status: ' + str(response.status_code))
+                                  ' failed. Exception: ' + str(e))
                     continue
                 for existing_data in existing_data_dict:
                     if existing_data['element'] != metadatafield['element'] or \
@@ -147,9 +157,9 @@ class Metadata:
                     imported += 1
                     break
                 if not found:
-                    logging.error('POST request ' + response.url + ' for id: ' + str(
-                        metadatafield['metadata_field_id']) + ' failed. Status: ' + str(
-                        response.status_code))
+                    logging.error('POST request ' + metadatafield_url + ' for id: ' +
+                                  str(metadatafield['metadata_field_id']) +
+                                  ' failed. Exception: ' + str(e))
 
         statistics_val = (len(metadatafield_json_a), imported)
         statistics_dict['metadatafieldregistry'] = statistics_val
@@ -159,8 +169,8 @@ class Metadata:
         """
         Get metadata value for dspace object.
         """
-        url_metadatafield = 'core/metadatafields'
-        url_metadataschema = 'core/metadataschemas'
+        metadatafield_url = 'core/metadatafields'
+        metadataschema_url = 'core/metadataschemas'
         result_dict = {}
         # get all metadatavalue for object
         if (old_resource_type_id, old_resource_id) not in self.metadatavalue_dict:
@@ -176,21 +186,21 @@ class Metadata:
                 continue
             try:
                 response = do_api_get_one(
-                    url_metadatafield,
+                    metadatafield_url,
                     self.metadatafield_id_dict[metadatavalue['metadata_field_id']])
                 metadatafield_json = convert_response_to_json(response)
-            except Exception:
+            except Exception as e:
                 logging.error('GET request' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+                              ' failed. Exception: ' + str(e))
                 continue
             # get metadataschema
             try:
                 response = do_api_get_one(
-                    url_metadataschema, metadatafield_json['_embedded']['schema']['id'])
+                    metadataschema_url, metadatafield_json['_embedded']['schema']['id'])
                 metadataschema_json = convert_response_to_json(response)
-            except Exception:
-                logging.error('GET request ' + response.url +
-                              ' failed. Status: ' + str(response.status_code))
+            except Exception as e:
+                logging.error('GET request ' + metadataschema_url +
+                              ' failed. Exception: ' + str(e))
                 continue
             # define and insert key and value of dict
             key = metadataschema_json['prefix'] + '.' + metadatafield_json['element']

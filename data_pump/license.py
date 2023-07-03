@@ -39,15 +39,15 @@ def import_license(eperson_id_dict, statistics_dict):
                 "Exception while reading label image with name: " + label[
                     'label'].lower() + ".png occurred: " + e)
         try:
-            response = do_api_post(label_url, None, label_json_p)
+            response = do_api_post(label_url, {}, label_json_p)
             created_label = convert_response_to_json(response)
             imported_label += 1
             del created_label['license']
             del created_label['_links']
             labels_dict[label['label_id']] = created_label
-        except Exception:
-            logging.error('POST request ' + response.url +
-                          ' failed. Status code ' + str(response.status_code))
+        except Exception as e:
+            logging.error('POST request ' + label_url +
+                          ' failed. Exception: ' + str(e))
 
     statistics_val = (len(label_json_a), imported_label)
     statistics_dict['license_label'] = statistics_val
@@ -88,11 +88,11 @@ def import_license(eperson_id_dict, statistics_dict):
         try:
             response = do_api_post(license_url, params, license_json_p)
             imported_license += 1
-        except Exception:
-            logging.error('POST request ' + response.url +
-                          ' failed. Status code ' + str(response.status_code))
+        except Exception as e:
+            logging.error('POST request ' + license_url +
+                          ' failed. Exception: ' + str(e))
 
-    statistics_val = (len(license_json_p), imported_license)
+    statistics_val = (len(license_json_a), imported_license)
     statistics_dict['license_definition'] = statistics_val
     logging.info("License_label, Extended_mapping, License_definitions "
                  "were successfully imported!")

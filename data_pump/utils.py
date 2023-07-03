@@ -50,7 +50,7 @@ def do_api_get_one(url, id):
     @return: response from api get
     """
     url = API_URL + url + '/' + str(id)
-    response = rest_proxy.d.api_get(url, None, None)
+    response = rest_proxy.d.api_get(url, {}, None)
     return response
 
 

@@ -31,14 +31,14 @@ def import_user_registration(email2epersonId_dict,
         else:
             user_reg_json_p['ePersonID'] = None
         try:
-            response = do_api_post(user_reg_url, None, user_reg_json_p)
+            response = do_api_post(user_reg_url, {}, user_reg_json_p)
             userRegistration_id_dict[user_reg_json['eperson_id']] = \
                 convert_response_to_json(response)['id']
             imported_user_reg += 1
-        except Exception:
+        except Exception as e:
             logging.error('POST request ' + user_reg_url + ' for id: ' +
                           str(user_reg_json['eperson_id']) +
-                          ' failed. Status: ' + str(response.status_code))
+                          ' failed. Exception: ' + str(e))
 
     statistics_val = (len(user_reg_json_a), imported_user_reg)
     statistics_dict['user_registration'] = statistics_val
