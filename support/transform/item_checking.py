@@ -14,7 +14,8 @@ def check_com_col():
     """
     Check if community and collection for test items are created.
     If they do not exist yet, they will be created.
-    This check will always run only once and then it will be skipped(see first lines of method)
+    This check will always run only once and then it will be skipped
+    (see first lines of method)
     """
     global com_col_checked
     if com_col_checked:
@@ -103,7 +104,8 @@ def assure_item_with_name_suffix(name):
 
 def get_test_soup(filename, suffix="xml", features="xml", find_metadata=True):
     """
-    Returns beautifulsoup object for checking. Stripped if available and not on dev-5.pc.
+    Returns beautifulsoup object for checking.
+    Stripped if available and not on dev-5.pc.
     If file has different suffix, change suffix param.
     If different parser should be used, change features param.
     If no .find("metadata") should be caled on returned object
@@ -141,7 +143,8 @@ def assure_item_from_file(filename, postpone=False):
     """
     Assure item from specified file exists.
     Name is checked from file["name"], not from ["metadata"]["dc.title"][0]["value"]!!
-    postpone=True does not import it immediately, but note that it should be imported later,
+    postpone=True does not import it immediately,
+    but note that it should be imported later,
     or will not be visible in OAI at all.
     """
     check_com_col()
