@@ -99,6 +99,14 @@ def read_metadata():
     metadatavalue_json = read_json('metadatavalue.json')
     metadatafield_json = read_json('metadatafieldregistry.json')
     sponsor_field_id = -1
+
+    if not metadatavalue_json:
+        logging.info('Metadatavalue JSON is empty.')
+        return
+    if not metadatafield_json:
+        logging.info('Metadatafield JSON is empty.')
+        return
+
     # Find out which field is `local.sponsor`, check only `sponsor` string
     for i in metadatafield_json:
         element = i['element']
@@ -106,10 +114,6 @@ def read_metadata():
             continue
         sponsor_field_id = i['metadata_field_id']
 
-    print('sponsor_field_id: ' + str(sponsor_field_id))
-    if not metadatavalue_json:
-        logging.info('Metadatavalue JSON is empty.')
-        return
     for i in metadatavalue_json:
         key = (i['resource_type_id'], i['resource_id'])
         # replace separator @@ by ;
@@ -1232,6 +1236,7 @@ def at_the_end_of_import():
 # to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>;<EU_IDENTIFIER>`
 def fix_local_sponsor_sequence(wrong_sequence):
     separator = ';'
+    sponsor_list_max_length = 5
 
     # sponsor list could have length 4 or 5
     sponsor_list = wrong_sequence.split(separator)
@@ -1240,7 +1245,7 @@ def fix_local_sponsor_sequence(wrong_sequence):
     project_name = sponsor_list[2]
     project_type = sponsor_list[3]
     eu_identifier = ''
-    if len(sponsor_list) == 5:
+    if len(sponsor_list) == sponsor_list_max_length:
         # has eu_identifier value
         eu_identifier = sponsor_list[4]
 
