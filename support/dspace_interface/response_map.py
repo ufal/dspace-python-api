@@ -8,7 +8,7 @@ from json import JSONDecodeError
 
 def check_response(r, additional_message):
     if r is None:
-        logging.ERROR("Failed to receive response. " + additional_message)
+        logging.error("Failed to receive response. " + additional_message)
         raise Exception("No response from server where one was expected")
     logging.info(str(additional_message) + " Response " + str(r.status_code))
     if r.status_code not in response_map:

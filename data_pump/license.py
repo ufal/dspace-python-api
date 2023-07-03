@@ -37,7 +37,7 @@ def import_license(eperson_id_dict, statistics_dict):
         except Exception as e:
             logging.error(
                 "Exception while reading label image with name: " + label[
-                    'label'].lower() + ".png occurred: " + e)
+                    'label'].lower() + ".png occurred: " + str(e))
         try:
             response = do_api_post(label_url, {}, label_json_p)
             created_label = convert_response_to_json(response)

@@ -6,7 +6,6 @@ community_id_dict = {}
 community2logo_dict = {}
 collection_id_dict = {}
 collection2logo_dict = {}
-community2logo_dict = {}
 item_id_dict = {}
 workflowitem_id_dict = {}
 bitstreamformat_id_dict = {}

@@ -19,10 +19,11 @@ from data_pump.user_registration import import_user_registration
 from utils import read_json
 
 
-def at_the_end_of_import(handle_class, statistics_dict):
+def at_the_end_of_import(handle_class_p, statistics_dict):
     # write statistic about handles
     handle_json_a = read_json("handle.json")
-    statistics_dict['handle'] = (len(handle_json_a), handle_class.get_imported_handle())
+    statistics_dict['handle'] = (len(handle_json_a),
+                                 handle_class_p.get_imported_handle())
     # write statistic into log
     logging.info("Statistics:")
     for key, value in statistics_dict.items():
@@ -75,9 +76,10 @@ if __name__ == "__main__":
     import_tasklistitem(var.workflowitem_id_dict,
                         var.eperson_id_dict,
                         var.statistics_dict)
-    import_bitstreamformatregistry(var.bitstreamformat_id_dict,
-                                   var.unknown_format_id_val,
-                                   var.statistics_dict)
+    var.unknown_format_id_val = import_bitstreamformatregistry(
+        var.bitstreamformat_id_dict,
+        var.unknown_format_id_val,
+        var.statistics_dict)
     import_bundle(metadata_class,
                   var.item_id_dict,
                   var.bundle_id_dict,

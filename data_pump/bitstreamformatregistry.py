@@ -24,7 +24,7 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
                 shortDesc2Id_dict[bitstreamformat['shortDescription']] = \
                     bitstreamformat['id']
                 if bitstreamformat['description'] == 'Unknown data format':
-                    bitstreamformat['id']
+                    unknown_format_id_val = bitstreamformat['id']
 
         bitstreamformat_json_a = read_json(bitsteamformat_json_name)
         if not bitstreamformat_json_a:
@@ -74,3 +74,4 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
                       ' failed. Exception: ' + str(e))
 
     logging.info("Bitstream format registry was successfully imported!")
+    return unknown_format_id_val
