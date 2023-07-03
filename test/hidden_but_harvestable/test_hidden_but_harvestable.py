@@ -38,8 +38,8 @@ class OLACTest(unittest.TestCase):
         name_of_item = get_name_from_file(data_filename)
         anon_req = requests.get(
             const.API_URL + "discover/search/objects?query=" + name_of_item)
-        items_found = anon_req.json()["_embedded"]["searchResult"]["_embedded"]
-        ["objects"]
+        items_found = \
+            anon_req.json()["_embedded"]["searchResult"]["_embedded"]["objects"]
         found_count = len(items_found)
         do_import = False
         if found_count != 0:
