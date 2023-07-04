@@ -85,7 +85,7 @@ def import_group2group(group_id_dict,
     Mapped tables: group2group
     """
     group2group_json_name = 'group2group.json'
-    group2group_url = 'clarin/eperson/groups/'
+    group2group_url = 'clarin/eperson/groups'
     imported = 0
     group2group_json_a = read_json(group2group_json_name)
     if not group2group_json_a:
@@ -97,7 +97,7 @@ def import_group2group(group_id_dict,
         childs_a = group_id_dict[group2group['child_id']]
         for parent in parents_a:
             for child in childs_a:
-                parent_url = group2group_url + parent + '/subgroups'
+                parent_url = group2group_url + '/' + parent + '/subgroups'
                 try:
                     child_url = API_URL + 'eperson/groups/' + child
                     do_api_post(parent_url, {}, child_url)

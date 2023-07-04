@@ -80,7 +80,7 @@ def import_community(metadata_class,
 
             # create admingroup
             if community['admin'] is not None:
-                admin_url = community_url + response_comm_id + '/adminGroup'
+                admin_url = community_url + '/' + response_comm_id + '/adminGroup'
                 try:
                     response = do_api_post(admin_url, {}, {})
                     group_id_dict[community['admin']] = [convert_response_to_json(

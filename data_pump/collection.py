@@ -78,7 +78,8 @@ def import_collection(metadata_class,
         # template_item_id, workflow_step_1, workflow_step_3, admin are not implemented,
         # because they are null in all data
         if collection['workflow_step_2']:
-            workflowGroups_url = collection_url + coll_id + '/workflowGroups/editor'
+            workflowGroups_url = collection_url + '/' + \
+                coll_id + '/workflowGroups/editor'
             try:
                 response = do_api_post(workflowGroups_url, {}, {})
                 group_id_dict[collection['workflow_step_2']] = [
@@ -88,7 +89,8 @@ def import_collection(metadata_class,
                 logging.error('POST request ' + workflowGroups_url +
                               ' failed. Exception: ' + str(e))
         if collection['submitter']:
-            submittersGroup_url = collection_url + coll_id + '/submittersGroup'
+            submittersGroup_url = collection_url + '/' + \
+                coll_id + '/submittersGroup'
             try:
                 response = do_api_post(submittersGroup_url, {}, {})
                 group_id_dict[collection['submitter']] = \
@@ -98,7 +100,8 @@ def import_collection(metadata_class,
                 logging.error('POST request ' + submittersGroup_url +
                               ' failed. Exception: ' + str(e))
         if collection['collection_id'] in coll2group_dict:
-            bitstreamReadGroup_url = collection_url + coll_id + '/bitstreamReadGroup'
+            bitstreamReadGroup_url = collection_url + '/' + \
+                coll_id + '/bitstreamReadGroup'
             try:
                 response = do_api_post(bitstreamReadGroup_url, {}, {})
                 group_id_dict[coll2group_dict[collection['collection_id']]] = [
@@ -107,7 +110,8 @@ def import_collection(metadata_class,
             except Exception as e:
                 logging.error('POST request ' + bitstreamReadGroup_url +
                               ' failed. Exception: ' + str(e))
-            itemReadGroup_url = collection_url + coll_id + '/itemReadGroup'
+            itemReadGroup_url = collection_url + '/' +\
+                coll_id + '/itemReadGroup'
             try:
                 response = do_api_post(itemReadGroup_url, {}, {})
                 group_id_dict[coll2group_dict[collection['collection_id']]].append(
