@@ -21,18 +21,64 @@ class Metadata:
 
     def read_metadata(self):
         metadatavalue_json_name = 'metadatavalue.json'
-        metadatavalue_json = read_json(metadatavalue_json_name)
-        if not metadatavalue_json:
+        metadatafield_json_name = 'metadatafieldregistry.json'
+
+        metadatavalue_json_a = read_json(metadatavalue_json_name)
+        if not metadatavalue_json_a:
             logging.info('Metadatavalue JSON is empty.')
             return
-        for metadatavalue in metadatavalue_json:
+
+        metadatafield_json_a = read_json(metadatafield_json_name)
+        sponsor_field_id = -1
+        if not metadatafield_json_a:
+            logging.info('Metadatafield JSON is empty.')
+            return
+
+        # Find out which field is `local.sponsor`, check only `sponsor` string
+        for metadatafield in metadatafield_json_a:
+            element = metadatafield['element']
+            if element != 'sponsor':
+                continue
+            sponsor_field_id = metadatafield['metadata_field_id']
+
+        for metadatavalue in metadatavalue_json_a:
             key = (metadatavalue['resource_type_id'], metadatavalue['resource_id'])
             # replace separator @@ by ;
             metadatavalue['text_value'] = metadatavalue['text_value'].replace("@@", ";")
+            # replace `local.sponsor` data sequence
+            # from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>`
+            # to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>`
+            if metadatavalue['metadata_field_id'] == sponsor_field_id:
+                metadatavalue['text_value'] = \
+                    self.fix_local_sponsor_sequence(metadatavalue['text_value'])
             if key in self.metadatavalue_dict.keys():
                 self.metadatavalue_dict[key].append(metadatavalue)
             else:
                 self.metadatavalue_dict[key] = [metadatavalue]
+
+    @staticmethod
+    def fix_local_sponsor_sequence(wrong_sequence_str):
+        """
+        Replace `local.sponsor` data sequence
+        from `<ORG>;<PROJECT_CODE>;<PROJECT_NAME>;<TYPE>;<EU_IDENTIFIER>`
+        to `<TYPE>;<PROJECT_CODE>;<ORG>;<PROJECT_NAME>;<EU_IDENTIFIER>`
+        """
+        separator = ';'
+        sponsor_list_max_length = 5
+
+        # sponsor list could have length 4 or 5
+        sponsor_list = wrong_sequence_str.split(separator)
+        org = sponsor_list[0]
+        project_code = sponsor_list[1]
+        project_name = sponsor_list[2]
+        project_type = sponsor_list[3]
+        eu_identifier = ''
+        if len(sponsor_list) == sponsor_list_max_length:
+            # has eu_identifier value
+            eu_identifier = sponsor_list[4]
+        # compose the `local.sponsor` sequence in the right way
+        return separator.join(
+            [project_type, project_code, org, project_name, eu_identifier])
 
     def import_metadataschemaregistry(self, statistics_dict):
         """
