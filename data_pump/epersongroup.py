@@ -1,12 +1,14 @@
 import logging
 
 from const import API_URL
-from utils import read_json, convert_response_to_json, do_api_get_all, do_api_post
+from utils import read_json, convert_response_to_json, do_api_get_all, do_api_post, \
+    save_dict_as_json
 
 
 def import_epersongroup(metadata_class,
                         group_id_dict,
-                        statistics_dict):
+                        statistics_dict,
+                        save_dict=False):
     """
     Import data into database.
     Mapped tables: epersongroup
@@ -55,6 +57,11 @@ def import_epersongroup(metadata_class,
                 logging.error('POST request ' + group_url + ' for id: ' +
                               str(group['eperson_group_id']) +
                               ' failed. Exception: ' + str(e))
+
+    # save group dict as json
+    if save_dict:
+        save_dict_as_json(group_json_name, group_id_dict)
+
     if 'epersongroup' in statistics_dict:
         statistics_val = (len(group_json_a), statistics_dict['epersongroup'][1] +
                           imported)

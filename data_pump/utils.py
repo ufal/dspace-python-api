@@ -4,6 +4,7 @@ import requests
 
 from support.dspace_proxy import rest_proxy
 from migration_const import DATA_PATH
+from migration_const import MAPPING_PATH
 from const import API_URL
 
 
@@ -67,3 +68,32 @@ def do_api_get_all(url):
     params = {'size': 1000}
     response = rest_proxy.d.api_get(url, params, None)
     return response
+
+
+def save_dict_as_json(json_name, dictionary: dict):
+    """
+    Save data from dictionaries as json.
+    """
+    os.makedirs(MAPPING_PATH, exist_ok=True)
+    with open(MAPPING_PATH + json_name, 'w') as f:
+        f.write(json.dumps(dictionary))
+
+
+def create_dict_from_json(json_name):
+    return {int(key): value
+            for key, value in read_json(json_name, MAPPING_PATH).items()}
+
+
+def insert_data_into_dicts(insert=False):
+    create_dict_from_json("eperson.json")
+    create_dict_from_json("group.json")
+    create_dict_from_json("metadataschemaregistry.json")
+    create_dict_from_json("metadatafield.json")
+    create_dict_from_json("community.json")
+    create_dict_from_json("collection.json")
+    create_dict_from_json("item.json")
+    create_dict_from_json("workspaceitem.json")
+    create_dict_from_json("workflowitem.json")
+    create_dict_from_json("bitstreamformat.json")
+    create_dict_from_json("bundle.json")
+    create_dict_from_json("bitstream.json")

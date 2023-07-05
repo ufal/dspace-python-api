@@ -1,7 +1,7 @@
 import logging
 import json
 
-from utils import read_json, convert_response_to_json, do_api_post
+from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
 
 
 def import_bitstream(metadata_class,
@@ -15,7 +15,8 @@ def import_bitstream(metadata_class,
                      community_id_dict,
                      collection_id_dict,
                      unknown_format_id_val,
-                     statistics_dict):
+                     statistics_dict,
+                     save_dict=False):
     """
     Import data into database.
     Mapped tables: bitstream, bundle2bitstream, metadata, most_recent_checksum
@@ -106,6 +107,9 @@ def import_bitstream(metadata_class,
                 str(bitstream['bitstream_id']) + ' failed. Exception: ' +
                 str(e))
 
+    # write bitstream dict as json
+    if save_dict:
+        save_dict_as_json(bitstream_json_name, bitstream_id_dict)
     statistics_val = (len(bitstream_json_a), imported)
     statistics_dict['bitstream'] = statistics_val
     # add logos (bitstreams) to collections and communities

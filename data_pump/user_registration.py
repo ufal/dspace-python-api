@@ -1,12 +1,13 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post
+from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
 
 
 def import_user_registration(email2epersonId_dict,
                              eperson_id_dict,
                              userRegistration_id_dict,
-                             statistics_dict):
+                             statistics_dict,
+                             save_dict=False):
     """
     Import data into database.
     Mapped tables: user_registration
@@ -40,6 +41,9 @@ def import_user_registration(email2epersonId_dict,
                           str(user_reg_json['eperson_id']) +
                           ' failed. Exception: ' + str(e))
 
+    # save user registration dict as json
+    if save_dict:
+        save_dict_as_json(user_reg_json_name, userRegistration_id_dict)
     statistics_val = (len(user_reg_json_a), imported_user_reg)
     statistics_dict['user_registration'] = statistics_val
     logging.info("User registration was successfully imported!")

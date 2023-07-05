@@ -1,6 +1,6 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post
+from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
 from support.dspace_proxy import rest_proxy
 from const import API_URL
 
@@ -11,7 +11,8 @@ def import_item(metadata_class,
                 item_id_dict,
                 collection_id_dict,
                 eperson_id_dict,
-                statistics_dict):
+                statistics_dict,
+                save_dict=False):
     """
     Import data into database.
     Mapped tables: item, collection2item, workspaceitem, cwf_workflowitem,
@@ -59,6 +60,8 @@ def import_item(metadata_class,
         statistics_dict['workspaceitem'] = (len(workspaceitem_json_a),
                                             imported_workspaceitem)
         imported_item += imported_workspaceitem
+        # save workspaceitem dict as json
+        save_dict_as_json(workspaceitem_json_name, workspaceitem_id_dict)
         logging.info("Workspaceitem was successfully imported!")
     else:
         logging.info("Workspaceitem JSON is empty.")
@@ -94,6 +97,9 @@ def import_item(metadata_class,
                               str(e))
             del items_dict[workflowitem['item_id']]
 
+        # save workflow dict as json
+        if save_dict:
+            save_dict_as_json(workflowitem_json_name, workflowitem_id_dict)
         statistics_val = (len(workflowitem_json_a), imported_workflowitem)
         statistics_dict['workflowitem'] = statistics_val
         imported_item += imported_workflowitem
@@ -128,6 +134,9 @@ def import_item(metadata_class,
             logging.error('POST request ' + item_url + ' for id: ' +
                           str(item['item_id']) + ' failed. Exception: ' + str(e))
 
+    # save item dict as json
+    if save_dict:
+        save_dict_as_json(item_json_name, item_id_dict)
     statistics_val = (statistics_dict['item'][0], imported_item)
     statistics_dict['item'] = statistics_val
     logging.info("Item and Collection2item were successfully imported!")

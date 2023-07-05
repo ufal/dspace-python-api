@@ -16,7 +16,7 @@ from data_pump.metadata import Metadata
 from data_pump.registrationdata import import_registrationdata
 from data_pump.tasklistitem import import_tasklistitem
 from data_pump.user_registration import import_user_registration
-from utils import read_json
+from utils import read_json, create_dict_from_json
 
 
 def at_the_end_of_import(handle_class_p, statistics_dict):
@@ -31,7 +31,38 @@ def at_the_end_of_import(handle_class_p, statistics_dict):
                      " expected and imported " + str(value[1]))
 
 
+def insert_data_into_dicts(eperson_json_name, user_registraion_json_name,
+                           group_json_name, community_json_name, collection_json_name,
+                           item_json_name, workspace_json_name, workflow_json_name,
+                           bitstreamformat_json_name, bundle_json_name,
+                           bitstream_json_name, insert_data=False):
+    if not insert_data:
+        return
+    var.eperson_id_dict = create_dict_from_json(eperson_json_name)
+    var.user_registration_id_dict = create_dict_from_json(user_registraion_json_name)
+    var.group_id_dict = create_dict_from_json(group_json_name)
+    var.community_id_dict = create_dict_from_json(community_json_name)
+    var.collection_id_dict = create_dict_from_json(collection_json_name)
+    var.item_id_dict = create_dict_from_json(item_json_name)
+    var.workflowitem_id_dict = create_dict_from_json(workspace_json_name)
+    var.workflowitem_id_dict = create_dict_from_json(workflow_json_name)
+    var.bitstreamformat_id_dict = create_dict_from_json(bitstreamformat_json_name)
+    var.bundle_id_dict = create_dict_from_json(bundle_json_name)
+    var.bitstream_id_dict = create_dict_from_json(bitstream_json_name)
+
+
 if __name__ == "__main__":
+    insert_data_into_dicts("eperson.json",
+                           "user_registration.json",
+                           "epersongroup.json",
+                           "community.json",
+                           "collection.json",
+                           "item.json",
+                           "workflowitem.json",
+                           "workspaceitem.json",
+                           "bitstreamformatregistry.json",
+                           "bundle.json",
+                           "bitstream.json")
     handle_class = Handle()
     metadata_class = Metadata(var.statistics_dict)
 
