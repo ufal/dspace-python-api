@@ -1,5 +1,5 @@
 import logging
-from utils import read_json, do_api_post
+from data_pump.utils import read_json, do_api_post
 
 
 def import_user_metadata(bitstream_id_dict,
@@ -15,29 +15,29 @@ def import_user_metadata(bitstream_id_dict,
     # read license_resource_user_allowance
     # mapping transaction_id to mapping_id
     user_allowance_dict = {}
-    user_allowance_json_a = read_json("license_resource_user_allowance.json")
-    if not user_allowance_json_a:
+    user_allowance_json_list = read_json("license_resource_user_allowance.json")
+    if not user_allowance_json_list:
         logging.info("License_resource_user_allowance JSON is empty.")
         return
-    for user_allowance in user_allowance_json_a:
+    for user_allowance in user_allowance_json_list:
         user_allowance_dict[user_allowance['transaction_id']] = user_allowance
 
     # read license_resource_mapping
     # mapping bitstream_id to mapping_id
-    resource_mapping_json_a = read_json('license_resource_mapping.json')
+    resource_mapping_json_list = read_json('license_resource_mapping.json')
     mappings_dict = {}
-    if not resource_mapping_json_a:
+    if not resource_mapping_json_list:
         logging.info("License_resource_mapping JSON is empty.")
         return
-    for resource_mapping in resource_mapping_json_a:
+    for resource_mapping in resource_mapping_json_list:
         mappings_dict[resource_mapping['mapping_id']] = resource_mapping['bitstream_id']
 
     # read user_metadata
-    user_met_json_a = read_json(user_met_json_name)
-    if not user_met_json_a:
+    user_met_json_list = read_json(user_met_json_name)
+    if not user_met_json_list:
         logging.info("User_metadata JSON is empty.")
         return
-    for user_met in user_met_json_a:
+    for user_met in user_met_json_list:
         if user_met['transaction_id'] not in user_allowance_dict:
             continue
         data_user_all_dict = user_allowance_dict[user_met['transaction_id']]
@@ -64,6 +64,6 @@ def import_user_metadata(bitstream_id_dict,
                           str(mappings_dict[data_user_all_dict['mapping_id']]) +
                           '. Exception: ' + str(e))
 
-    statistics_val = (len(user_met_json_a), imported_user_met)
+    statistics_val = (len(user_met_json_list), imported_user_met)
     statistics_dict['user_metadata'] = statistics_val
     logging.info("User metadata successfully imported!")

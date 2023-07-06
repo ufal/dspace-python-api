@@ -1,6 +1,7 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
+    save_dict_as_json
 
 
 def import_bundle(metadata_class,
@@ -19,25 +20,25 @@ def import_bundle(metadata_class,
     item_url = 'core/items/'
     imported = 0
     # load item2bundle into dict
-    item2bundle_json_a = read_json(item2bundle_json_name)
-    statistics_val = (len(item2bundle_json_a), 0)
+    item2bundle_json_list = read_json(item2bundle_json_name)
+    statistics_val = (len(item2bundle_json_list), 0)
     statistics_dict['item2bundle'] = statistics_val
     item2bundle_dict = {}
-    if not item2bundle_json_a:
+    if not item2bundle_json_list:
         logging.info("Item2bundle JSON is empty.")
         return
-    for item2bundle in item2bundle_json_a:
+    for item2bundle in item2bundle_json_list:
         if item2bundle['item_id'] in item2bundle_dict:
             item2bundle_dict[item2bundle['item_id']].append(item2bundle['bundle_id'])
         else:
             item2bundle_dict[item2bundle['item_id']] = [item2bundle['bundle_id']]
 
     # load bundles and map bundles to their primary bitstream ids
-    bundle_json_a = read_json(bundle_json_name)
-    if not bundle_json_a:
+    bundle_json_list = read_json(bundle_json_name)
+    if not bundle_json_list:
         logging.info("Bundle JSON is empty.")
         return
-    for bundle in bundle_json_a:
+    for bundle in bundle_json_list:
         if bundle['primary_bitstream_id']:
             primary_bitstream_dict[bundle['primary_bitstream_id']] = bundle['bundle_id']
 

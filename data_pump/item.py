@@ -1,6 +1,7 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
+    save_dict_as_json
 from support.dspace_proxy import rest_proxy
 from const import API_URL
 
@@ -31,19 +32,19 @@ def import_item(metadata_class,
     imported_item = 0
     workspaceitem_id_dict = {}
     # create dict from items by item id
-    item_json_a = read_json(item_json_name)
+    item_json_list = read_json(item_json_name)
     items_dict = {}
-    if not item_json_a:
+    if not item_json_list:
         logging.info("Item JSON is empty.")
         return
-    for item in item_json_a:
+    for item in item_json_list:
         items_dict[item['item_id']] = item
-    statistics_dict['item'] = (len(item_json_a), 0)
+    statistics_dict['item'] = (len(item_json_list), 0)
 
     # create item and workspaceitem
-    workspaceitem_json_a = read_json(workspaceitem_json_name)
-    if workspaceitem_json_a is not None:
-        for workspaceitem in workspaceitem_json_a:
+    workspaceitem_json_list = read_json(workspaceitem_json_name)
+    if workspaceitem_json_list is not None:
+        for workspaceitem in workspaceitem_json_list:
             item = items_dict[workspaceitem['item_id']]
             import_workspaceitem(item, workspaceitem['collection_id'],
                                  workspaceitem['multiple_titles'],
@@ -60,7 +61,7 @@ def import_item(metadata_class,
             imported_workspaceitem += 1
             del items_dict[workspaceitem['item_id']]
 
-        statistics_dict['workspaceitem'] = (len(workspaceitem_json_a),
+        statistics_dict['workspaceitem'] = (len(workspaceitem_json_list),
                                             imported_workspaceitem)
         imported_item += imported_workspaceitem
         # save workspaceitem dict as json
@@ -72,9 +73,9 @@ def import_item(metadata_class,
     # create workflowitem
     # workflowitem is created from workspaceitem
     # -1, because the workflowitem doesn't contain this attribute
-    workflowitem_json_a = read_json(workflowitem_json_name)
-    if workflowitem_json_a is not None:
-        for workflowitem in workflowitem_json_a:
+    workflowitem_json_list = read_json(workflowitem_json_name)
+    if workflowitem_json_list is not None:
+        for workflowitem in workflowitem_json_list:
             item = items_dict[workflowitem['item_id']]
             import_workspaceitem(item, workflowitem['collection_id'],
                                  workflowitem['multiple_titles'],
@@ -104,7 +105,7 @@ def import_item(metadata_class,
         # save workflow dict as json
         if save_dict:
             save_dict_as_json(saved_workflow_json_name, workflowitem_id_dict)
-        statistics_val = (len(workflowitem_json_a), imported_workflowitem)
+        statistics_val = (len(workflowitem_json_list), imported_workflowitem)
         statistics_dict['workflowitem'] = statistics_val
         imported_item += imported_workflowitem
         logging.info("Cwf_workflowitem was successfully imported!")

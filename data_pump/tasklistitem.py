@@ -13,11 +13,11 @@ def import_tasklistitem(workflowitem_id_dict,
     tasklistitem_json_name = "tasklistitem.json"
     tasklistitem_url = 'clarin/eperson/groups/tasklistitem'
     imported_tasklistitem = 0
-    tasklistitem_json_a = read_json(tasklistitem_json_name)
-    if not tasklistitem_json_a:
+    tasklistitem_json_list = read_json(tasklistitem_json_name)
+    if not tasklistitem_json_list:
         logging.info("Tasklistitem JSON is empty.")
         return
-    for tasklistitem in tasklistitem_json_a:
+    for tasklistitem in tasklistitem_json_list:
         try:
             params = {
                 'epersonUUID': eperson_id_dict[tasklistitem['eperson_id']],
@@ -32,6 +32,6 @@ def import_tasklistitem(workflowitem_id_dict,
             logging.error('POST request ' + tasklistitem_url + ' failed. Exception: ' +
                           str(e))
 
-    statistics_val = (len(tasklistitem_json_a), imported_tasklistitem)
+    statistics_val = (len(tasklistitem_json_list), imported_tasklistitem)
     statistics_dict['tasklistitem'] = statistics_val
     logging.info("Tasklistitem was sucessfully imported!")

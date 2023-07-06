@@ -1,6 +1,7 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
+    save_dict_as_json
 
 
 def import_community(metadata_class,
@@ -20,12 +21,12 @@ def import_community(metadata_class,
     community_url = 'core/communities'
     imported_comm = 0
     imported_group = 0
-    community_json_a = read_json(community_json_name)
-    comm2comm_json_a = read_json(comm2comm_json_name)
+    community_json_list = read_json(community_json_name)
+    comm2comm_json_list = read_json(comm2comm_json_name)
     parent_dict = {}
     child_dict = {}
-    if comm2comm_json_a is not None:
-        for comm2comm in comm2comm_json_a:
+    if comm2comm_json_list is not None:
+        for comm2comm in comm2comm_json_list:
             parent_id = comm2comm['parent_comm_id']
             child_id = comm2comm['child_comm_id']
             if parent_id in parent_dict.keys():
@@ -36,19 +37,19 @@ def import_community(metadata_class,
                 child_dict[child_id].append(parent_id)
             else:
                 child_dict[child_id] = parent_id
-        statistics_dict['community'] = (len(community_json_a), 0)
-    if not community_json_a:
+        statistics_dict['community'] = (len(community_json_list), 0)
+    if not community_json_list:
         logging.info("Community JSON is empty.")
         return
     counter = 0
-    while community_json_a:
+    while community_json_list:
         community_json_p = {}
         # process community only when:
         # comm is not parent and child
         # comm is parent and not child
         # parent comm exists
         # else process it later
-        community = community_json_a[counter]
+        community = community_json_list[counter]
         i_id = community['community_id']
         if (i_id not in parent_dict.keys() and
             i_id not in child_dict.keys()) or\
@@ -91,10 +92,10 @@ def import_community(metadata_class,
                 except Exception as e:
                     logging.error('POST request ' + admin_url +
                                   ' failed. Exception: ' + str(e))
-            del community_json_a[counter]
+            del community_json_list[counter]
         else:
             counter += 1
-        if counter == len(community_json_a):
+        if counter == len(community_json_list):
             counter = 0
 
     # save community dict as json

@@ -1,8 +1,8 @@
 import logging
 
 from const import API_URL
-from utils import read_json, convert_response_to_json, do_api_get_all, do_api_post, \
-    save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_get_all, \
+    do_api_post, save_dict_as_json
 
 
 def import_epersongroup(metadata_class,
@@ -17,7 +17,7 @@ def import_epersongroup(metadata_class,
     saved_group_json_name = 'epersongroup_dict.json'
     group_url = 'eperson/groups'
     imported = 0
-    group_json_a = read_json(group_json_name)
+    group_json_list = read_json(group_json_name)
     # group Administrator and Anonymous already exist
     # we need to remember their id
     existing_data_dict = get_existing_epersongroups(group_url)
@@ -30,10 +30,10 @@ def import_epersongroup(metadata_class,
             else:
                 logging.error('Unrecognized eperson group ' + existing_data['name'])
 
-    if not group_json_a:
+    if not group_json_list:
         logging.info("Epersongroup JSON is empty.")
         return
-    for group in group_json_a:
+    for group in group_json_list:
         group_id = group['eperson_group_id']
         # group Administrator and Anonymous already exist
         # group is created with dspace object too
@@ -64,11 +64,11 @@ def import_epersongroup(metadata_class,
         save_dict_as_json(saved_group_json_name, group_id_dict)
 
     if 'epersongroup' in statistics_dict:
-        statistics_val = (len(group_json_a), statistics_dict['epersongroup'][1] +
+        statistics_val = (len(group_json_list), statistics_dict['epersongroup'][1] +
                           imported)
         statistics_dict['epersongroup'] = statistics_val
     else:
-        statistics_val = (len(group_json_a), imported)
+        statistics_val = (len(group_json_list), imported)
         statistics_dict['epersongroup'] = statistics_val
     logging.info("Eperson group was successfully imported!")
 
@@ -95,12 +95,12 @@ def import_group2group(group_id_dict,
     group2group_json_name = 'group2group.json'
     group2group_url = 'clarin/eperson/groups'
     imported = 0
-    group2group_json_a = read_json(group2group_json_name)
-    if not group2group_json_a:
+    group2group_json_list = read_json(group2group_json_name)
+    if not group2group_json_list:
         logging.info("Group2group JSON is empty.")
         return
 
-    for group2group in group2group_json_a:
+    for group2group in group2group_json_list:
         parents_a = group_id_dict[group2group['parent_id']]
         childs_a = group_id_dict[group2group['child_id']]
         for parent in parents_a:
@@ -117,6 +117,6 @@ def import_group2group(group_id_dict,
                     logging.error('POST request ' + parent_url + ' for id: ' +
                                   str(parent) + ' failed. Exception: ' + str(e))
 
-    statistics_val = (len(group2group_json_a), imported)
+    statistics_val = (len(group2group_json_list), imported)
     statistics_dict['group2group'] = statistics_val
     logging.info("Group2group was successfully imported!")

@@ -35,11 +35,11 @@ def get_data_as_json(database, host, db_user, db_password):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process database connection')
-    parser.add_argument('--database', description='database name',
+    parser.add_argument('--database', help='database name',
                         required=True, type=str)
-    parser.add_argument('--host', description='type of host', required=True, type=str)
-    parser.add_argument('--user', description='database user', required=True, type=str)
-    parser.add_argument('--password', description='database password',
+    parser.add_argument('--host', help='type of host', required=True, type=str)
+    parser.add_argument('--user', help='database user', required=True, type=str)
+    parser.add_argument('--password', help='database password',
                         required=True, type=str)
     args = parser.parse_args()
     get_data_as_json(args.database, args.host, args.user, args.password)

@@ -1,6 +1,7 @@
 import logging
 
-from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
+    save_dict_as_json
 
 
 def import_collection(metadata_class,
@@ -22,22 +23,22 @@ def import_collection(metadata_class,
     collection_url = 'core/collections'
     imported_coll = 0
     imported_group = 0
-    collection_json_a = read_json(collection_json_name)
-    comm2coll_json_a = read_json(com2col_json_name)
+    collection_json_list = read_json(collection_json_name)
+    comm2coll_json_list = read_json(com2col_json_name)
     coll2comm_dict = {}
 
-    if not comm2coll_json_a:
+    if not comm2coll_json_list:
         logging.info("Community2collection JSON is empty.")
         return
-    for comm2coll in comm2coll_json_a:
+    for comm2coll in comm2coll_json_list:
         coll2comm_dict[comm2coll['collection_id']] = comm2coll['community_id']
 
     # because the role DEFAULT_READ is without old group id in collection
     coll2group_dict = {}
-    metadata_json_a = read_json(metadata_json_name)
+    metadata_json_list = read_json(metadata_json_name)
 
-    if metadata_json_a is not None:
-        for metadata in metadata_json_a:
+    if metadata_json_list is not None:
+        for metadata in metadata_json_list:
             if metadata['resource_type_id'] == 6 and \
                     'COLLECTION_' in metadata['text_value'] and\
                     '_DEFAULT_READ' in metadata['text_value']:
@@ -46,10 +47,10 @@ def import_collection(metadata_class,
                 coll2group_dict[int(text[positions[0] + 1: positions[1]])] = \
                     metadata['resource_id']
 
-    if not collection_json_a:
+    if not collection_json_list:
         logging.info("Collection JSON is empty.")
         return
-    for collection in collection_json_a:
+    for collection in collection_json_list:
         collection_json_p = {}
         metadata_col_dict =\
             metadata_class.get_metadata_value(3, collection['collection_id'])
@@ -126,7 +127,7 @@ def import_collection(metadata_class,
     # save collection dict as json
     if save_dict:
         save_dict_as_json(saved_collection_json_name, collection_id_dict)
-    statistics_val = (len(collection_json_a), imported_coll)
+    statistics_val = (len(collection_json_list), imported_coll)
     statistics_dict['collection'] = statistics_val
     statistics_val = (0, statistics_dict['epersongroup'][1] + imported_group)
     statistics_dict['epersongroup'] = statistics_val

@@ -1,6 +1,6 @@
 import logging
 
-from utils import do_api_post, read_json
+from data_pump.utils import do_api_post, read_json
 
 
 class Handle:
@@ -18,11 +18,11 @@ class Handle:
         where value is list of jsons.
         """
         handle_json_name = 'handle.json'
-        handle_json_a = read_json(handle_json_name)
-        if not handle_json_a:
+        handle_json_list = read_json(handle_json_name)
+        if not handle_json_list:
             logging.info('Handle JSON is empty.')
             return
-        for handle in handle_json_a:
+        for handle in handle_json_list:
             key = (handle['resource_type_id'], handle['resource_id'])
             if key in self.handle_dict.keys():
                 self.handle_dict[key].append(handle)

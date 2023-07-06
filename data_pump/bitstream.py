@@ -30,19 +30,19 @@ def import_bitstream(metadata_class,
     imported = 0
 
     # load bundle2bitstream
-    bundle2bitstream_json_a = read_json(bundle2bitstream_json_name)
-    if bundle2bitstream_json_a:
-        for bundle2bitstream in bundle2bitstream_json_a:
+    bundle2bitstream_json_list = read_json(bundle2bitstream_json_name)
+    if bundle2bitstream_json_list:
+        for bundle2bitstream in bundle2bitstream_json_list:
             bitstream2bundle_dict[bundle2bitstream['bitstream_id']] = \
                 bundle2bitstream['bundle_id']
 
     # load and import bitstreams
-    bitstream_json_a = read_json(bitstream_json_name)
-    if not bitstream_json_a:
+    bitstream_json_list = read_json(bitstream_json_name)
+    if not bitstream_json_list:
         logging.info("Bitstream JSON is empty.")
         return
     counter = 0
-    for bitstream in bitstream_json_a:
+    for bitstream in bitstream_json_list:
         if counter % 500 == 0:
             # do bitstream checksum
             # do this after every 500 imported bitstreams,
@@ -112,7 +112,7 @@ def import_bitstream(metadata_class,
     # write bitstream dict as json
     if save_dict:
         save_dict_as_json(saved_bitstream_json_name, bitstream_id_dict)
-    statistics_val = (len(bitstream_json_a), imported)
+    statistics_val = (len(bitstream_json_list), imported)
     statistics_dict['bitstream'] = statistics_val
     # add logos (bitstreams) to collections and communities
     add_logo_to_community(community2logo_dict, bitstream_id_dict, community_id_dict)
