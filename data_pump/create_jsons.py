@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+
 import psycopg2
 import json
 
@@ -22,7 +24,7 @@ def get_data_as_json(database, host, db_user, db_password):
     for name_t in table_name:
         # access to 0. position, because name_t is tuple
         name = name_t[0]
-        j_name = 'data/' + name + '.json'
+        j_name = os.path.join("data", "name" + ".json")
         with open(j_name, 'w', encoding='utf-8') as j:
             cursor.execute("SELECT json_agg(row_to_json(t)) FROM \"{}\" t".format(name))
             # access to 0. position, because the fetchone returns tuple
