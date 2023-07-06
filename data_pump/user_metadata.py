@@ -6,9 +6,9 @@ def import_user_metadata(bitstream_id_dict,
                          user_registration_id_dict,
                          statistics_dict):
     """
-        Import data into database.
-        Mapped tables: user_metadata, license_resource_user_allowance
-        """
+    Import data into database.
+    Mapped tables: user_metadata, license_resource_user_allowance
+    """
     user_met_url = 'clarin/import/usermetadata'
     user_met_json_name = 'user_metadata.json'
     imported_user_met = 0
