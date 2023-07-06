@@ -10,7 +10,7 @@ def import_collection(metadata_class,
                       collection_id_dict,
                       collection2logo_dict,
                       statistics_dict,
-                      save_dict=True):
+                      save_dict):
     """
     Import data into database.
     Mapped tables: collection, community2collection, metadatavalue, handle

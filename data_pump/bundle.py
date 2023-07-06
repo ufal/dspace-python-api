@@ -8,7 +8,7 @@ def import_bundle(metadata_class,
                   bundle_id_dict,
                   primary_bitstream_dict,
                   statistics_dict,
-                  save_dict=True):
+                  save_dict):
     """
     Import data into database.
     Mapped tables: item2bundle, bundle

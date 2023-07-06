@@ -21,6 +21,8 @@ def import_registrationdata(statistics_dict):
             response = do_api_post(registrationdata_url, {}, registrationdata_json_p)
             if response.ok:
                 imported_registrationdata += 1
+            else:
+                raise Exception(response)
         except Exception as e:
             logging.error('POST request' + registrationdata_url + ' for email: ' +
                           registrationdata['email'] + ' failed. Exception: ' + str(e))

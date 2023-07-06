@@ -7,7 +7,7 @@ def import_user_registration(email2epersonId_dict,
                              eperson_id_dict,
                              userRegistration_id_dict,
                              statistics_dict,
-                             save_dict=True):
+                             save_dict):
     """
     Import data into database.
     Mapped tables: user_registration

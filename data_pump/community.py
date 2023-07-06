@@ -9,7 +9,7 @@ def import_community(metadata_class,
                      community_id_dict,
                      community2logo_dict,
                      statistics_dict,
-                     save_dict=True):
+                     save_dict):
     """
     Import data into database.
     Mapped tables: community, community2community, metadatavalue, handle

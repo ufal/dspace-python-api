@@ -8,7 +8,7 @@ from utils import read_json, convert_response_to_json, do_api_get_all, do_api_po
 def import_epersongroup(metadata_class,
                         group_id_dict,
                         statistics_dict,
-                        save_dict=True):
+                        save_dict):
     """
     Import data into database.
     Mapped tables: epersongroup
@@ -108,8 +108,11 @@ def import_group2group(group_id_dict,
                 parent_url = group2group_url + '/' + parent + '/subgroups'
                 try:
                     child_url = API_URL + 'eperson/groups/' + child
-                    do_api_post(parent_url, {}, child_url)
-                    imported += 1
+                    response = do_api_post(parent_url, {}, child_url)
+                    if response.ok:
+                        imported += 1
+                    else:
+                        raise Exception(response)
                 except Exception as e:
                     logging.error('POST request ' + parent_url + ' for id: ' +
                                   str(parent) + ' failed. Exception: ' + str(e))

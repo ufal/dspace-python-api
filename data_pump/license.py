@@ -5,7 +5,7 @@ from migration_const import ICON_PATH
 from utils import read_json, do_api_post, convert_response_to_json, save_dict_as_json
 
 
-def import_license(eperson_id_dict, statistics_dict, save_dict=True):
+def import_license(eperson_id_dict, statistics_dict, save_dict):
     """
     Import data into database.
     Mapped tables: license_label, extended_mapping, license_definitions
@@ -90,8 +90,11 @@ def import_license(eperson_id_dict, statistics_dict, save_dict=True):
                 ext_map_dict[license_['license_id']]
         params = {'eperson': eperson_id_dict[license_['eperson_id']]}
         try:
-            do_api_post(license_url, params, license_json_p)
-            imported_license += 1
+            response = do_api_post(license_url, params, license_json_p)
+            if response.ok:
+                imported_license += 1
+            else:
+                raise Exception(response)
         except Exception as e:
             logging.error('POST request ' + license_url +
                           ' failed. Exception: ' + str(e))

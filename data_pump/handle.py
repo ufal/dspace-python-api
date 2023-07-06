@@ -47,11 +47,14 @@ class Handle:
                 'url': handle['url']
             }
             try:
-                do_api_post(handle_url, {}, handle_json_p)
-                self.imported_handle += 1
+                response = do_api_post(handle_url, {}, handle_json_p)
+                if response.ok:
+                    self.imported_handle += 1
+                else:
+                    raise Exception(response)
             except Exception as e:
-                logging.error('POST response ' + handle_url +
-                              ' failed. Exception: ' + str(e))
+                logging.error('POST response ' + handle_url + ' for handle: ' +
+                              handle['handle'] + ' failed. Exception: ' + str(e))
 
         logging.info("Handles with url were successfully imported!")
 

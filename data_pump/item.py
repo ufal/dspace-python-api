@@ -12,7 +12,7 @@ def import_item(metadata_class,
                 collection_id_dict,
                 eperson_id_dict,
                 statistics_dict,
-                save_dict=True):
+                save_dict):
     """
     Import data into database.
     Mapped tables: item, collection2item, workspaceitem, cwf_workflowitem,

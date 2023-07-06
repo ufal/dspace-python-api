@@ -7,7 +7,7 @@ from utils import read_json, convert_response_to_json, \
 
 
 class Metadata:
-    def __init__(self, statistics_dict, insert_dict=False):
+    def __init__(self, statistics_dict, insert_dict):
         """
         Read metadatavalue as json and
         convert it to dictionary with tuple key: resource_type_id and resource_id.

@@ -7,7 +7,7 @@ from utils import read_json, convert_response_to_json, do_api_get_all, do_api_po
 def import_bitstreamformatregistry(bitstreamformat_id_dict,
                                    unknown_format_id_val,
                                    statistics_dict,
-                                   save_dict=True):
+                                   save_dict):
     """
     Import data into database.
     Mapped tables: bitstreamformatregistry

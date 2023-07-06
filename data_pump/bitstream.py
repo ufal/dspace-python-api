@@ -1,7 +1,7 @@
 import logging
-import json
 
-from utils import read_json, convert_response_to_json, do_api_post, save_dict_as_json
+from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
+    save_dict_as_json
 
 
 def import_bitstream(metadata_class,
@@ -16,7 +16,7 @@ def import_bitstream(metadata_class,
                      collection_id_dict,
                      unknown_format_id_val,
                      statistics_dict,
-                     save_dict=True):
+                     save_dict):
     """
     Import data into database.
     Mapped tables: bitstream, bundle2bitstream, metadata, most_recent_checksum
@@ -50,11 +50,12 @@ def import_bitstream(metadata_class,
             # fill the tables: most_recent_checksum and checksum_result
             # based on imported bitstreams
             try:
-                do_api_post(checksum_url, {}, None)
+                response = do_api_post(checksum_url, {}, None)
+                if not response.ok:
+                    raise Exception(response)
             except Exception as e:
-                e_json = json.loads(e.args[0])
                 logging.error('POST request ' +
-                              e_json['path'] + ' failed. Exception: ' + str(e))
+                              checksum_url + ' failed. Exception: ' + str(e))
             counter = 0
         counter += 1
         bitstream_json_p = {}
@@ -139,10 +140,12 @@ def add_logo_to_community(community2logo_dict, bitstream_id_dict, community_id_d
             'bitstream_id': bitstream_id_dict[value]
         }
         try:
-            do_api_post(logo_comm_url, params, None)
+            response = do_api_post(logo_comm_url, params, None)
+            if not response.ok:
+                raise Exception(response)
         except Exception as e:
-            logging.error('POST request ' + logo_comm_url +
-                          ' failed. Exception: ' + str(e))
+            logging.error('POST request ' + logo_comm_url + ' for community: ' +
+                          str(key) + ' failed. Exception: ' + str(e))
     logging.info(
         "Logos for communities were successfully added!")
 
@@ -162,9 +165,11 @@ def add_logo_to_collection(collection2logo_dict, bitstream_id_dict, collection_i
         params = {'collection_id': collection_id_dict[key],
                   'bitstream_id': bitstream_id_dict[value]}
         try:
-            do_api_post(logo_coll_url, params, None)
+            response = do_api_post(logo_coll_url, params, None)
+            if not response.ok:
+                raise Exception(response)
         except Exception as e:
-            logging.error('POST request ' + logo_coll_url +
-                          ' failed. Exception: ' + str(e))
+            logging.error('POST request ' + logo_coll_url + ' for collection: ' +
+                          str(key) + ' failed. Exception: ' + str(e))
     logging.info(
         "Logos for collections were successfully added!")

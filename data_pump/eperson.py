@@ -8,7 +8,7 @@ def import_eperson(metadata_class,
                    eperson_id_dict,
                    email2epersonId_dict,
                    statistics_dict,
-                   save_dict=True):
+                   save_dict):
     """
     Import data into database.
     Mapped tables: eperson, metadatavalue
@@ -82,8 +82,11 @@ def import_group2eperson(eperson_id_dict,
                 '/epersons'
             eperson_url = API_URL + 'eperson/groups/' + eperson_id_dict[
                 group2eperson['eperson_id']]
-            do_api_post(group_url, {}, eperson_url)
-            imported_group2eper += 1
+            response = do_api_post(group_url, {}, eperson_url)
+            if response.ok:
+                imported_group2eper += 1
+            else:
+                raise Exception(response)
         except Exception as e:
             logging.error('POST request ' +
                           group_url + ' failed. Exception: ' + str(e))
