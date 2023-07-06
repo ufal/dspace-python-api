@@ -9,12 +9,13 @@ def import_community(metadata_class,
                      community_id_dict,
                      community2logo_dict,
                      statistics_dict,
-                     save_dict=False):
+                     save_dict=True):
     """
     Import data into database.
     Mapped tables: community, community2community, metadatavalue, handle
     """
     community_json_name = 'community.json'
+    saved_community_json_name = 'community_dict.json'
     comm2comm_json_name = 'community2community.json'
     community_url = 'core/communities'
     imported_comm = 0
@@ -98,12 +99,12 @@ def import_community(metadata_class,
 
     # save community dict as json
     if save_dict:
-        save_dict_as_json(community_json_name, community_id_dict)
+        save_dict_as_json(saved_community_json_name, community_id_dict)
 
     if 'community' in statistics_dict:
         statistics_val = (statistics_dict['community'][0], imported_comm)
         statistics_dict['community'] = statistics_val
-    else:
-        statistics_val = (0, imported_group)
-        statistics_dict['epersongroup'] = statistics_val
+
+    statistics_val = (0, imported_group)
+    statistics_dict['epersongroup'] = statistics_val
     logging.info("Community and Community2Community were successfully imported!")

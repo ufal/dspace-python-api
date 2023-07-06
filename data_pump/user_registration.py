@@ -7,12 +7,13 @@ def import_user_registration(email2epersonId_dict,
                              eperson_id_dict,
                              userRegistration_id_dict,
                              statistics_dict,
-                             save_dict=False):
+                             save_dict=True):
     """
     Import data into database.
     Mapped tables: user_registration
     """
     user_reg_json_name = "user_registration.json"
+    saved_user_reg_json_name = 'user_registration_dict.json'
     user_reg_url = 'clarin/import/userregistration'
     imported_user_reg = 0
     # read user_registration
@@ -43,7 +44,7 @@ def import_user_registration(email2epersonId_dict,
 
     # save user registration dict as json
     if save_dict:
-        save_dict_as_json(user_reg_json_name, userRegistration_id_dict)
+        save_dict_as_json(saved_user_reg_json_name, userRegistration_id_dict)
     statistics_val = (len(user_reg_json_a), imported_user_reg)
     statistics_dict['user_registration'] = statistics_val
     logging.info("User registration was successfully imported!")

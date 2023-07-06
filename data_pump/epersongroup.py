@@ -8,12 +8,13 @@ from utils import read_json, convert_response_to_json, do_api_get_all, do_api_po
 def import_epersongroup(metadata_class,
                         group_id_dict,
                         statistics_dict,
-                        save_dict=False):
+                        save_dict=True):
     """
     Import data into database.
     Mapped tables: epersongroup
     """
     group_json_name = 'epersongroup.json'
+    saved_group_json_name = 'epersongroup_dict.json'
     group_url = 'eperson/groups'
     imported = 0
     group_json_a = read_json(group_json_name)
@@ -60,7 +61,7 @@ def import_epersongroup(metadata_class,
 
     # save group dict as json
     if save_dict:
-        save_dict_as_json(group_json_name, group_id_dict)
+        save_dict_as_json(saved_group_json_name, group_id_dict)
 
     if 'epersongroup' in statistics_dict:
         statistics_val = (len(group_json_a), statistics_dict['epersongroup'][1] +

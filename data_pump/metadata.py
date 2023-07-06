@@ -87,12 +87,13 @@ class Metadata:
         return separator.join(
             [project_type, project_code, org, project_name, eu_identifier])
 
-    def import_metadataschemaregistry(self, statistics_dict, save_dict=False):
+    def import_metadataschemaregistry(self, statistics_dict, save_dict=True):
         """
         Import data into database.
         Mapped tables: metadataschemaregistry
         """
         metadataschema_json_name = 'metadataschemaregistry.json'
+        saved_metadataschema_json_name = 'metadataschema_dict.json'
         metadataschema_url = 'core/metadataschemas'
         imported = 0
         # get all existing data from database table
@@ -140,7 +141,8 @@ class Metadata:
 
         # save metadataschema dict as json
         if save_dict:
-            save_dict_as_json(metadataschema_json_name, self.metadataschema_id_dict)
+            save_dict_as_json(saved_metadataschema_json_name,
+                              self.metadataschema_id_dict)
         statistics_val = (len(metadataschema_json_a), imported)
         statistics_dict['metadataschemaregistry'] = statistics_val
         logging.info("MetadataSchemaRegistry was successfully imported!")
@@ -160,12 +162,13 @@ class Metadata:
                           + str(e))
         return existing_data_dict
 
-    def import_metadatafieldregistry(self, statistics_dict, save_dict=False):
+    def import_metadatafieldregistry(self, statistics_dict, save_dict=True):
         """
         Import data into database.
         Mapped tables: metadatafieldregistry
         """
         metadatafield_json_name = 'metadatafieldregistry.json'
+        saved_metadatafield_json_name = 'metadatafield_dict.json'
         metadatafield_url = 'core/metadatafields'
         imported = 0
         existing_data_dict = None
@@ -221,7 +224,7 @@ class Metadata:
 
         # save metadatafield dict as json
         if save_dict:
-            save_dict_as_json(metadatafield_json_name, self.metadatafield_id_dict)
+            save_dict_as_json(saved_metadatafield_json_name, self.metadatafield_id_dict)
         statistics_val = (len(metadatafield_json_a), imported)
         statistics_dict['metadatafieldregistry'] = statistics_val
         logging.info("MetadataFieldRegistry was successfully imported!")

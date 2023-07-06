@@ -8,13 +8,14 @@ def import_bundle(metadata_class,
                   bundle_id_dict,
                   primary_bitstream_dict,
                   statistics_dict,
-                  save_dict=False):
+                  save_dict=True):
     """
     Import data into database.
     Mapped tables: item2bundle, bundle
     """
     item2bundle_json_name = 'item2bundle.json'
     bundle_json_name = 'bundle.json'
+    saved_bundle_json_name = 'bundle_dict.json'
     item_url = 'core/items/'
     imported = 0
     # load item2bundle into dict
@@ -64,7 +65,7 @@ def import_bundle(metadata_class,
 
     # save bundle dict as json
     if save_dict:
-        save_dict_as_json(bundle_json_name, bundle_id_dict)
+        save_dict_as_json(saved_bundle_json_name, bundle_id_dict)
     statistics_val = (statistics_dict['item2bundle'][0], imported)
     statistics_dict['item2bundle'] = statistics_val
     logging.info("Bundle and Item2Bundle were successfully imported!")

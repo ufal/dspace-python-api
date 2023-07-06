@@ -12,7 +12,7 @@ def import_item(metadata_class,
                 collection_id_dict,
                 eperson_id_dict,
                 statistics_dict,
-                save_dict=False):
+                save_dict=True):
     """
     Import data into database.
     Mapped tables: item, collection2item, workspaceitem, cwf_workflowitem,
@@ -20,8 +20,11 @@ def import_item(metadata_class,
     """
     item_json_name = "item.json"
     workspaceitem_json_name = "workspaceitem.json"
+    saved_workspace_json_name = "workspaceitem_dict.json"
     workflowitem_json_name = 'workflowitem.json'
+    saved_workflow_json_name = "workflow_dict.json"
     item_url = 'clarin/import/item'
+    saved_item_json_name = "item_dict.json"
     workflowitem_url = 'clarin/import/workflowitem'
     imported_workspaceitem = 0
     imported_workflowitem = 0
@@ -61,7 +64,8 @@ def import_item(metadata_class,
                                             imported_workspaceitem)
         imported_item += imported_workspaceitem
         # save workspaceitem dict as json
-        save_dict_as_json(workspaceitem_json_name, workspaceitem_id_dict)
+        if save_dict:
+            save_dict_as_json(saved_workspace_json_name, workspaceitem_id_dict)
         logging.info("Workspaceitem was successfully imported!")
     else:
         logging.info("Workspaceitem JSON is empty.")
@@ -99,7 +103,7 @@ def import_item(metadata_class,
 
         # save workflow dict as json
         if save_dict:
-            save_dict_as_json(workflowitem_json_name, workflowitem_id_dict)
+            save_dict_as_json(saved_workflow_json_name, workflowitem_id_dict)
         statistics_val = (len(workflowitem_json_a), imported_workflowitem)
         statistics_dict['workflowitem'] = statistics_val
         imported_item += imported_workflowitem
@@ -136,7 +140,7 @@ def import_item(metadata_class,
 
     # save item dict as json
     if save_dict:
-        save_dict_as_json(item_json_name, item_id_dict)
+        save_dict_as_json(saved_item_json_name, item_id_dict)
     statistics_val = (statistics_dict['item'][0], imported_item)
     statistics_dict['item'] = statistics_val
     logging.info("Item and Collection2item were successfully imported!")

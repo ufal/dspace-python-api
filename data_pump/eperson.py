@@ -8,12 +8,13 @@ def import_eperson(metadata_class,
                    eperson_id_dict,
                    email2epersonId_dict,
                    statistics_dict,
-                   save_dict=False):
+                   save_dict=True):
     """
     Import data into database.
     Mapped tables: eperson, metadatavalue
     """
     eperson_json_name = 'eperson.json'
+    saved_eperson_json_name = 'eperson_dict.json'
     eperson_url = 'clarin/import/eperson'
     imported_eperson = 0
     eperson_json_a = read_json(eperson_json_name)
@@ -54,7 +55,7 @@ def import_eperson(metadata_class,
 
     # save eperson dict as json
     if save_dict:
-        save_dict_as_json(eperson_json_name, eperson_id_dict)
+        save_dict_as_json(saved_eperson_json_name, eperson_id_dict)
     statistics_val = (len(eperson_json_a), imported_eperson)
     statistics_dict['eperson'] = statistics_val
     logging.info("Eperson was successfully imported!")

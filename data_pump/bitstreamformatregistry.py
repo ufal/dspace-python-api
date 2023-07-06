@@ -7,12 +7,13 @@ from utils import read_json, convert_response_to_json, do_api_get_all, do_api_po
 def import_bitstreamformatregistry(bitstreamformat_id_dict,
                                    unknown_format_id_val,
                                    statistics_dict,
-                                   save_dict=False):
+                                   save_dict=True):
     """
     Import data into database.
     Mapped tables: bitstreamformatregistry
     """
     bitsteamformat_json_name = 'bitstreamformatregistry.json'
+    saved_bitsteamformat_json_name = 'bitstreamformatregistry_dict.json'
     bitstreamformat_url = 'core/bitstreamformats'
     imported = 0
     # read all existing data from bitstreamformatregistry
@@ -72,7 +73,7 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
 
         # save bitstreamregistry dict as json
         if save_dict:
-            save_dict_as_json(bitsteamformat_json_name, bitstreamformat_id_dict)
+            save_dict_as_json(saved_bitsteamformat_json_name, bitstreamformat_id_dict)
         statistics_val = (len(bitstreamformat_json_a), imported)
         statistics_dict['bitstreamformatregistry'] = statistics_val
     except Exception as e:

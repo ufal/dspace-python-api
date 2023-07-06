@@ -16,7 +16,7 @@ def import_bitstream(metadata_class,
                      collection_id_dict,
                      unknown_format_id_val,
                      statistics_dict,
-                     save_dict=False):
+                     save_dict=True):
     """
     Import data into database.
     Mapped tables: bitstream, bundle2bitstream, metadata, most_recent_checksum
@@ -24,6 +24,7 @@ def import_bitstream(metadata_class,
     """
     bitstream_json_name = 'bitstream.json'
     bundle2bitstream_json_name = 'bundle2bitstream.json'
+    saved_bitstream_json_name = 'bitstream_dict.json'
     bitstream_url = 'clarin/import/core/bitstream'
     checksum_url = 'clarin/import/core/bitstream/checksum'
     imported = 0
@@ -109,7 +110,7 @@ def import_bitstream(metadata_class,
 
     # write bitstream dict as json
     if save_dict:
-        save_dict_as_json(bitstream_json_name, bitstream_id_dict)
+        save_dict_as_json(saved_bitstream_json_name, bitstream_id_dict)
     statistics_val = (len(bitstream_json_a), imported)
     statistics_dict['bitstream'] = statistics_val
     # add logos (bitstreams) to collections and communities

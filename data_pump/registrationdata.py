@@ -3,7 +3,7 @@ import logging
 from utils import read_json, do_api_post
 
 
-def import_registrationdata(registrationdata_dict, statistics_dict):
+def import_registrationdata(statistics_dict):
     """
     Import data into database.
     Mapped tables: registrationdata

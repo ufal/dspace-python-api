@@ -10,12 +10,13 @@ def import_collection(metadata_class,
                       collection_id_dict,
                       collection2logo_dict,
                       statistics_dict,
-                      save_dict=False):
+                      save_dict=True):
     """
     Import data into database.
     Mapped tables: collection, community2collection, metadatavalue, handle
     """
     collection_json_name = 'collection.json'
+    saved_collection_json_name = 'collection_dict.json'
     com2col_json_name = 'community2collection.json'
     metadata_json_name = 'metadatavalue.json'
     collection_url = 'core/collections'
@@ -124,7 +125,7 @@ def import_collection(metadata_class,
 
     # save collection dict as json
     if save_dict:
-        save_dict_as_json(collection_json_name, collection_id_dict)
+        save_dict_as_json(saved_collection_json_name, collection_id_dict)
     statistics_val = (len(collection_json_a), imported_coll)
     statistics_dict['collection'] = statistics_val
     statistics_val = (0, statistics_dict['epersongroup'][1] + imported_group)
