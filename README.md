@@ -4,6 +4,14 @@
 used for blackbox testing, data-ingestion procedures
 
 # How to migrate CLARIN-DSpace5.* to CLARIN-DSpace7.*
+
+### Important:
+Make sure that your email server is NOT running because some of the endpoints that are used
+are sending emails to the input email addresses. 
+For example, when using the endpoint for creating new registration data, 
+there exists automatic function that sends email, what we don't want
+because we use this endpoint for importing existing data.
+
 ### Prerequisites:
 - Installed CLARIN-DSpace7.*. with running database, solr, tomcat
 
