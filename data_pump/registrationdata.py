@@ -17,8 +17,10 @@ def import_registrationdata(statistics_dict):
         return
     for registrationdata in registrationdata_json_list:
         registrationdata_json_p = {'email': registrationdata['email']}
+        params = {'accountRequestType': 'register'}
         try:
-            response = do_api_post(registrationdata_url, {}, registrationdata_json_p)
+            response = do_api_post(registrationdata_url, params,
+                                   registrationdata_json_p)
             if response.ok:
                 imported_registrationdata += 1
             else:
