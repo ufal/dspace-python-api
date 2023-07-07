@@ -63,12 +63,10 @@ def import_bitstream(metadata_class,
             metadata_class.get_metadata_value(0, bitstream['bitstream_id'])
         if metadata_bitstream_dict is not None:
             bitstream_json_p['metadata'] = metadata_bitstream_dict
-            # bitstream['size_bytes']
-        bitstream_json_p['sizeBytes'] = 1748
-        # bitstream['checksum']
+        bitstream_json_p['sizeBytes'] = bitstream['size_bytes']
         bitstream_json_p['checkSum'] = {
             'checkSumAlgorithm': bitstream['checksum_algorithm'],
-            'value': '8a4605be74aa9ea9d79846c1fba20a33'
+            'value': bitstream['checksum']
         }
         if not bitstream['bitstream_format_id']:
             logging.info(
@@ -76,8 +74,7 @@ def import_bitstream(metadata_class,
                 f'does not have a bitstream_format_id. '
                 f'Using {unknown_format_id_val} instead.')
             bitstream['bitstream_format_id'] = unknown_format_id_val
-            # bitstream['internal_id']
-        params = {'internal_id': '77893754617268908529226218097860272513',
+        params = {'internal_id': bitstream['internal_id'],
                   'storeNumber': bitstream['store_number'],
                   'bitstreamFormat': bitstreamformat_id_dict[
                       bitstream['bitstream_format_id']],
