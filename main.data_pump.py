@@ -1,5 +1,6 @@
 import logging
 import argparse
+import sys
 
 import data_pump.var_declarations as var
 from data_pump.bitstream import import_bitstream
@@ -61,6 +62,16 @@ if __name__ == "__main__":
                         help='bool value if we save dict values into jsons',
                         required=False, type=bool, default=False)
     args = parser.parse_args()
+
+    # Is the email server really off?
+    email_s_off = input("Please make sure your email server is turned off. "
+                        "Otherwise unbearable amount of emails will be sent. "
+                        "Is your EMAIL SERVER really OFF? (Y/N)")
+    email_s_off = email_s_off.lower()
+    # terminate the program
+    if email_s_off not in ("y", "yes"):
+        sys.exit()
+
     insert_data_into_dicts("eperson_dict.json",
                            "user_registration_dict.json",
                            "epersongroup_dict.json",
