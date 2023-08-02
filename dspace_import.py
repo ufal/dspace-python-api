@@ -594,7 +594,7 @@ def import_metadatafieldregistry():
                     i['metadata_field_id']) + ' failed. Status: ' + str(response.status_code))
                 continue
             for j in existing_data:
-                if j['element'] != i['element'] or j['qualifier'] != i['qualifier']:
+                if j['_embedded']['schema']['id'] != param['schemaId'] or j['element'] != i['element'] or j['qualifier'] != i['qualifier']:
                     continue
                 metadata_field_id[i['metadata_field_id']] = j['id']
                 logging.info('Metadatafieldregistry with element: ' + i['element'] + ' already exists in database!')
