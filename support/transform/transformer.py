@@ -3,7 +3,8 @@ This scripts transforms web metadata to .json form that can be used for importin
 through dspace_proxy from support.dspace_proxy.rest_proxy.
 
 It expects lines copied from web, e.g.
-https://lindat.mff.cuni.cz/repository/xmlui/handle/11858/00-097C-0000-0001-CC1E-B?show=full
+https://lindat.mff.cuni.cz/repository/xmlui/handle/11858/
+00-097C-0000-0001-CC1E-B?show=full
 in file `website_copy.txt` and emits output in `out.json`
 
 It adds some useful data (name, withdrawn, in_archive...), but please note it does not
@@ -37,7 +38,7 @@ x.close()
 
 metadata_list = {}
 for val in value_list:
-    if not (val.md in metadata_list):
+    if val.md not in metadata_list:
         metadata_list[val.md] = []
     spec = {"value": val.vl,
             "language": None,
@@ -47,7 +48,8 @@ for val in value_list:
             }
     metadata_list[val.md].append(spec)
 
-out_feed = {"name": metadata_list["dc.title"][0]["value"], "metadata": metadata_list, "inArchive": True,
+out_feed = {"name": metadata_list["dc.title"][0]["value"],
+            "metadata": metadata_list, "inArchive": True,
             "discoverable": True,
             "withdrawn": False,
             "type": "item"}

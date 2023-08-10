@@ -4,6 +4,14 @@
 used for blackbox testing, data-ingestion procedures
 
 # How to migrate CLARIN-DSpace5.* to CLARIN-DSpace7.*
+
+### Important:
+Make sure that your email server is NOT running because some of the endpoints that are used
+are sending emails to the input email addresses. 
+For example, when using the endpoint for creating new registration data, 
+there exists automatic function that sends email, what we don't want
+because we use this endpoint for importing existing data.
+
 ### Prerequisites:
 - Installed CLARIN-DSpace7.*. with running database, solr, tomcat
 
@@ -74,7 +82,7 @@ Update `migration_const.py`
 8. Create JSON files from the database tables. **NOTE: You must do it for both databases `clarin-dspace` and `clarin-utilities`** (JSON files are stored in the `data` folder)
 - Go to `dspace-python-api` in the cmd
 - Run `pip install -r requirements.txt`
-- Run `python data_migration.py <DATABSE NAME> <HOST> postgres <PASSWORD FOR POSTGRES>` e.g., `python data_migration.py clarin-dspace localhost postgres pass` (arguments for database connection - database, host, user, password) for the BOTH databases // NOTE there must exist data folder in the project structure
+- Run `python create_jsons.py --database <DATABSE NAME> --host <HOST> --user postgres --password <PASSWORD FOR POSTGRES>` e.g., `python create_jsons.py --database clarin-dspace --host localhost --user postgres --password pass` (arguments for database connection - database, host, user, password) for the BOTH databases // NOTE there must exist data folder in the project structure
 
 ***
 9. Make sure, your backend configuration (`dspace.cfg`) includes all handle prefixes from generated handle json in property `handle.additional.prefixes`, 
@@ -87,7 +95,7 @@ e.g.,`handle.additional.prefixes = 11858, 11234, 11372, 11346, 20.500.12801, 20.
 11. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
 - **NOTE:** database must be up to date (`dspace database migrate force` must be called in the `dspace/bin`)
 - **NOTE:** dspace server must be running
-- From the `dspace-python-api` run command `python dspace_import.py`
+- From the `dspace-python-api` run command `python main.data_pump.py`
 
 ***
 ## !!!Migration notes:!!!

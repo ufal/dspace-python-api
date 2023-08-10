@@ -18,9 +18,12 @@ __all__ = ['DSpaceObject', 'SimpleDSpaceObject', 'Community',
 class DSpaceObject:
     """
     Base class to represent DSpaceObject API resources
-    The variables here are present in an _embedded response and the ones required for POST / PUT / PATCH
-    operations are included in the dict returned by asDict(). Implements toJSON() as well.
-    This class can be used on its own but is generally expected to be extended by other types: Item, Bitstream, etc.
+    The variables here are present in an _embedded response
+    and the ones required for POST / PUT / PATCH
+    operations are included in the dict returned by asDict().
+    Implements toJSON() as well.
+    This class can be used on its own but is generally
+    expected to be extended by other types: Item, Bitstream, etc.
     """
     uuid = None
     name = None
@@ -34,7 +37,8 @@ class DSpaceObject:
     def __init__(self, api_resource=None, dso=None):
         """
         Default constructor
-        @param api_resource: optional API resource (JSON) from a GET response or successful POST can populate instance
+        @param api_resource: optional API resource (JSON) from
+        a GET response or successful POST can populate instance
         """
 
         self.type = None
@@ -55,20 +59,26 @@ class DSpaceObject:
                 self.handle = api_resource['handle']
             if 'metadata' in api_resource:
                 self.metadata = api_resource['metadata']
-            # Python interprets _ prefix as private so for now, renaming this and handling it separately
-            # alternatively - each item could implement getters, or a public method to return links
+            # Python interprets _ prefix as private so for now,
+            # renaming this and handling it separately
+            # alternatively - each item could implement getters,
+            # or a public method to return links
             if '_links' in api_resource:
                 self.links = api_resource['_links']
             else:
-                # TODO - write 'construct self URI method'... all we need is type, UUID and some mapping of type
+                # TODO - write 'construct self URI method'...
+                #  all we need is type, UUID and some mapping of type
                 #  to the URI type segment eg community -> communities
                 self.links = {'self': {'href': ''}}
 
-    def add_metadata(self, field, value, language=None, authority=None, confidence=-1, place=None):
+    def add_metadata(self, field, value, language=None, authority=None,
+                     confidence=-1, place=None):
         """
-        Add metadata to a DSO. This is performed on the local object only, it is not an API operation (see patch)
+        Add metadata to a DSO. This is performed on the local object only,
+        it is not an API operation (see patch)
         This is useful when constructing new objects for ingest.
-        When doing simple changes like "retrieve a DSO, add some metadata, update" then it is best to use a patch
+        When doing simple changes like "retrieve a DSO, add some metadata,
+        update" then it is best to use a patch
         operation, not this class method. See
         :param field:
         :param value:
@@ -82,8 +92,10 @@ class DSpaceObject:
             return
         if field in self.metadata:
             values = self.metadata[field]
-            # Ensure we don't accidentally duplicate place value. If this place already exists, the user
-            # should use a patch operation or we should allow another way to re-order / re-calc place?
+            # Ensure we don't accidentally duplicate place value.
+            # If this place already exists, the user
+            # should use a patch operation or
+            # we should allow another way to re-order / re-calc place?
             # For now, we'll just set place to none if it matches an existing place
             for v in values:
                 if v['place'] == place:
@@ -92,7 +104,8 @@ class DSpaceObject:
         else:
             values = []
         values.append({"value": value, "language": language,
-                       "authority": authority, "confidence": confidence, "place": place})
+                       "authority": authority, "confidence": confidence,
+                       "place": place})
         self.metadata[field] = values
 
         # Return this as an easy way for caller to inspect or use
@@ -113,7 +126,8 @@ class DSpaceObject:
 
     def as_dict(self):
         """
-        Return custom dict of this DSpaceObject with specific attributes included (no _links, etc.)
+        Return custom dict of this DSpaceObject with
+        specific attributes included (no _links, etc.)
         @return: dict of this DSpaceObject for API use
         """
         return {
@@ -126,7 +140,8 @@ class DSpaceObject:
         }
 
     def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=None)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True,
+                          indent=None)
 
     def to_json_pretty(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
@@ -134,7 +149,8 @@ class DSpaceObject:
 
 class SimpleDSpaceObject(DSpaceObject):
     """
-    Objects that share similar simple API methods eg. PUT update for full metadata replacement, can have handles, etc.
+    Objects that share similar simple API methods eg.
+    PUT update for full metadata replacement, can have handles, etc.
     By default this is Item, Community, Collection classes
     """
 
@@ -160,9 +176,12 @@ class Item(SimpleDSpaceObject):
 
         if api_resource is not None:
             self.type = 'item'
-            self.inArchive = api_resource['inArchive'] if 'inArchive' in api_resource else False
-            self.discoverable = api_resource['discoverable'] if 'discoverable' in api_resource else False
-            self.withdrawn = api_resource['withdrawn'] if 'withdrawn' in api_resource else False
+            self.inArchive = api_resource['inArchive'] \
+                if 'inArchive' in api_resource else False
+            self.discoverable = api_resource['discoverable'] \
+                if 'discoverable' in api_resource else False
+            self.withdrawn = api_resource['withdrawn'] \
+                if 'withdrawn' in api_resource else False
 
     def get_metadata_values(self, field):
         """
@@ -177,11 +196,13 @@ class Item(SimpleDSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this Item, based on super with item-specific attributes added
+        Return a dict representation of this Item,
+        based on super with item-specific attributes added
         @return: dict of Item for API use
         """
         dso_dict = super(Item, self).as_dict()
-        item_dict = {'inArchive': self.inArchive, 'discoverable': self.discoverable, 'withdrawn': self.withdrawn}
+        item_dict = {'inArchive': self.inArchive,
+                     'discoverable': self.discoverable, 'withdrawn': self.withdrawn}
         return {**dso_dict, **item_dict}
 
     @classmethod
@@ -209,7 +230,8 @@ class Community(SimpleDSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this Community, based on super with community-specific attributes added
+        Return a dict representation of this Community,
+        based on super with community-specific attributes added
         @return: dict of Item for API use
         """
         dso_dict = super(Community, self).as_dict()
@@ -226,7 +248,8 @@ class Collection(SimpleDSpaceObject):
 
     def __init__(self, api_resource=None):
         """
-        Default constructor. Call DSpaceObject init then set collection-specific attributes
+        Default constructor. Call DSpaceObject init then
+        set collection-specific attributes
         @param api_resource: API result object to use as initial data
         """
         super(Collection, self).__init__(api_resource)
@@ -235,7 +258,8 @@ class Collection(SimpleDSpaceObject):
     def as_dict(self):
         dso_dict = super(Collection, self).as_dict()
         """
-        Return a dict representation of this Collection, based on super with collection-specific attributes added
+        Return a dict representation of this Collection, 
+        based on super with collection-specific attributes added
         @return: dict of Item for API use
         """
         collection_dict = {}
@@ -258,7 +282,8 @@ class Bundle(DSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this Bundle, based on super with bundle-specific attributes added
+        Return a dict representation of this Bundle,
+        based on super with bundle-specific attributes added
         @return: dict of Bundle for API use
         """
         dso_dict = super(Bundle, self).as_dict()
@@ -282,7 +307,8 @@ class Bitstream(DSpaceObject):
 
     def __init__(self, api_resource=None):
         """
-        Default constructor. Call DSpaceObject init then set bitstream-specific attributes
+        Default constructor. Call DSpaceObject init then
+        set bitstream-specific attributes
         @param api_resource: API result object to use as initial data
         """
         super(Bitstream, self).__init__(api_resource)
@@ -298,18 +324,21 @@ class Bitstream(DSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this Bitstream, based on super with bitstream-specific attributes added
+        Return a dict representation of this Bitstream,
+        based on super with bitstream-specific attributes added
         @return: dict of Bitstream for API use
         """
         dso_dict = super(Bitstream, self).as_dict()
-        bitstream_dict = {'bundleName': self.bundleName, 'sizeBytes': self.sizeBytes, 'checkSum': self.checkSum,
+        bitstream_dict = {'bundleName': self.bundleName, 'sizeBytes': self.sizeBytes,
+                          'checkSum': self.checkSum,
                           'sequenceId': self.sequenceId}
         return {**dso_dict, **bitstream_dict}
 
 
 class Group(DSpaceObject):
     """
-    Extends DSpaceObject to implement specific attributes and methods for groups (aka. EPersonGroups)
+    Extends DSpaceObject to implement specific attributes and
+    methods for groups (aka. EPersonGroups)
     """
     type = 'group'
     name = None
@@ -329,7 +358,8 @@ class Group(DSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this Group, based on super with group-specific attributes added
+        Return a dict representation of this Group,
+        based on super with group-specific attributes added
         @return: dict of Group for API use
         """
         dso_dict = super(Group, self).as_dict()
@@ -339,7 +369,8 @@ class Group(DSpaceObject):
 
 class User(SimpleDSpaceObject):
     """
-    Extends DSpaceObject to implement specific attributes and methods for users (aka. EPersons)
+    Extends DSpaceObject to implement specific attributes
+    and methods for users (aka. EPersons)
     """
     type = 'user'
     name = None,
@@ -374,11 +405,13 @@ class User(SimpleDSpaceObject):
 
     def as_dict(self):
         """
-        Return a dict representation of this User, based on super with user-specific attributes added
+        Return a dict representation of this User,
+        based on super with user-specific attributes added
         @return: dict of User for API use
         """
         dso_dict = super(User, self).as_dict()
-        user_dict = {'name': self.name, 'netid': self.netid, 'lastActive': self.lastActive, 'canLogIn': self.canLogIn,
+        user_dict = {'name': self.name, 'netid': self.netid,
+                     'lastActive': self.lastActive, 'canLogIn': self.canLogIn,
                      'email': self.email, 'requireCertificate': self.requireCertificate,
                      'selfRegistered': self.selfRegistered}
         return {**dso_dict, **user_dict}
