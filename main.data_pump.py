@@ -1,6 +1,8 @@
-import logging
 import argparse
 import sys
+
+import logging
+logging.basicConfig(level=logging.INFO)
 
 import data_pump.var_declarations as var
 from data_pump.bitstream import import_bitstream
@@ -19,6 +21,7 @@ from data_pump.registrationdata import import_registrationdata
 from data_pump.tasklistitem import import_tasklistitem
 from data_pump.user_registration import import_user_registration
 from data_pump.utils import read_json, create_dict_from_json
+from data_pump.sequences import migrate_sequences
 
 
 def at_the_end_of_import(handle_class_p, statistics_dict):
@@ -161,5 +164,9 @@ if __name__ == "__main__":
     import_user_metadata(var.bitstream_id_dict,
                          var.user_registration_id_dict,
                          var.statistics_dict)
+
+    # migrate sequences
+    migrate_sequences()
+
     at_the_end_of_import(handle_class, var.statistics_dict)
     logging.info("Data migration is completed!")
