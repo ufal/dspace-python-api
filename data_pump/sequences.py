@@ -3,10 +3,27 @@ import logging
 import time
 
 import psycopg2
-
-_logger = logging.getLogger("migrate_sequences")
+from psycopg2 import extensions
 
 _this_dir = os.path.dirname(os.path.abspath(__file__))
+_temp_dir = os.path.join(_this_dir, "..", "temp-files")
+
+# create temp dir if needed
+if not os.path.exists(_temp_dir):
+    os.makedirs(_temp_dir, exist_ok=True)
+
+# standard console output
+_logger = logging.getLogger("migrate_sequences")
+
+# testing output to file
+file_path = os.path.join(_temp_dir, "__failed_sequences.txt")
+file_handler = logging.FileHandler(file_path, mode="w")
+file_handler.setLevel(logging.ERROR)
+
+_logger_test = logging.getLogger("test_migrated_sequences")
+_logger_test.setLevel(logging.ERROR)
+_logger_test.addHandler(file_handler)
+
 
 settings = {
     "host": "localhost",
@@ -60,50 +77,33 @@ def migrate_sequences():
     db_idx = 0
 
     # check if all sequences from clarin 5 are already present in clarin 7
-    missing_seq = []
+    failed_seq = []
     for c5_seq in clarin5_all_seq:
 
         c5_seq_name = c5_seq[name_idx]
         seq_db = c5_seq[db_idx]
 
-        if c5_seq_name in c7_dspace_seq_names:
-            # use cursor according to database to which sequence belongs
-            if seq_db == "clarin-dspace":
-                cursor = cursor_c5_dspace
-            else:
-                cursor = cursor_c5_utilities
+        if c5_seq_name not in c7_dspace_seq_names:
+            continue
 
-            # get current value of given sequence
-            cursor.execute(f"SELECT last_value FROM {c5_seq_name}")
-            c5_seq_val = cursor.fetchone()[0]
-
-            # set value of the sequence in clarin 7 dspace database
-            cursor_c7_dspace.execute(f"SELECT setval('{c5_seq_name}', {c5_seq_val})")
-            c7_dspace.commit()
-
-            # check value of the sequence in clarin7 database
-            cursor_c7_dspace.execute(f"SELECT last_value FROM {c5_seq_name}")
-            c7_seq_val = cursor_c7_dspace.fetchone()[0]
-
-            if c5_seq_val != c7_seq_val:
-                _logger.error(f"Sequence [{c5_seq_val}] value [{c7_seq_val}] in clarin7 "
-                              f"does not match expected value [{c5_seq_val}] in clarin5.")
-
+        # use cursor according to database to which sequence belongs
+        if seq_db == "clarin-dspace":
+            cursor = cursor_c5_dspace
         else:
-            # add to missing sequences list which will be exported to file later
-            missing_seq.append(c5_seq_name)
+            cursor = cursor_c5_utilities
 
-    # export missing sequences to file
-    temp_dir = os.path.join(_this_dir, "..", "temp-files")
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir, exist_ok=True)
+        # get current value of given sequence
+        cursor.execute(f"SELECT last_value FROM {c5_seq_name}")
+        c5_seq_val = cursor.fetchone()[0]
 
-    file_path = os.path.join(temp_dir, "__missing_sequences.txt")
+        # set value of the sequence in clarin 7 dspace database
+        cursor_c7_dspace.execute(f"SELECT setval('{c5_seq_name}', {c5_seq_val})")
+        c7_dspace.commit()
 
-    with open(file_path, mode="w", encoding="utf-8") as file:
-        file.write("\n".join(missing_seq))
+        # check value of the sequence in clarin7 database
+        test_seq_value(cursor_c7_dspace, c5_seq_name, c5_seq_val)
 
-    _logger.info("Sequence migration is complete. Missing sequences are in root/temp/missing_sequences.txt")
+    _logger.info("Sequence migration is complete.")
 
 
 def connect_to_db(database: str, user: str, password: str, host="localhost", port=5432, max_attempt=5, conn_delay=2):
@@ -126,3 +126,11 @@ def connect_to_db(database: str, user: str, password: str, host="localhost", por
         time.sleep(conn_delay)
 
     raise ConnectionError(f"Connection to {database} could not be established in {max_attempt} attempts.")
+
+
+def test_seq_value(cursor: psycopg2.extensions.cursor, seq_name: str, expected_val: int):
+    cursor.execute(f"SELECT last_value FROM {seq_name}")
+    seq_val = cursor.fetchone()[0]
+
+    if seq_val != expected_val:
+        _logger_test.error(f"{seq_name}   --> [{seq_val}] does not match expected [{expected_val}].")
