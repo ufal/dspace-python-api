@@ -3,7 +3,7 @@ import logging
 import time
 
 import psycopg2
-from psycopg2 import extensions
+import const
 
 _this_dir = os.path.dirname(os.path.abspath(__file__))
 _temp_dir = os.path.join(_this_dir, "..", "temp-files")
@@ -24,14 +24,6 @@ _logger_test = logging.getLogger("test_migrated_sequences")
 _logger_test.setLevel(logging.ERROR)
 _logger_test.addHandler(file_handler)
 
-
-settings = {
-    "host": "localhost",
-    "user": "postgres",
-    "password": "aaa"
-}
-
-
 def migrate_sequences():
     """
         Migrate sequences from clarin 5 database to clarin 7 database.
@@ -39,21 +31,21 @@ def migrate_sequences():
     _logger.info("Sequence migration started.")
 
     # create database connection
-    c5_dspace_conn = connect_to_db(database="clarin-dspace",
-                                   host=settings["host"],
-                                   user=settings["user"],
-                                   password=settings["password"])
+    c5_dspace_conn = connect_to_db(database=const.CLARIN_DSPACE_NAME,
+                                   host=const.CLARIN_DSPACE_HOST,
+                                   user=const.CLARIN_DSPACE_USER,
+                                   password=const.CLARIN_DSPACE_PASSWORD)
 
-    c5_utilities_conn = connect_to_db(database="clarin-utilities",
-                                      host=settings["host"],
-                                      user=settings["user"],
-                                      password=settings["password"])
+    c5_utilities_conn = connect_to_db(database=const.CLARIN_UTILITIES_NAME,
+                                      host=const.CLARIN_UTILITIES_HOST,
+                                      user=const.CLARIN_UTILITIES_USER,
+                                      password=const.CLARIN_UTILITIES_PASSWORD)
 
-    c7_dspace = connect_to_db(database="dspace",
-                              host="localhost",
-                              port=5430,
-                              user="dspace",
-                              password="dspace")
+    c7_dspace = connect_to_db(database=const.CLARIN_DSPACE_7_NAME,
+                              host=const.CLARIN_DSPACE_7_HOST,
+                              port=const.CLARIN_DSPACE_7_PORT,
+                              user=const.CLARIN_DSPACE_7_USER,
+                              password=const.CLARIN_DSPACE_7_PASSWORD)
 
     # get all sequences from clarin-dspace database
     cursor_c5_dspace = c5_dspace_conn.cursor()

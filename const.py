@@ -45,6 +45,29 @@ col_UUID = None
 ITM_prefix = "BB-TEST-ITM-"
 EMBEDDED = "_embedded"
 
+# Database const - for copying sequences
+# CLARIN-DSpace 5 databases
+# CLARIN_DSPACE_*
+CLARIN_DSPACE_NAME = "clarin-dspace"
+CLARIN_DSPACE_HOST = "localhost"
+CLARIN_DSPACE_USER = "<USERNAME>"
+CLARIN_DSPACE_PASSWORD = "<PASSWORD>"
+
+# CLARIN_UTILITIES_*
+CLARIN_UTILITIES_NAME = "clarin-utilities"
+CLARIN_UTILITIES_HOST = "localhost"
+CLARIN_UTILITIES_USER = "<USERNAME>"
+CLARIN_UTILITIES_PASSWORD = "<PASSWORD>"
+
+# CLARIN-DSpace 7 database
+CLARIN_DSPACE_7_NAME = "dspace"
+CLARIN_DSPACE_7_HOST = "localhost"
+CLARIN_DSPACE_7_PORT = 5432
+CLARIN_DSPACE_7_USER = "<USERNAME>"
+CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"
+
+
+
 
 class ItemType(enum.Enum):
     ITEM = 1
