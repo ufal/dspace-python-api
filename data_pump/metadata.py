@@ -206,7 +206,8 @@ class Metadata:
                                   ' failed. Exception: ' + str(e))
                     continue
                 for existing_data in existing_data_dict:
-                    if existing_data['element'] != metadatafield['element'] or \
+                    if existing_data['_embedded']['schema']['id'] != metadatafield['metadata_schema_id'] or \
+                            existing_data['element'] != metadatafield['element'] or \
                             existing_data['qualifier'] != metadatafield['qualifier']:
                         continue
                     self.metadatafield_id_dict[metadatafield['metadata_field_id']] = \
