@@ -37,7 +37,12 @@ def import_eperson(metadata_class,
             'welcomeInfo': eperson['welcome_info'],
             'canEditSubmissionMetadata': eperson['can_edit_submission_metadata']
         }
-        email2epersonId_dict[eperson['email']] = eperson['eperson_id']
+
+        # eperson email could consist of more emails, add eperson_id into everyone
+        eperson_email_array = get_eperson_emails(eperson['email'])
+        for eperson_email in eperson_email_array:
+            email2epersonId_dict[eperson_email] = eperson['eperson_id']
+
         if metadatavalue_eperson_dict:
             eperson_json_p['metadata'] = metadatavalue_eperson_dict
         params = {
@@ -61,6 +66,19 @@ def import_eperson(metadata_class,
     statistics_dict['eperson'] = statistics_val
     logging.info("Eperson was successfully imported!")
 
+
+'''
+The eperson email could consist of more email, return all of them in the array  
+'''
+
+
+def get_eperson_emails(email):
+    if ';' not in email:
+        return [email]
+
+    # email value contains of two email, take just the first one.
+    # e.g., test@msn.com;name@gmail.com
+    return email.split(';')
 
 def import_group2eperson(eperson_id_dict,
                          group_id_dict,
