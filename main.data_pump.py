@@ -1,6 +1,6 @@
-import logging
 import argparse
 import sys
+import logging
 
 import data_pump.var_declarations as var
 from data_pump.bitstream import import_bitstream
@@ -19,6 +19,10 @@ from data_pump.registrationdata import import_registrationdata
 from data_pump.tasklistitem import import_tasklistitem
 from data_pump.user_registration import import_user_registration
 from data_pump.utils import read_json, create_dict_from_json
+from data_pump.sequences import migrate_sequences
+
+logging.basicConfig(level=logging.INFO)
+_logger = logging.getLogger("root")
 
 
 def at_the_end_of_import(handle_class_p, statistics_dict):
@@ -27,9 +31,9 @@ def at_the_end_of_import(handle_class_p, statistics_dict):
     statistics_dict['handle'] = (len(handle_json_list),
                                  handle_class_p.get_imported_handle())
     # write statistic into log
-    logging.info("Statistics:")
+    _logger.info("Statistics:")
     for key, value in statistics_dict.items():
-        logging.info(key + ": " + str(value[0]) +
+        _logger.info(key + ": " + str(value[0]) +
                      " expected and imported " + str(value[1]))
 
 
@@ -87,7 +91,7 @@ if __name__ == "__main__":
     handle_class = Handle()
     metadata_class = Metadata(var.statistics_dict, args.save_dict_bool)
 
-    logging.info("Data migration started!")
+    _logger.info("Data migration started!")
     import_community(metadata_class,
                      handle_class,
                      var.group_id_dict,
@@ -161,5 +165,9 @@ if __name__ == "__main__":
     import_user_metadata(var.bitstream_id_dict,
                          var.user_registration_id_dict,
                          var.statistics_dict)
+
+    # migrate sequences
+    migrate_sequences()
+
     at_the_end_of_import(handle_class, var.statistics_dict)
-    logging.info("Data migration is completed!")
+    _logger.info("Data migration is completed!")
