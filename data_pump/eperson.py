@@ -73,6 +73,9 @@ The eperson email could consist of more email, return all of them in the array
 
 
 def get_eperson_emails(email):
+    if email is None:
+        return []
+
     if ';' not in email:
         return [email]
 
