@@ -15,16 +15,16 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        if insert_dict:
-            self.metadataschema_id_dict = \
-                insert_data_into_dicts("metadataschemaregistry.json")
-            self.metadatafield_id_dict = \
-                insert_data_into_dicts("metadatafieldregistry.json")
+        # if insert_dict:
+        #     self.metadataschema_id_dict = \
+        #         insert_data_into_dicts("metadataschemaregistry.json")
+        #     self.metadatafield_id_dict = \
+        #         insert_data_into_dicts("metadatafieldregistry.json")
 
         # import all metadata
-        self.read_metadata()
-        self.import_metadataschemaregistry(statistics_dict)
-        self.import_metadatafieldregistry(statistics_dict)
+        # self.read_metadata()
+        # self.import_metadataschemaregistry(statistics_dict)
+        # self.import_metadatafieldregistry(statistics_dict)
 
     def read_metadata(self):
         metadatavalue_json_name = 'metadatavalue.json'
