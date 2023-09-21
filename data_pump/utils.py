@@ -43,17 +43,6 @@ def do_api_post(url, params: dict, json_p):
     return response
 
 
-def do_api_post_custom(url, params: dict, list, content_type):
-    """
-    Insert data into database by api.
-    @param url: url for api post
-    @param params: parameters for api post
-    @param json_p: posted data
-    @return: response from api post
-    """
-    url = API_URL + url
-    response = rest_proxy.d.api_post(url, params, list, False, content_type)
-    return response
 
 
 def do_api_get_one(url, object_id):
