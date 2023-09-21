@@ -1,7 +1,7 @@
 import enum
 import logging
 
-user = "m@m.edu"
+user = "test@test.edu"
 password = "dspace"
 # password = "admin"
 # user = "m@edu.com"
@@ -9,12 +9,12 @@ password = "dspace"
 
 # http or https
 use_ssl = False
-host = "localhost"
-# host = "dev-5.pc"
-fe_port = ":4000"
-# fe_port = None
-be_port = ":8080"
-# be_port = None
+# host = "localhost"
+host = "dev-5.pc"
+# fe_port = ":4000"
+fe_port = None
+# be_port = ":8080"
+be_port = None
 be_location = "/server/"
 
 # config logging

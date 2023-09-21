@@ -1,7 +1,7 @@
 import logging
 
 from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
-    save_dict_as_json, do_api_post_custom
+    save_dict_as_json
 from support.dspace_proxy import rest_proxy
 from const import API_URL
 
