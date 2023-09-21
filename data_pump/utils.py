@@ -43,8 +43,6 @@ def do_api_post(url, params: dict, json_p):
     return response
 
 
-
-
 def do_api_get_one(url, object_id):
     """
     Get data with id from table.
