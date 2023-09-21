@@ -44,37 +44,37 @@ def insert_data_into_dicts(eperson_json_name, user_registraion_json_name,
                            bitstream_json_name, insert_data):
     if not insert_data:
         return
-    # var.eperson_id_dict = create_dict_from_json(eperson_json_name)
-    # var.user_registration_id_dict = create_dict_from_json(user_registraion_json_name)
-    # var.group_id_dict = create_dict_from_json(group_json_name)
-    # var.community_id_dict = create_dict_from_json(community_json_name)
+    var.eperson_id_dict = create_dict_from_json(eperson_json_name)
+    var.user_registration_id_dict = create_dict_from_json(user_registraion_json_name)
+    var.group_id_dict = create_dict_from_json(group_json_name)
+    var.community_id_dict = create_dict_from_json(community_json_name)
     var.collection_id_dict = create_dict_from_json(collection_json_name)
     var.item_id_dict = create_dict_from_json(item_json_name)
-    # var.workflowitem_id_dict = create_dict_from_json(workspace_json_name)
-    # var.workflowitem_id_dict = create_dict_from_json(workflow_json_name)
-    # var.bitstreamformat_id_dict = create_dict_from_json(bitstreamformat_json_name)
-    # var.bundle_id_dict = create_dict_from_json(bundle_json_name)
-    # var.bitstream_id_dict = create_dict_from_json(bitstream_json_name)
+    var.workflowitem_id_dict = create_dict_from_json(workspace_json_name)
+    var.workflowitem_id_dict = create_dict_from_json(workflow_json_name)
+    var.bitstreamformat_id_dict = create_dict_from_json(bitstreamformat_json_name)
+    var.bundle_id_dict = create_dict_from_json(bundle_json_name)
+    var.bitstream_id_dict = create_dict_from_json(bitstream_json_name)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Upload values into dictionaries')
     parser.add_argument('--load_dict_bool',
                         help='bool value if we load values into dict',
-                        required=False, type=bool, default=True)
+                        required=False, type=bool, default=False)
     parser.add_argument('--save_dict_bool',
                         help='bool value if we save dict values into jsons',
                         required=False, type=bool, default=False)
     args = parser.parse_args()
-    #
-    # # Is the email server really off?
-    # email_s_off = input("Please make sure your email server is turned off. "
-    #                     "Otherwise unbearable amount of emails will be sent. "
-    #                     "Is your EMAIL SERVER really OFF? (Y/N)")
-    # email_s_off = email_s_off.lower()
-    # # terminate the program
-    # if email_s_off not in ("y", "yes"):
-    #     sys.exit()
+
+    # Is the email server really off?
+    email_s_off = input("Please make sure your email server is turned off. "
+                        "Otherwise unbearable amount of emails will be sent. "
+                        "Is your EMAIL SERVER really OFF? (Y/N)")
+    email_s_off = email_s_off.lower()
+    # terminate the program
+    if email_s_off not in ("y", "yes"):
+        sys.exit()
 
     insert_data_into_dicts("eperson_dict.json",
                            "user_registration_dict.json",
@@ -90,43 +90,43 @@ if __name__ == "__main__":
                            args.load_dict_bool)
     handle_class = Handle()
     metadata_class = Metadata(var.statistics_dict, args.load_dict_bool)
-    #
-    # _logger.info("Data migration started!")
-    # import_community(metadata_class,
-    #                  handle_class,
-    #                  var.group_id_dict,
-    #                  var.community_id_dict,
-    #                  var.community2logo_dict,
-    #                  var.statistics_dict,
-    #                  args.save_dict_bool)
-    # import_collection(metadata_class,
-    #                   handle_class,
-    #                   var.group_id_dict,
-    #                   var.community_id_dict,
-    #                   var.collection_id_dict,
-    #                   var.collection2logo_dict,
-    #                   var.statistics_dict,
-    #                   args.save_dict_bool)
-    # import_registrationdata(var.statistics_dict)
-    # import_epersongroup(metadata_class,
-    #                     var.group_id_dict,
-    #                     var.statistics_dict,
-    #                     args.save_dict_bool)
-    # import_group2group(var.group_id_dict, var.statistics_dict)
-    # import_eperson(metadata_class,
-    #                var.eperson_id_dict,
-    #                var.email2epersonId_dict,
-    #                var.statistics_dict,
-    #                args.save_dict_bool)
-    # import_user_registration(var.email2epersonId_dict,
-    #                          var.eperson_id_dict,
-    #                          var.user_registration_id_dict,
-    #                          var.statistics_dict,
-    #                          args.save_dict_bool)
-    # import_group2eperson(var.eperson_id_dict,
-    #                      var.group_id_dict,
-    #                      var.statistics_dict)
-    # import_license(var.eperson_id_dict, var.statistics_dict, args.save_dict_bool)
+
+    _logger.info("Data migration started!")
+    import_community(metadata_class,
+                     handle_class,
+                     var.group_id_dict,
+                     var.community_id_dict,
+                     var.community2logo_dict,
+                     var.statistics_dict,
+                     args.save_dict_bool)
+    import_collection(metadata_class,
+                      handle_class,
+                      var.group_id_dict,
+                      var.community_id_dict,
+                      var.collection_id_dict,
+                      var.collection2logo_dict,
+                      var.statistics_dict,
+                      args.save_dict_bool)
+    import_registrationdata(var.statistics_dict)
+    import_epersongroup(metadata_class,
+                        var.group_id_dict,
+                        var.statistics_dict,
+                        args.save_dict_bool)
+    import_group2group(var.group_id_dict, var.statistics_dict)
+    import_eperson(metadata_class,
+                   var.eperson_id_dict,
+                   var.email2epersonId_dict,
+                   var.statistics_dict,
+                   args.save_dict_bool)
+    import_user_registration(var.email2epersonId_dict,
+                             var.eperson_id_dict,
+                             var.user_registration_id_dict,
+                             var.statistics_dict,
+                             args.save_dict_bool)
+    import_group2eperson(var.eperson_id_dict,
+                         var.group_id_dict,
+                         var.statistics_dict)
+    import_license(var.eperson_id_dict, var.statistics_dict, args.save_dict_bool)
     import_item(metadata_class,
                 handle_class,
                 var.workflowitem_id_dict,
@@ -135,39 +135,39 @@ if __name__ == "__main__":
                 var.eperson_id_dict,
                 var.statistics_dict,
                 args.save_dict_bool)
-    # import_tasklistitem(var.workflowitem_id_dict,
-    #                     var.eperson_id_dict,
-    #                     var.statistics_dict)
-    # var.unknown_format_id_val = import_bitstreamformatregistry(
-    #     var.bitstreamformat_id_dict,
-    #     var.unknown_format_id_val,
-    #     var.statistics_dict,
-    #     args.save_dict_bool)
-    # import_bundle(metadata_class,
-    #               var.item_id_dict,
-    #               var.bundle_id_dict,
-    #               var.primaryBitstream_dict,
-    #               var.statistics_dict,
-    #               args.save_dict_bool)
-    # import_bitstream(metadata_class,
-    #                  var.bitstreamformat_id_dict,
-    #                  var.primaryBitstream_dict,
-    #                  var.bitstream2bundle_dict,
-    #                  var.bundle_id_dict,
-    #                  var.community2logo_dict,
-    #                  var.collection2logo_dict,
-    #                  var.bitstream_id_dict,
-    #                  var.community_id_dict,
-    #                  var.collection_id_dict,
-    #                  var.unknown_format_id_val,
-    #                  var.statistics_dict,
-    #                  args.save_dict_bool)
-    # import_user_metadata(var.bitstream_id_dict,
-    #                      var.user_registration_id_dict,
-    #                      var.statistics_dict)
-    #
-    # # migrate sequences
-    # migrate_sequences()
+    import_tasklistitem(var.workflowitem_id_dict,
+                        var.eperson_id_dict,
+                        var.statistics_dict)
+    var.unknown_format_id_val = import_bitstreamformatregistry(
+        var.bitstreamformat_id_dict,
+        var.unknown_format_id_val,
+        var.statistics_dict,
+        args.save_dict_bool)
+    import_bundle(metadata_class,
+                  var.item_id_dict,
+                  var.bundle_id_dict,
+                  var.primaryBitstream_dict,
+                  var.statistics_dict,
+                  args.save_dict_bool)
+    import_bitstream(metadata_class,
+                     var.bitstreamformat_id_dict,
+                     var.primaryBitstream_dict,
+                     var.bitstream2bundle_dict,
+                     var.bundle_id_dict,
+                     var.community2logo_dict,
+                     var.collection2logo_dict,
+                     var.bitstream_id_dict,
+                     var.community_id_dict,
+                     var.collection_id_dict,
+                     var.unknown_format_id_val,
+                     var.statistics_dict,
+                     args.save_dict_bool)
+    import_user_metadata(var.bitstream_id_dict,
+                         var.user_registration_id_dict,
+                         var.statistics_dict)
+
+    # migrate sequences
+    migrate_sequences()
 
     at_the_end_of_import(handle_class, var.statistics_dict)
     _logger.info("Data migration is completed!")
