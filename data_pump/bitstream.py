@@ -97,7 +97,7 @@ def import_bitstream(metadata_class,
                 str(bitstream['bitstream_id']) + ' failed. Exception: ' +
                 str(e))
 
-    # do bitstream checksum for latest imported bitstreams
+    # do bitstream checksum for the last imported bitstreams
     # these bitstreams can be less than 500, so it is not calculated in a loop
     do_most_recent_checksum()
 
