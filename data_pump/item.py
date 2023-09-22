@@ -9,6 +9,7 @@ from const import API_URL
 def import_item(metadata_class,
                 handle_class,
                 workflowitem_id_dict,
+                workspaceitem_id_dict,
                 item_id_dict,
                 collection_id_dict,
                 eperson_id_dict,
@@ -23,14 +24,13 @@ def import_item(metadata_class,
     workspaceitem_json_name = "workspaceitem.json"
     saved_workspace_json_name = "workspaceitem_dict.json"
     workflowitem_json_name = 'workflowitem.json'
-    saved_workflow_json_name = "workflow_dict.json"
+    saved_workflow_json_name = "workflowitem_dict.json"
     item_url = 'clarin/import/item'
     saved_item_json_name = "item_dict.json"
     workflowitem_url = 'clarin/import/workflowitem'
     imported_workspaceitem = 0
     imported_workflowitem = 0
     imported_item = 0
-    workspaceitem_id_dict = {}
     # create dict from items by item id
     item_json_list = read_json(item_json_name)
     items_dict = {}

@@ -37,9 +37,9 @@ def at_the_end_of_import(handle_class_p, statistics_dict):
                      " expected and imported " + str(value[1]))
 
 
-def insert_data_into_dicts(eperson_json_name, user_registraion_json_name,
+def load_data_into_dicts(eperson_json_name, user_registraion_json_name,
                            group_json_name, community_json_name, collection_json_name,
-                           item_json_name, workspace_json_name, workflow_json_name,
+                           item_json_name, workspaceitem_json_name, workflow_json_name,
                            bitstreamformat_json_name, bundle_json_name,
                            bitstream_json_name, insert_data):
     if not insert_data:
@@ -50,7 +50,7 @@ def insert_data_into_dicts(eperson_json_name, user_registraion_json_name,
     var.community_id_dict = create_dict_from_json(community_json_name)
     var.collection_id_dict = create_dict_from_json(collection_json_name)
     var.item_id_dict = create_dict_from_json(item_json_name)
-    var.workflowitem_id_dict = create_dict_from_json(workspace_json_name)
+    var.workspaceitem_id_dict = create_dict_from_json(workspaceitem_json_name)
     var.workflowitem_id_dict = create_dict_from_json(workflow_json_name)
     var.bitstreamformat_id_dict = create_dict_from_json(bitstreamformat_json_name)
     var.bundle_id_dict = create_dict_from_json(bundle_json_name)
@@ -59,7 +59,7 @@ def insert_data_into_dicts(eperson_json_name, user_registraion_json_name,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Upload values into dictionaries')
-    parser.add_argument('--insert_dict_bool',
+    parser.add_argument('--load_dict_bool',
                         help='bool value if we load values into dict',
                         required=False, type=bool, default=False)
     parser.add_argument('--save_dict_bool',
@@ -76,18 +76,18 @@ if __name__ == "__main__":
     if email_s_off not in ("y", "yes"):
         sys.exit()
 
-    insert_data_into_dicts("eperson_dict.json",
+    load_data_into_dicts("eperson_dict.json",
                            "user_registration_dict.json",
                            "epersongroup_dict.json",
                            "community_dict.json",
                            "collection_dict.json",
                            "item_dict.json",
-                           "workflowitem_dict.json",
                            "workspaceitem_dict.json",
+                           "workflowitem_dict.json",
                            "bitstreamformatregistry_dict.json",
                            "bundle_dict.json",
                            "bitstream_dict.json",
-                           args.insert_dict_bool)
+                           args.load_dict_bool)
     handle_class = Handle()
     metadata_class = Metadata(var.statistics_dict, args.save_dict_bool)
 
@@ -130,6 +130,7 @@ if __name__ == "__main__":
     import_item(metadata_class,
                 handle_class,
                 var.workflowitem_id_dict,
+                var.workspaceitem_id_dict,
                 var.item_id_dict,
                 var.collection_id_dict,
                 var.eperson_id_dict,
