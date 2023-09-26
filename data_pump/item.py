@@ -9,6 +9,7 @@ from const import API_URL
 def import_item(metadata_class,
                 handle_class,
                 workflowitem_id_dict,
+                workspaceitem_id_dict,
                 item_id_dict,
                 collection_id_dict,
                 eperson_id_dict,
@@ -32,7 +33,6 @@ def import_item(metadata_class,
     imported_workspaceitem = 0
     imported_workflowitem = 0
     imported_item = 0
-    workspaceitem_id_dict = {}
     # create dict from items by item id
     item_json_list = read_json(item_json_name)
     items_dict = {}
