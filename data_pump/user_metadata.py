@@ -81,7 +81,7 @@ def import_user_metadata(bitstream_id_dict,
             }
             response = do_api_post(user_met_url, params, user_met_list_request)
             if response.ok:
-                imported_user_met += 1
+                imported_user_met += len(user_met_list_request)
             else:
                 raise Exception(response)
         except Exception as e:
