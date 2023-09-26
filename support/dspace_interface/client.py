@@ -171,7 +171,7 @@ class DSpaceClient:
         """
         Perform a POST request. Refresh XSRF token if necessary.
         POSTs are typically used to create objects.
-        @param content_type:
+        @param content_type: Type of the content, it is `JSON` by default
         @param url:     DSpace REST API URL
         @param params:  Any parameters to include (eg ?parent=abbc-....)
         @param data:  Data in json-ready form (dict) to send as
