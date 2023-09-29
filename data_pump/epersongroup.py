@@ -19,17 +19,8 @@ def import_epersongroup(metadata_class,
     imported = 0
     group_json_list = read_json(group_json_name)
     # group Administrator and Anonymous already exist
-    # we need to remember their id
-    existing_data_dict = get_existing_epersongroups(group_url)
-    if existing_data_dict is not None:
-        for existing_data in existing_data_dict:
-            if existing_data['name'] == 'Anonymous':
-                group_id_dict[0] = [existing_data['id']]
-            elif existing_data['name'] == 'Administrator':
-                group_id_dict[1] = [existing_data['id']]
-            else:
-                logging.error('Unrecognized eperson group ' + existing_data['name'])
-
+    # we need to remember their id if we haven't done it yet
+    # load_admin_anonymous_groups(var.group_id_dict)
     if not group_json_list:
         logging.info("Epersongroup JSON is empty.")
         return
@@ -120,3 +111,32 @@ def import_group2group(group_id_dict,
     statistics_val = (len(group2group_json_list), imported)
     statistics_dict['group2group'] = statistics_val
     logging.info("Group2group was successfully imported!")
+
+def load_admin_anonymous_groups(group_id_dict):
+    """
+    Load Administrator and Anonymous groups into dict.
+    This data already exists in database.
+    Remember its id.
+    """
+    group_url = 'eperson/groups'
+    existing_data_dict = get_existing_epersongroups(group_url)
+    if existing_data_dict is not None:
+        for existing_data in existing_data_dict:
+            if existing_data['name'] == 'Anonymous':
+                group_id_dict[0] = [existing_data['id']]
+            elif existing_data['name'] == 'Administrator':
+                group_id_dict[1] = [existing_data['id']]
+            else:
+                logging.error('Unrecognized eperson group ' + existing_data['name'])
+
+def get_existing_epersongroups(group_url):
+    """
+    Get all existing eperson groups from database.
+    """
+    existing_data_dict = None
+    try:
+        response = do_api_get_all(group_url)
+        existing_data_dict = convert_response_to_json(response)['_embedded']['groups']
+    except Exception as e:
+        logging.error('GET request ' + group_url + ' failed. Exception: ' + str(e))
+    return existing_data_dict

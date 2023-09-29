@@ -81,19 +81,4 @@ def save_dict_as_json(json_name, dictionary: dict):
 
 def create_dict_from_json(json_name):
     return {int(key): value
-            for key, value in read_json(json_name, MAPPING_PATH).items()}
-
-
-def insert_data_into_dicts(insert=False):
-    create_dict_from_json("eperson.json")
-    create_dict_from_json("group.json")
-    create_dict_from_json("metadataschemaregistry.json")
-    create_dict_from_json("metadatafield.json")
-    create_dict_from_json("community.json")
-    create_dict_from_json("collection.json")
-    create_dict_from_json("item.json")
-    create_dict_from_json("workspaceitem.json")
-    create_dict_from_json("workflowitem.json")
-    create_dict_from_json("bitstreamformat.json")
-    create_dict_from_json("bundle.json")
-    create_dict_from_json("bitstream.json")
+            for key, value in read_json(json_name, DATA_PATH).items()}

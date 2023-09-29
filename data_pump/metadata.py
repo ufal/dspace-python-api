@@ -3,11 +3,11 @@ import logging
 
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
-    insert_data_into_dicts
+    create_dict_from_json
 
 
 class Metadata:
-    def __init__(self, statistics_dict, insert_dict):
+    def __init__(self, statistics_dict, load_dict):
         """
         Read metadatavalue as json and
         convert it to dictionary with tuple key: resource_type_id and resource_id.
@@ -15,11 +15,11 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        if insert_dict:
+        if load_dict:
             self.metadataschema_id_dict = \
-                insert_data_into_dicts("metadataschemaregistry.json")
+                create_dict_from_json("metadataschemaregistry.json")
             self.metadatafield_id_dict = \
-                insert_data_into_dicts("metadatafieldregistry.json")
+                create_dict_from_json("metadatafieldregistry.json")
 
         # import all metadata
         self.read_metadata()

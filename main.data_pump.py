@@ -10,7 +10,8 @@ from data_pump.collection import import_collection
 from data_pump.community import import_community
 from data_pump.user_metadata import import_user_metadata
 from data_pump.eperson import import_eperson, import_group2eperson
-from data_pump.epersongroup import import_epersongroup, import_group2group
+from data_pump.epersongroup import import_epersongroup, import_group2group, \
+    load_admin_anonymous_groups
 from data_pump.handle import Handle
 from data_pump.item import import_item
 from data_pump.license import import_license
@@ -89,9 +90,11 @@ if __name__ == "__main__":
                            "bitstream_dict.json",
                            args.load_dict_bool)
     handle_class = Handle()
-    metadata_class = Metadata(var.statistics_dict, args.save_dict_bool)
+    metadata_class = Metadata(var.statistics_dict, args.load_dict_bool)
 
     _logger.info("Data migration started!")
+    # group Administrator and Anonymous already exist, load them
+    load_admin_anonymous_groups(var.group_id_dict)
     import_community(metadata_class,
                      handle_class,
                      var.group_id_dict,
