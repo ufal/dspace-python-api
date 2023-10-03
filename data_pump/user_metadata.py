@@ -37,23 +37,51 @@ def import_user_metadata(bitstream_id_dict,
     if not user_met_json_list:
         logging.info("User_metadata JSON is empty.")
         return
+
+    # Group user metadata by `transaction_id`. The endpoint must receive list of all metadata with the same
+    # transaction_id` because if the endpoint will be called for every `user_metadata` there will be a huge amount
+    # of `license_resource_user_allowance` records with not correct mapping with the `user_metadata` table.
+    user_met_json_dict = {}
     for user_met in user_met_json_list:
         if user_met['transaction_id'] not in user_allowance_dict:
             continue
-        data_user_all_dict = user_allowance_dict[user_met['transaction_id']]
-        user_met_json_p = [{'metadataKey': user_met['metadata_key'],
-                            'metadataValue': user_met['metadata_value']}]
+
+        # If the user_metadata with transaction_id has some values in the list - append the list, otherwise
+        # create a new one
+        if user_met['transaction_id'] in user_met_json_dict:
+            user_met_json_dict[user_met['transaction_id']].append(user_met)
+        else:
+            user_met_json_dict[user_met['transaction_id']] = [user_met]
+
+    # Go through dict and import user_metadata
+    for user_met_key in user_met_json_dict.keys():
+        # Get list of all user_metadata following `transaction_id`
+        user_met_list = user_met_json_dict[user_met_key]
+        # Get user_registration data for importing
+        data_user_all_dict = user_allowance_dict[user_met_list[0]['transaction_id']]
+        # Get `eperson_id` for importing
+        eperson_id = user_met_list[0]['eperson_id']
+
+        # Prepare user_metadata list for request
+        user_met_list_request = []
+        for user_met in user_met_list:
+            user_met_list_request.append(
+                {'metadataKey': user_met['metadata_key'],
+                 'metadataValue': user_met['metadata_value']
+                 })
+
         try:
+            # Prepare params for the import endpoint
             params = {
                 'bitstreamUUID': bitstream_id_dict[mappings_dict[
                     data_user_all_dict['mapping_id']]],
                 'createdOn': data_user_all_dict['created_on'],
                 'token': data_user_all_dict['token'],
-                'userRegistrationId': user_registration_id_dict[user_met['eperson_id']]
+                'userRegistrationId': user_registration_id_dict[eperson_id]
             }
-            response = do_api_post(user_met_url, params, user_met_json_p)
+            response = do_api_post(user_met_url, params, user_met_list_request)
             if response.ok:
-                imported_user_met += 1
+                imported_user_met += len(user_met_list_request)
             else:
                 raise Exception(response)
         except Exception as e:
@@ -64,6 +92,6 @@ def import_user_metadata(bitstream_id_dict,
                           str(mappings_dict[data_user_all_dict['mapping_id']]) +
                           '. Exception: ' + str(e))
 
-    statistics_val = (len(user_met_json_list), imported_user_met)
+    statistics_val = (len(user_met_json_dict), imported_user_met)
     statistics_dict['user_metadata'] = statistics_val
     logging.info("User metadata successfully imported!")
