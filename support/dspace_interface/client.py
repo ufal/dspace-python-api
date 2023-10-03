@@ -167,20 +167,21 @@ class DSpaceClient:
             self.session.cookies.update({'X-XSRF-Token': t})
         return r
 
-    def api_post(self, url, params, json_p, retry=False):
+    def api_post(self, url, params, data, retry=False, content_type='application/json'):
         """
         Perform a POST request. Refresh XSRF token if necessary.
         POSTs are typically used to create objects.
+        @param content_type: Type of the content, it is `JSON` by default
         @param url:     DSpace REST API URL
         @param params:  Any parameters to include (eg ?parent=abbc-....)
-        @param json_p:  Data in json-ready form (dict) to send as
+        @param data:  Data in json-ready form (dict) to send as
                         POST body (eg. item.as_dict())
         @param retry:   Has this method already been retried?
                         Used if we need to refresh XSRF.
         @return:        Response from API
         """
-        h = {'Content-type': 'application/json'}
-        r = self.session.post(url, json=json_p, params=params, headers=h)
+        h = {'Content-type': content_type}
+        r = self.session.post(url, json=data, params=params, headers=h)
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
             logging.debug('API Post: Updating token to ' + t)
@@ -201,7 +202,7 @@ class DSpaceClient:
                         'API Post: Already retried... something must be wrong')
                 else:
                     logging.info("API Post: Retrying request with updated CSRF token")
-                    return self.api_post(url, params=params, json_p=json_p, retry=True)
+                    return self.api_post(url, params=params, data=data, retry=True)
         elif r.status_code == 401:
             r_json = r.json()
             if 'message' in r_json and 'Authentication is required' in r_json[
@@ -220,7 +221,7 @@ class DSpaceClient:
                     retry_value = False
                     if self.exception401Counter > 3:
                         retry_value = True
-                    return self.api_post(url, params=params, json_p=json_p,
+                    return self.api_post(url, params=params, data=data,
                                          retry=retry_value)
 
         check_response(r, "api post")

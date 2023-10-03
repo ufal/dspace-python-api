@@ -24,10 +24,12 @@ def import_item(metadata_class,
     workspaceitem_json_name = "workspaceitem.json"
     saved_workspace_json_name = "workspaceitem_dict.json"
     workflowitem_json_name = 'workflowitem.json'
-    saved_workflow_json_name = "workflowitem_dict.json"
+    saved_workflow_json_name = "workflow_dict.json"
+    collection2table_name = "collection2item.json"
     item_url = 'clarin/import/item'
     saved_item_json_name = "item_dict.json"
     workflowitem_url = 'clarin/import/workflowitem'
+    item2collection_url = 'clarin/import/item/{item_uuid}/mappedCollections'
     imported_workspaceitem = 0
     imported_workflowitem = 0
     imported_item = 0
@@ -138,6 +140,41 @@ def import_item(metadata_class,
         except Exception as e:
             logging.error('POST request ' + item_url + ' for id: ' +
                           str(item['item_id']) + ' failed. Exception: ' + str(e))
+
+    # Import collection2item table - only items which are mapped in more collections
+    # Add another collection into Item only if another collection is not owning_collection
+    collection2table_json_list = read_json(collection2table_name)
+    coll_2_item_dict = {}
+    items_with_more_colls = {}
+    # Find items which are mapped in more collections and store them into dictionary in this way
+    # {'item_uuid': [collection_uuid_1, collection_uuid_2]}
+    for collection2table in collection2table_json_list:
+        # Every item should have mapped only one collection - the owning collection except the items which
+        # are mapped into more collections
+        item_uuid = item_id_dict[collection2table['item_id']]
+        collection_uuid = collection_id_dict[collection2table['collection_id']]
+        if item_uuid in coll_2_item_dict:
+            # Add another collection into dict to get all collections for current Item
+            coll_2_item_dict[item_uuid].append(collection_id_dict[collection2table['collection_id']])
+            # Add item UUID and collection UUID into list in this way {`item_uuid`: `collection_uuid`}
+            items_with_more_colls[item_uuid] = collection_uuid
+            continue
+        coll_2_item_dict[item_uuid] = [collection_uuid]
+
+    # Call Vanilla REST endpoint which add relation between Item and Collection into the collection2item table
+    for item_with_more_coll_uuid in items_with_more_colls.keys():
+        # Prepare request URL - replace `{item_uuid}` with current `item_with_more_coll_uuid`
+        request_url = item2collection_url.replace('{item_uuid}', item_with_more_coll_uuid)
+
+        # Prepare request body which should looks like this:
+        # `"https://localhost:8080/spring-rest/api/core/collections/{collection_uuid_1}" + \n
+        # "https://localhost:8080/spring-rest/api/core/collections/{collection_uuid_2}"
+        request_body = []
+        collection_url = 'core/collections/'
+        for collection_uuid in coll_2_item_dict[item_with_more_coll_uuid]:
+            request_body.append(API_URL + collection_url + collection_uuid)
+
+        do_api_post(request_url, {}, request_body)
 
     # save item dict as json
     if save_dict:
