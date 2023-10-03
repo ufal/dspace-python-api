@@ -8,6 +8,7 @@ from data_pump.bitstreamformatregistry import import_bitstreamformatregistry
 from data_pump.bundle import import_bundle
 from data_pump.collection import import_collection
 from data_pump.community import import_community
+from data_pump.resourcepolicy import import_resource_policies, delete_all_resource_policy
 from data_pump.user_metadata import import_user_metadata
 from data_pump.eperson import import_eperson, import_group2eperson
 from data_pump.epersongroup import import_epersongroup, import_group2group, \
@@ -34,6 +35,13 @@ def at_the_end_of_import(handle_class_p, statistics_dict):
     # write statistic into log
     _logger.info("Statistics:")
     for key, value in statistics_dict.items():
+        # resourcepolicy has own style of statistics
+        if key == 'resourcepolicy':
+            string = ''
+            for rpKey, rpValue in value.items():
+                string += str(rpValue) + ' ' + rpKey + ', '
+            _logger.info(key + ": " + string)
+            continue
         _logger.info(key + ": " + str(value[0]) +
                      " expected and imported " + str(value[1]))
 
@@ -169,7 +177,17 @@ if __name__ == "__main__":
     import_user_metadata(var.bitstream_id_dict,
                          var.user_registration_id_dict,
                          var.statistics_dict)
-
+    # before importing of resource policies we have to delete all
+    # created data
+    delete_all_resource_policy()
+    import_resource_policies(var.community_id_dict,
+                             var.collection_id_dict,
+                             var.item_id_dict,
+                             var.bundle_id_dict,
+                             var.bitstream_id_dict,
+                             var.eperson_id_dict,
+                             var.group_id_dict,
+                             var.statistics_dict)
     # migrate sequences
     migrate_sequences()
 

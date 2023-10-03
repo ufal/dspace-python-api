@@ -54,6 +54,17 @@ def do_api_get_one(url, object_id):
     response = rest_proxy.d.api_get(url, {}, None)
     return response
 
+def do_api_get(url, params):
+    """
+    Get data with id from table.
+    @param url: url for api get
+    @param object_id: id of object
+    @return: response from api get
+    """
+    url = API_URL + url
+    response = rest_proxy.d.api_get(url, params, None)
+    return response
+
 
 def do_api_get_all(url):
     """
@@ -81,4 +92,4 @@ def save_dict_as_json(json_name, dictionary: dict):
 
 def create_dict_from_json(json_name):
     return {int(key): value
-            for key, value in read_json(json_name, DATA_PATH).items()}
+            for key, value in read_json(json_name, MAPPING_PATH).items()}

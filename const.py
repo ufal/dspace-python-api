@@ -66,7 +66,19 @@ CLARIN_DSPACE_7_PORT = 5432
 CLARIN_DSPACE_7_USER = "<USERNAME>"
 CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"
 
+
 class ItemType(enum.Enum):
     ITEM = 1
     COMMUNITY = 2
     COLLECTION = 3
+
+
+# constants for resource type ID, taken from DSpace (BE) codebase
+BITSTREAM = 0
+BUNDLE = 1
+ITEM = 2
+COLLECTION = 3
+COMMUNITY = 4
+SITE = 5
+GROUP = 6
+EPERSON = 7
