@@ -67,12 +67,11 @@ def import_eperson(metadata_class,
     logging.info("Eperson was successfully imported!")
 
 
-'''
-The eperson email could consist of more email, return all of them in the array  
-'''
-
-
 def get_eperson_emails(email):
+    """
+    The eperson email could consist of more email, return all of them in the array.
+    If the email doesn't contain `;` that means there is only one email without `;` separator.
+    """
     if email is None:
         return []
 
