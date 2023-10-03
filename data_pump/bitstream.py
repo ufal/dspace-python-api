@@ -26,7 +26,6 @@ def import_bitstream(metadata_class,
     bundle2bitstream_json_name = 'bundle2bitstream.json'
     saved_bitstream_json_name = 'bitstream_dict.json'
     bitstream_url = 'clarin/import/core/bitstream'
-    checksum_url = 'clarin/import/core/bitstream/checksum'
     imported = 0
 
     # load bundle2bitstream
@@ -43,19 +42,11 @@ def import_bitstream(metadata_class,
         return
     counter = 0
     for bitstream in bitstream_json_list:
+        # do bitstream checksum
+        # do this after every 500 imported bitstreams,
+        # because the server may be out of memory
         if counter % 500 == 0:
-            # do bitstream checksum
-            # do this after every 500 imported bitstreams,
-            # because the server may be out of memory
-            # fill the tables: most_recent_checksum and checksum_result
-            # based on imported bitstreams
-            try:
-                response = do_api_post(checksum_url, {}, None)
-                if not response.ok:
-                    raise Exception(response)
-            except Exception as e:
-                logging.error('POST request ' +
-                              checksum_url + ' failed. Exception: ' + str(e))
+            do_most_recent_checksum()
             counter = 0
         counter += 1
         bitstream_json_p = {}
@@ -106,6 +97,10 @@ def import_bitstream(metadata_class,
                 str(bitstream['bitstream_id']) + ' failed. Exception: ' +
                 str(e))
 
+    # do bitstream checksum for the last imported bitstreams
+    # these bitstreams can be less than 500, so it is not calculated in a loop
+    do_most_recent_checksum()
+
     # write bitstream dict as json
     if save_dict:
         save_dict_as_json(saved_bitstream_json_name, bitstream_id_dict)
@@ -118,6 +113,22 @@ def import_bitstream(metadata_class,
     logging.info(
         "Bitstream, bundle2bitstream, most_recent_checksum "
         "and checksum_result were successfully imported!")
+
+
+def do_most_recent_checksum():
+    """
+    Fill the tables most_recent_checksum and checksum_result based
+    on imported bitstreams that haven't already their checksum
+    calculated.
+    """
+    checksum_url = 'clarin/import/core/bitstream/checksum'
+    try:
+        response = do_api_post(checksum_url, {}, None)
+        if not response.ok:
+            raise Exception(response)
+    except Exception as e:
+        logging.error('POST request ' +
+                      checksum_url + ' failed. Exception: ' + str(e))
 
 
 def add_logo_to_community(community2logo_dict, bitstream_id_dict, community_id_dict):
