@@ -73,7 +73,7 @@ Update `const.py`
 - `be_port = "<YOUR_BE_PORT>"`
 - `# be_port = ":8080"`
 - `be_location = "/server/"`
-##### Database const - for copying sequences
+#### Database const - for copying sequences
 - `CLARIN_DSPACE_NAME = "clarin-dspace"`
 - `CLARIN_DSPACE_HOST = "localhost"`
 - `CLARIN_DSPACE_USER = "<USERNAME>"`
