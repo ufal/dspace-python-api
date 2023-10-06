@@ -2,6 +2,7 @@ import logging
 
 from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
     save_dict_as_json
+from migration_const import COMMUNITY_DICT
 
 
 def import_community(metadata_class,
@@ -16,7 +17,6 @@ def import_community(metadata_class,
     Mapped tables: community, community2community, metadatavalue, handle
     """
     community_json_name = 'community.json'
-    saved_community_json_name = 'community_dict.json'
     comm2comm_json_name = 'community2community.json'
     community_url = 'core/communities'
     imported_comm = 0
@@ -100,7 +100,7 @@ def import_community(metadata_class,
 
     # save community dict as json
     if save_dict:
-        save_dict_as_json(saved_community_json_name, community_id_dict)
+        save_dict_as_json(COMMUNITY_DICT, community_id_dict)
 
     if 'community' in statistics_dict:
         statistics_val = (statistics_dict['community'][0], imported_comm)

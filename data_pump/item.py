@@ -4,7 +4,7 @@ from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
     save_dict_as_json
 from support.dspace_proxy import rest_proxy
 from const import API_URL
-
+from migration_const import WORKFLOWITEM_DICT, WORKSPACEITEM_DICT, ITEM_DICT
 
 def import_item(metadata_class,
                 handle_class,
@@ -22,12 +22,9 @@ def import_item(metadata_class,
     """
     item_json_name = "item.json"
     workspaceitem_json_name = "workspaceitem.json"
-    saved_workspace_json_name = "workspaceitem_dict.json"
     workflowitem_json_name = 'workflowitem.json'
-    saved_workflow_json_name = "workflow_dict.json"
     collection2table_name = "collection2item.json"
     item_url = 'clarin/import/item'
-    saved_item_json_name = "item_dict.json"
     workflowitem_url = 'clarin/import/workflowitem'
     item2collection_url = 'clarin/import/item/{item_uuid}/mappedCollections'
     imported_workspaceitem = 0
@@ -68,7 +65,7 @@ def import_item(metadata_class,
         imported_item += imported_workspaceitem
         # save workspaceitem dict as json
         if save_dict:
-            save_dict_as_json(saved_workspace_json_name, workspaceitem_id_dict)
+            save_dict_as_json(WORKSPACEITEM_DICT, workspaceitem_id_dict)
         logging.info("Workspaceitem was successfully imported!")
     else:
         logging.info("Workspaceitem JSON is empty.")
@@ -106,7 +103,7 @@ def import_item(metadata_class,
 
         # save workflow dict as json
         if save_dict:
-            save_dict_as_json(saved_workflow_json_name, workflowitem_id_dict)
+            save_dict_as_json(WORKFLOWITEM_DICT, workflowitem_id_dict)
         statistics_val = (len(workflowitem_json_list), imported_workflowitem)
         statistics_dict['workflowitem'] = statistics_val
         imported_item += imported_workflowitem
@@ -178,7 +175,7 @@ def import_item(metadata_class,
 
     # save item dict as json
     if save_dict:
-        save_dict_as_json(saved_item_json_name, item_id_dict)
+        save_dict_as_json(ITEM_DICT, item_id_dict)
     statistics_val = (statistics_dict['item'][0], imported_item)
     statistics_dict['item'] = statistics_val
     logging.info("Item and Collection2item were successfully imported!")

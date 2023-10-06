@@ -1,10 +1,9 @@
 import logging
 
-
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
     create_dict_from_json
-
+from migration_const import METADATAFIELD_DICT, METADATASCHEMA_DICT
 
 class Metadata:
     def __init__(self, statistics_dict, load_dict):
@@ -15,16 +14,16 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        # if load_dict:
-        #     self.metadataschema_id_dict = \
-        #         create_dict_from_json("metadataschemaregistry.json")
-        #     self.metadatafield_id_dict = \
-        #         create_dict_from_json("metadatafieldregistry.json")
-
-        # import all metadata
         self.read_metadata()
-        self.import_metadataschemaregistry(statistics_dict)
-        self.import_metadatafieldregistry(statistics_dict)
+
+        if load_dict:
+            self.metadataschema_id_dict = \
+                create_dict_from_json(METADATASCHEMA_DICT)
+            self.metadatafield_id_dict = \
+                create_dict_from_json(METADATAFIELD_DICT)
+        else:
+            self.import_metadataschemaregistry(statistics_dict)
+            self.import_metadatafieldregistry(statistics_dict)
 
     def read_metadata(self):
         metadatavalue_json_name = 'metadatavalue.json'
@@ -93,7 +92,6 @@ class Metadata:
         Mapped tables: metadataschemaregistry
         """
         metadataschema_json_name = 'metadataschemaregistry.json'
-        saved_metadataschema_json_name = 'metadataschema_dict.json'
         metadataschema_url = 'core/metadataschemas'
         imported = 0
         # get all existing data from database table
@@ -141,7 +139,7 @@ class Metadata:
 
         # save metadataschema dict as json
         if save_dict:
-            save_dict_as_json(saved_metadataschema_json_name,
+            save_dict_as_json(METADATASCHEMA_DICT,
                               self.metadataschema_id_dict)
         statistics_val = (len(metadataschema_json_list), imported)
         statistics_dict['metadataschemaregistry'] = statistics_val
@@ -168,7 +166,6 @@ class Metadata:
         Mapped tables: metadatafieldregistry
         """
         metadatafield_json_name = 'metadatafieldregistry.json'
-        saved_metadatafield_json_name = 'metadatafield_dict.json'
         metadatafield_url = 'core/metadatafields'
         imported = 0
         existing_data_dict = None
@@ -225,7 +222,7 @@ class Metadata:
 
         # save metadatafield dict as json
         if save_dict:
-            save_dict_as_json(saved_metadatafield_json_name, self.metadatafield_id_dict)
+            save_dict_as_json(METADATAFIELD_DICT, self.metadatafield_id_dict)
         statistics_val = (len(metadatafield_json_list), imported)
         statistics_dict['metadatafieldregistry'] = statistics_val
         logging.info("MetadataFieldRegistry was successfully imported!")

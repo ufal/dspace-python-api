@@ -3,6 +3,7 @@ import logging
 from const import API_URL
 from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
     save_dict_as_json
+from migration_const import EPERSON_DICT
 
 
 def import_eperson(metadata_class,
@@ -15,7 +16,6 @@ def import_eperson(metadata_class,
     Mapped tables: eperson, metadatavalue
     """
     eperson_json_name = 'eperson.json'
-    saved_eperson_json_name = 'eperson_dict.json'
     eperson_url = 'clarin/import/eperson'
     imported_eperson = 0
     eperson_json_list = read_json(eperson_json_name)
@@ -61,7 +61,7 @@ def import_eperson(metadata_class,
 
     # save eperson dict as json
     if save_dict:
-        save_dict_as_json(saved_eperson_json_name, eperson_id_dict)
+        save_dict_as_json(EPERSON_DICT, eperson_id_dict)
     statistics_val = (len(eperson_json_list), imported_eperson)
     statistics_dict['eperson'] = statistics_val
     logging.info("Eperson was successfully imported!")

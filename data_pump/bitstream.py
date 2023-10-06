@@ -2,7 +2,7 @@ import logging
 
 from data_pump.utils import read_json, convert_response_to_json, do_api_post, \
     save_dict_as_json
-
+from migration_const import BITSTREAM_DICT
 
 def import_bitstream(metadata_class,
                      bitstreamformat_id_dict,
@@ -24,7 +24,6 @@ def import_bitstream(metadata_class,
     """
     bitstream_json_name = 'bitstream.json'
     bundle2bitstream_json_name = 'bundle2bitstream.json'
-    saved_bitstream_json_name = 'bitstream_dict.json'
     bitstream_url = 'clarin/import/core/bitstream'
     imported = 0
 
@@ -103,7 +102,7 @@ def import_bitstream(metadata_class,
 
     # write bitstream dict as json
     if save_dict:
-        save_dict_as_json(saved_bitstream_json_name, bitstream_id_dict)
+        save_dict_as_json(BITSTREAM_DICT, bitstream_id_dict)
     statistics_val = (len(bitstream_json_list), imported)
     statistics_dict['bitstream'] = statistics_val
     # add logos (bitstreams) to collections and communities

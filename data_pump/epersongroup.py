@@ -3,6 +3,7 @@ import logging
 from const import API_URL
 from data_pump.utils import read_json, convert_response_to_json, do_api_get_all, \
     do_api_post, save_dict_as_json
+from migration_const import EPERSONGROUP_DICT
 
 
 def import_epersongroup(metadata_class,
@@ -14,7 +15,6 @@ def import_epersongroup(metadata_class,
     Mapped tables: epersongroup
     """
     group_json_name = 'epersongroup.json'
-    saved_group_json_name = 'epersongroup_dict.json'
     group_url = 'eperson/groups'
     imported = 0
     group_json_list = read_json(group_json_name)
@@ -52,7 +52,7 @@ def import_epersongroup(metadata_class,
 
     # save group dict as json
     if save_dict:
-        save_dict_as_json(saved_group_json_name, group_id_dict)
+        save_dict_as_json(EPERSONGROUP_DICT, group_id_dict)
 
     if 'epersongroup' in statistics_dict:
         statistics_val = (len(group_json_list), statistics_dict['epersongroup'][1] +

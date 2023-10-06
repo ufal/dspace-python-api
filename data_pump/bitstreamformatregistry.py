@@ -2,7 +2,7 @@ import logging
 
 from data_pump.utils import read_json, convert_response_to_json, do_api_get_all, \
     do_api_post, save_dict_as_json
-
+from migration_const import BITSTREAM_FORMAT_DICT
 
 def import_bitstreamformatregistry(bitstreamformat_id_dict,
                                    unknown_format_id_val,
@@ -13,7 +13,6 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
     Mapped tables: bitstreamformatregistry
     """
     bitsteamformat_json_name = 'bitstreamformatregistry.json'
-    saved_bitsteamformat_json_name = 'bitstreamformatregistry_dict.json'
     bitstreamformat_url = 'core/bitstreamformats'
     imported = 0
     # read all existing data from bitstreamformatregistry
@@ -73,7 +72,7 @@ def import_bitstreamformatregistry(bitstreamformat_id_dict,
 
         # save bitstreamregistry dict as json
         if save_dict:
-            save_dict_as_json(saved_bitsteamformat_json_name, bitstreamformat_id_dict)
+            save_dict_as_json(BITSTREAM_FORMAT_DICT, bitstreamformat_id_dict)
         statistics_val = (len(bitstreamformat_json_list), imported)
         statistics_dict['bitstreamformatregistry'] = statistics_val
     except Exception as e:
