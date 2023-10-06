@@ -73,6 +73,20 @@ Update `const.py`
 - `be_port = "<YOUR_BE_PORT>"`
 - `# be_port = ":8080"`
 - `be_location = "/server/"`
+##### Database const - for copying sequences
+- `CLARIN_DSPACE_NAME = "clarin-dspace"`
+- `CLARIN_DSPACE_HOST = "localhost"`
+- `CLARIN_DSPACE_USER = "<USERNAME>"`
+- `CLARIN_DSPACE_PASSWORD = "<PASSWORD>"`
+- `CLARIN_UTILITIES_NAME = "clarin-utilities"`
+- `CLARIN_UTILITIES_HOST = "localhost"`
+- `CLARIN_UTILITIES_USER = "<USERNAME>"`
+- `CLARIN_UTILITIES_PASSWORD = "<PASSWORD>"`
+- `CLARIN_DSPACE_7_NAME = "dspace"`
+- `CLARIN_DSPACE_7_HOST = "localhost"`
+- `CLARIN_DSPACE_7_PORT = 5432`
+- `CLARIN_DSPACE_7_USER = "<USERNAME>"`
+- `CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"`
 
 Update `migration_const.py`
 - `REPOSITORY_PATH = "<PROJECT_PATH>"`

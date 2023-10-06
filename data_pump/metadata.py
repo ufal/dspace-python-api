@@ -15,11 +15,11 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        if load_dict:
-            self.metadataschema_id_dict = \
-                create_dict_from_json("metadataschemaregistry.json")
-            self.metadatafield_id_dict = \
-                create_dict_from_json("metadatafieldregistry.json")
+        # if load_dict:
+        #     self.metadataschema_id_dict = \
+        #         create_dict_from_json("metadataschemaregistry.json")
+        #     self.metadatafield_id_dict = \
+        #         create_dict_from_json("metadatafieldregistry.json")
 
         # import all metadata
         self.read_metadata()
