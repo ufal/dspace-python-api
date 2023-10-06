@@ -203,7 +203,10 @@ class Metadata:
                                   ' failed. Exception: ' + str(e))
                     continue
                 for existing_data in existing_data_dict:
-                    if existing_data['_embedded']['schema']['id'] != metadatafield['metadata_schema_id'] or \
+                    if metadatafield['metadata_schema_id'] not in self.metadataschema_id_dict.keys():
+                        continue
+
+                    if existing_data['_embedded']['schema']['id'] != self.metadataschema_id_dict[metadatafield['metadata_schema_id']] or \
                             existing_data['element'] != metadatafield['element'] or \
                             existing_data['qualifier'] != metadatafield['qualifier']:
                         continue
