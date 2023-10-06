@@ -135,3 +135,7 @@ output.txt
 date.txt
 debug.log.txt
 clarin-dspace-dump-8.8.23
+
+# data folders
+.data/
+.temp-files/
