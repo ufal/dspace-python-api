@@ -15,12 +15,13 @@ class DspaceRESTProxy:
         self.response = None
         self.d = DSpaceClient(api_endpoint=const.API_URL,
                               username=const.user, password=const.password)
-        authenticated = self.d.authenticate()
-        if not authenticated:
-            logging.error('Error logging in to dspace REST API at ' +
-                          const.API_URL + '! Exiting!')
-            raise ConnectionError("Cannot connect to dspace!")
-        logging.info("Successfully logged in to dspace on " + const.API_URL)
+        if const.authentication:
+            authenticated = self.d.authenticate()
+            if not authenticated:
+                logging.error('Error logging in to dspace REST API at ' +
+                              const.API_URL + '! Exiting!')
+                raise ConnectionError("Cannot connect to dspace!")
+            logging.info("Successfully logged in to dspace on " + const.API_URL)
 
     def get(self, command, params=None, data=None):
         """

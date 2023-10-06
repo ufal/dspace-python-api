@@ -26,13 +26,13 @@ because we use this endpoint for importing existing data.
 > // clarin-dspace database
 > - `createdb --username=postgres --owner=dspace --encoding=UNICODE clarin-dspace` // create a clarin database with owner
 
-> // It run on second try:
+> // Running on second try:
 > - `psql -U postgres clarin-dspace < <CLARIN_DUMP_FILE_PATH>`
 
 > // clarin-utilities database
-> - `createdb --username=postgres --owner=dspace --encoding=UNICODE clarin-utilities` // create a utilities database with owner
+> - `createdb --username=postgres --owner=dspace --encoding=UNICODE clarin-utilities` // create the utilities database with owner
 
-> // It run on second try:
+> // Running on second try:
 > - `psql -U postgres clarin-utilities < <UTILITIES_DUMP_FILE_PATH>`
 
 ***
@@ -88,9 +88,7 @@ Update `const.py`
 - `CLARIN_DSPACE_7_USER = "<USERNAME>"`
 - `CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"`
 
-Update `migration_const.py`
-- `REPOSITORY_PATH = "<PROJECT_PATH>"`
-- `DATA_PATH = REPOSITORY_PATH + "data/"`
+**NOTE:** Be sure, that `authorization = True`, because some of the used endpoints won't work
 
 ***
 8. Create JSON files from the database tables. **NOTE: You must do it for both databases `clarin-dspace` and `clarin-utilities`** (JSON files are stored in the `data` folder)
@@ -106,7 +104,10 @@ e.g.,`handle.additional.prefixes = 11858, 11234, 11372, 11346, 20.500.12801, 20.
 10. Copy `assetstore` from dspace5 to dspace7 (for bitstream import). `assetstore` is in the folder where you have installed DSpace `dspace/assetstore`.
 
 ***
-11. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
+11. Create `icon/` folder if it doesn't exist in project and copy all the icons that are used into it.
+
+***
+12. Import data from the json files (python-api/data/*) into dspace database (CLARIN-DSpace7.*)
 - **NOTE:** database must be up to date (`dspace database migrate force` must be called in the `dspace/bin`)
 - **NOTE:** dspace server must be running
 - From the `dspace-python-api` run command `python main.data_pump.py`

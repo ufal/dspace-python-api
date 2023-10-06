@@ -7,6 +7,7 @@ from migration_const import DATA_PATH
 from migration_const import MAPPING_PATH
 from const import API_URL
 
+_this_dir = os.path.dirname(os.path.abspath(__file__))
 
 def read_json(file_name, file_path=DATA_PATH):
     """
@@ -14,7 +15,7 @@ def read_json(file_name, file_path=DATA_PATH):
     @param file_name: file name
     @return: data as json
     """
-    f_path = os.path.join(file_path, file_name)
+    f_path = os.path.join(_this_dir, '..', file_path, file_name)
     assert os.path.exists(f_path)
     with open(f_path, mode='r', encoding='utf-8') as f:
         json_p = json.load(f)

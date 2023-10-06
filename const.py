@@ -3,6 +3,7 @@ import logging
 
 user = "test@test.edu"
 password = "dspace"
+authentication = True
 
 # http or https
 use_ssl = False
