@@ -3,6 +3,7 @@ import sys
 import logging
 
 import data_pump.var_declarations as var
+import migration_const as mig_const
 from data_pump.bitstream import import_bitstream
 from data_pump.bitstreamformatregistry import import_bitstreamformatregistry
 from data_pump.bundle import import_bundle
@@ -46,24 +47,18 @@ def at_the_end_of_import(handle_class_p, statistics_dict):
                      " expected and imported " + str(value[1]))
 
 
-def load_data_into_dicts(eperson_json_name, user_registraion_json_name,
-                           group_json_name, community_json_name, collection_json_name,
-                           item_json_name, workspaceitem_json_name, workflow_json_name,
-                           bitstreamformat_json_name, bundle_json_name,
-                           bitstream_json_name, insert_data):
-    if not insert_data:
-        return
-    var.eperson_id_dict = create_dict_from_json(eperson_json_name)
-    var.user_registration_id_dict = create_dict_from_json(user_registraion_json_name)
-    var.group_id_dict = create_dict_from_json(group_json_name)
-    var.community_id_dict = create_dict_from_json(community_json_name)
-    var.collection_id_dict = create_dict_from_json(collection_json_name)
-    var.item_id_dict = create_dict_from_json(item_json_name)
-    var.workspaceitem_id_dict = create_dict_from_json(workspaceitem_json_name)
-    var.workflowitem_id_dict = create_dict_from_json(workflow_json_name)
-    var.bitstreamformat_id_dict = create_dict_from_json(bitstreamformat_json_name)
-    var.bundle_id_dict = create_dict_from_json(bundle_json_name)
-    var.bitstream_id_dict = create_dict_from_json(bitstream_json_name)
+def load_data_into_dicts():
+    var.eperson_id_dict = create_dict_from_json(mig_const.EPERSON_DICT)
+    var.user_registration_id_dict = create_dict_from_json(mig_const.USER_REGISTRATION_DICT)
+    var.group_id_dict = create_dict_from_json(mig_const.EPERSONGROUP_DICT)
+    var.community_id_dict = create_dict_from_json(mig_const.COMMUNITY_DICT)
+    var.collection_id_dict = create_dict_from_json(mig_const.COLLECTION_DICT)
+    var.item_id_dict = create_dict_from_json(mig_const.ITEM_DICT)
+    var.workspaceitem_id_dict = create_dict_from_json(mig_const.WORKSPACEITEM_DICT)
+    var.workflowitem_id_dict = create_dict_from_json(mig_const.WORKFLOWITEM_DICT)
+    var.bitstreamformat_id_dict = create_dict_from_json(mig_const.BITSTREAM_FORMAT_DICT)
+    var.bundle_id_dict = create_dict_from_json(mig_const.BUNDLE_DICT)
+    var.bitstream_id_dict = create_dict_from_json(mig_const.BITSTREAM_DICT)
 
 
 if __name__ == "__main__":
@@ -85,20 +80,10 @@ if __name__ == "__main__":
     if email_s_off not in ("y", "yes"):
         sys.exit()
 
-    load_data_into_dicts("eperson_dict.json",
-                           "user_registration_dict.json",
-                           "epersongroup_dict.json",
-                           "community_dict.json",
-                           "collection_dict.json",
-                           "item_dict.json",
-                           "workspaceitem_dict.json",
-                           "workflowitem_dict.json",
-                           "bitstreamformatregistry_dict.json",
-                           "bundle_dict.json",
-                           "bitstream_dict.json",
-                           args.load_dict_bool)
+    if args.load_dict_bool:
+        load_data_into_dicts()
     handle_class = Handle()
-    metadata_class = Metadata(var.statistics_dict, args.save_dict_bool)
+    metadata_class = Metadata(var.statistics_dict, args.load_dict_bool)
 
     _logger.info("Data migration started!")
     # group Administrator and Anonymous already exist, load them
@@ -137,7 +122,7 @@ if __name__ == "__main__":
     import_group2eperson(var.eperson_id_dict,
                          var.group_id_dict,
                          var.statistics_dict)
-    import_license(var.eperson_id_dict, var.statistics_dict, args.save_dict_bool)
+    import_license(var.eperson_id_dict, var.statistics_dict)
     import_item(metadata_class,
                 handle_class,
                 var.workflowitem_id_dict,

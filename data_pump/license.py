@@ -6,14 +6,13 @@ from data_pump.utils import read_json, do_api_post, convert_response_to_json, \
     save_dict_as_json
 
 
-def import_license(eperson_id_dict, statistics_dict, save_dict):
+def import_license(eperson_id_dict, statistics_dict):
     """
     Import data into database.
     Mapped tables: license_label, extended_mapping, license_definitions
     """
     # import license label
     label_json_name = 'license_label.json'
-    saved_label_json_name = ' label_dict.json'
     label_url = 'core/clarinlicenselabels'
     imported_label = 0
     labels_dict = {}
@@ -51,9 +50,6 @@ def import_license(eperson_id_dict, statistics_dict, save_dict):
             logging.error('POST request ' + label_url +
                           ' failed. Exception: ' + str(e))
 
-    # save label dict as json
-    if save_dict:
-        save_dict_as_json(saved_label_json_name, labels_dict)
     statistics_val = (len(label_json_list), imported_label)
     statistics_dict['license_label'] = statistics_val
 
