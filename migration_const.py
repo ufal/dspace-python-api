@@ -12,7 +12,7 @@ ACTIONS_LIST = ["READ", "WRITE", "OBSOLETE (DELETE)",
 # mapping dict names
 EPERSON_DICT = "eperson_dict.json"
 USER_REGISTRATION_DICT = "user_registration_dict.json"
-EPERSONGROUP_DICT = "ersongroup_dict.json"
+EPERSONGROUP_DICT = "epersongroup_dict.json"
 COMMUNITY_DICT = "community_dict.json"
 COLLECTION_DICT = "collection_dict.json"
 ITEM_DICT = "item_dict.json"
