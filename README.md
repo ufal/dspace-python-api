@@ -87,6 +87,9 @@ Update `const.py`
 - `CLARIN_DSPACE_7_PORT = 5432`
 - `CLARIN_DSPACE_7_USER = "<USERNAME>"`
 - `CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"`
+#### const - for importing licenses
+- `OLD_LICENSE_DEFINITION_STRING = <OLD_SITE_URL>`
+- `NEW_LICENSE_DEFINITION_STRING = <NEW_SITE_URL>`
 
 **NOTE:** Be sure, that `authorization = True`, because some of the used endpoints won't work
 

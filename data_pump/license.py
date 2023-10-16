@@ -1,9 +1,9 @@
 import logging
 import os
 
+from const import OLD_LICENSE_DEFINITION_STRING, NEW_LICENSE_DEFINITION_STRING
 from migration_const import ICON_PATH
-from data_pump.utils import read_json, do_api_post, convert_response_to_json, \
-    save_dict_as_json
+from data_pump.utils import read_json, do_api_post, convert_response_to_json
 
 
 def import_license(eperson_id_dict, statistics_dict):
@@ -77,7 +77,7 @@ def import_license(eperson_id_dict, statistics_dict):
     for license_ in license_json_list:
         license_json_p = {
             'name': license_['name'],
-            'definition': license_['definition'],
+            'definition': update_license_definition(license_['definition']),
             'confirmation': license_['confirmation'],
             'requiredInfo': license_['required_info'],
             'clarinLicenseLabel': labels_dict[license_['label_id']]
@@ -100,3 +100,17 @@ def import_license(eperson_id_dict, statistics_dict):
     statistics_dict['license_definition'] = statistics_val
     logging.info("License_label, Extended_mapping, License_definitions "
                  "were successfully imported!")
+
+
+def update_license_definition(current_license_definition: str):
+    """
+    Replace license definition url from current site url to a new site url
+    e.g., from `https://lindat.mff.cuni.cz/repository/xmlui/page/licence-hamledt`
+    to `https://lindat.mff.cuni.cz/repository/static/licence-hamledt.html`
+    """
+    # Replace old site url to a new site url
+    new_license_definition = current_license_definition.replace(OLD_LICENSE_DEFINITION_STRING,
+                                                                NEW_LICENSE_DEFINITION_STRING)
+    # File name has a missing `.html` suffix -> add that suffix to the end of the definition url
+    new_license_definition = new_license_definition + '.html'
+    return new_license_definition

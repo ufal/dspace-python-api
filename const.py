@@ -64,6 +64,12 @@ CLARIN_DSPACE_7_PORT = 5432
 CLARIN_DSPACE_7_USER = "<USERNAME>"
 CLARIN_DSPACE_7_PASSWORD = "<PASSWORD>"
 
+# IMPORTING LICENSES
+# String which should be replaced
+OLD_LICENSE_DEFINITION_STRING = 'https://lindat.mff.cuni.cz/repository/xmlui/page/'
+# String which will be replaced instead of OLD_LICENSE_DEFINITION_STRING
+NEW_LICENSE_DEFINITION_STRING = FE_url + '/static/'
+
 
 class ItemType(enum.Enum):
     ITEM = 1
