@@ -1,12 +1,13 @@
 import logging
 
+from const import HANDLE_PREFIX
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
     create_dict_from_json
 from migration_const import METADATAFIELD_DICT, METADATASCHEMA_DICT
 
 class Metadata:
-    def __init__(self, statistics_dict, load_dict):
+    def __init__(self, statistics_dict, handle_item_it_dict, load_dict):
         """
         Read metadatavalue as json and
         convert it to dictionary with tuple key: resource_type_id and resource_id.
@@ -14,7 +15,7 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        self.read_metadata()
+        self.read_metadata(handle_item_it_dict)
 
         if load_dict:
             self.metadataschema_id_dict = \
@@ -25,7 +26,7 @@ class Metadata:
             self.import_metadataschemaregistry(statistics_dict)
             self.import_metadatafieldregistry(statistics_dict)
 
-    def read_metadata(self):
+    def read_metadata(self, handle_item_it_dict):
         metadatavalue_json_name = 'metadatavalue.json'
         metadatafield_json_name = 'metadatafieldregistry.json'
 
@@ -61,6 +62,12 @@ class Metadata:
                 self.metadatavalue_dict[key].append(metadatavalue)
             else:
                 self.metadatavalue_dict[key] = [metadatavalue]
+
+            # Store into `handle_item_id_dict`
+            if HANDLE_PREFIX in metadatavalue['text_value']:
+                # TODO filter values which are not only handle
+                handle_item_it_dict[metadatavalue['text_value']] = metadatavalue['resource_id']
+
 
     @staticmethod
     def fix_local_sponsor_sequence(wrong_sequence_str):

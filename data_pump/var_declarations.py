@@ -9,6 +9,8 @@ collection2logo_dict = {}
 item_id_dict = {}
 workflowitem_id_dict = {}
 workspaceitem_id_dict = {}
+# {'handle': 'item_id'} - for importing item versions
+item_handle_item_id_dict = {}
 bitstreamformat_id_dict = {}
 primaryBitstream_dict = {}
 bitstream2bundle_dict = {}
