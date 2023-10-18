@@ -9,8 +9,8 @@ collection2logo_dict = {}
 item_id_dict = {}
 workflowitem_id_dict = {}
 workspaceitem_id_dict = {}
-# {'handle': 'item_id'} - for importing item versions
-item_handle_item_id_dict = {}
+# {'handle': {'item_id': id, 'isreplacedby': handle, 'replaces': handle}} - for importing item versions
+item_handle_item_metadata_dict = {}
 bitstreamformat_id_dict = {}
 primaryBitstream_dict = {}
 bitstream2bundle_dict = {}
@@ -18,3 +18,8 @@ bundle_id_dict = {}
 bitstream_id_dict = {}
 statistics_dict = {}
 unknown_format_id_val = None
+
+# Migration item version history
+DC_RELATION_REPLACES = 'dc.relation.replaces'
+DC_RELATION_ISREPLACEDBY = 'dc.relation.isreplacedby'
+
