@@ -52,13 +52,16 @@ def migrate_sequences():
     cursor_c5_dspace.execute("SELECT * FROM information_schema.sequences")
     c5_dspace_seq = cursor_c5_dspace.fetchall()
 
-    # get all sequences from clarin-utilities database
-    cursor_c5_utilities = c5_utilities_conn.cursor()
-    cursor_c5_utilities.execute("SELECT * FROM information_schema.sequences")
-    c5_utilities_seq = cursor_c5_utilities.fetchall()
+    # Do not import `clarin-utilities` sequences because of this issue:
+    # https://github.com/dataquest-dev/dspace-python-api/issues/114
 
-    # join all clarin5 sequences into one list as clarin 7 only has one database for sequences
-    clarin5_all_seq = c5_dspace_seq + c5_utilities_seq
+    # # get all sequences from clarin-utilities database
+    # cursor_c5_utilities = c5_utilities_conn.cursor()
+    # cursor_c5_utilities.execute("SELECT * FROM information_schema.sequences")
+    # c5_utilities_seq = cursor_c5_utilities.fetchall()
+    #
+    # # join all clarin5 sequences into one list as clarin 7 only has one database for sequences
+    clarin5_all_seq = c5_dspace_seq
 
     cursor_c7_dspace = c7_dspace.cursor()
     cursor_c7_dspace.execute("SELECT * FROM information_schema.sequences")
@@ -81,8 +84,8 @@ def migrate_sequences():
         # use cursor according to database to which sequence belongs
         if seq_db == "clarin-dspace":
             cursor = cursor_c5_dspace
-        else:
-            cursor = cursor_c5_utilities
+        # else:
+        #     cursor = cursor_c5_utilities
 
         # get current value of given sequence
         cursor.execute(f"SELECT last_value FROM {c5_seq_name}")
