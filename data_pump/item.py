@@ -220,9 +220,8 @@ def migrate_item_history(metadata_class,
         item_uuid = item_id_dict[item_id]
         # Get `dc.relation.replace` and `dc.relation.isreplacedby` metadata value
         # Sequence is order from the first version to the latest
-        item_version_sequence = ['http://hdl.handle.net/11234/1-1699', 'http://hdl.handle.net/11234/1-1548', 'http://hdl.handle.net/11234/LRT-1478', 'http://hdl.handle.net/11234/1-1464', 'http://hdl.handle.net/11234/1-1827', 'http://hdl.handle.net/11234/1-1983', 'http://hdl.handle.net/11234/1-2515', 'http://hdl.handle.net/11234/1-2837', 'http://hdl.handle.net/11234/1-2895', 'http://hdl.handle.net/11234/1-2988', 'http://hdl.handle.net/11234/1-3105', 'http://hdl.handle.net/11234/1-3226', 'http://hdl.handle.net/11234/1-3424', 'http://hdl.handle.net/11234/1-3683', 'http://hdl.handle.net/11234/1-3687', 'http://hdl.handle.net/11234/1-4611', 'http://hdl.handle.net/11234/1-4758', 'http://hdl.handle.net/11234/1-4923']
-        # TODO sequences are not ordered
-        # item_version_sequence = get_item_version_sequence(item_id, items_dict, metadata_class, item_handle_item_metadata_dict)
+        # item_version_sequence = ['http://hdl.handle.net/11234/1-1464', 'http://hdl.handle.net/11234/LRT-1478', 'http://hdl.handle.net/11234/1-1548', 'http://hdl.handle.net/11234/1-1699', 'http://hdl.handle.net/11234/1-1827', 'http://hdl.handle.net/11234/1-1983', 'http://hdl.handle.net/11234/1-2515', 'http://hdl.handle.net/11234/1-2837', 'http://hdl.handle.net/11234/1-2895', 'http://hdl.handle.net/11234/1-2988', 'http://hdl.handle.net/11234/1-3105', 'http://hdl.handle.net/11234/1-3226', 'http://hdl.handle.net/11234/1-3424', 'http://hdl.handle.net/11234/1-3683', 'http://hdl.handle.net/11234/1-3687', 'http://hdl.handle.net/11234/1-4611', 'http://hdl.handle.net/11234/1-4758', 'http://hdl.handle.net/11234/1-4923']
+        item_version_sequence = get_item_version_sequence(item_id, items_dict, metadata_class, item_handle_item_metadata_dict)
 
         # Insert data into `versionhistory`
 
@@ -300,6 +299,7 @@ def get_item_version_sequence(item_id,
                                           True)
     previous_versions = get_item_versions(item_id, current_item_handle, metadata_class, item_handle_item_metadata_dict,
                                        False)
+    previous_versions.reverse()
 
     return previous_versions + [current_item_handle] + newer_versions
 
