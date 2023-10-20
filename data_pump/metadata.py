@@ -4,7 +4,7 @@ from const import HANDLE_PREFIX
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
     create_dict_from_json
-from data_pump.var_declarations import DC_RELATION_REPLACES, DC_RELATION_ISREPLACEDBY
+from data_pump.var_declarations import DC_RELATION_REPLACES_ID, DC_RELATION_ISREPLACEDBY_ID
 from migration_const import METADATAFIELD_DICT, METADATASCHEMA_DICT
 
 class Metadata:
@@ -77,7 +77,7 @@ class Metadata:
 
             if metadatavalue['metadata_field_id'] == 25:
                 version_history_metadata['item_id'] = metadatavalue['resource_id']
-            handle_item_metadata_dict[metadatavalue['text_value']] = version_history_metadata
+                handle_item_metadata_dict[metadatavalue['text_value']] = version_history_metadata
 
             # # Update isreplacedby or replaces
             # if metadatavalue['metadata_field_id'] not in [50, 51]:
@@ -107,10 +107,10 @@ class Metadata:
             # # Append `dc.relation.replaces` into item which replaces current item
             # if metadatavalue['metadata_field_id'] == 50:
             #     # If it is `dc.relation.replaces` this value must be added into the item which replaces current item
-            #     replacement_version_item[DC_RELATION_REPLACES] = metadatavalue['text_value']
+            #     replacement_version_item[DC_RELATION_REPLACES_ID] = metadatavalue['text_value']
             # # Append `dc.relation.isreplacedby` into item which is replaced by the current item
             # elif metadatavalue['metadata_field_id'] == 51:
-            #     replacement_version_item[DC_RELATION_ISREPLACEDBY] = metadatavalue['text_value']
+            #     replacement_version_item[DC_RELATION_ISREPLACEDBY_ID] = metadatavalue['text_value']
             #
             # handle_item_metadata_dict[item_handle] = replacement_version_item
 

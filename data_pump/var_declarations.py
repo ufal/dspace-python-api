@@ -20,6 +20,7 @@ statistics_dict = {}
 unknown_format_id_val = None
 
 # Migration item version history
-DC_RELATION_REPLACES = 'dc.relation.replaces'
-DC_RELATION_ISREPLACEDBY = 'dc.relation.isreplacedby'
+DC_RELATION_REPLACES_ID = 50
+DC_RELATION_ISREPLACEDBY_ID = 51
+DC_IDENTIFIER_URI_ID = 25
 
