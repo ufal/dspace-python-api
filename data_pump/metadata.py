@@ -4,7 +4,7 @@ from const import HANDLE_PREFIX
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
     create_dict_from_json
-from data_pump.var_declarations import DC_RELATION_REPLACES, DC_RELATION_ISREPLACEDBY
+from data_pump.var_declarations import DC_RELATION_REPLACES_ID, DC_RELATION_ISREPLACEDBY_ID, DC_IDENTIFIER_URI_ID
 from migration_const import METADATAFIELD_DICT, METADATASCHEMA_DICT
 
 class Metadata:
@@ -64,9 +64,7 @@ class Metadata:
             else:
                 self.metadatavalue_dict[key] = [metadatavalue]
 
-            # Store item version history into `handle_item_metadata_dict`
-            # metadata_field_id = 25 - dc.identifier.uri;
-            # TODO filter values which are not only handle
+            # Store item handle and item id connection in dict
             if not metadatavalue['text_value'].startswith(HANDLE_PREFIX):
                 continue
             # Insert data into handle_item_metadata_dict
@@ -75,44 +73,10 @@ class Metadata:
             if metadatavalue['text_value'] in handle_item_metadata_dict.keys():
                 version_history_metadata = handle_item_metadata_dict[metadatavalue['text_value']]
 
-            if metadatavalue['metadata_field_id'] == 25:
+            # metadata_field_id 25 is Item's handle
+            if metadatavalue['metadata_field_id'] == DC_IDENTIFIER_URI_ID:
                 version_history_metadata['item_id'] = metadatavalue['resource_id']
-            handle_item_metadata_dict[metadatavalue['text_value']] = version_history_metadata
-
-            # # Update isreplacedby or replaces
-            # if metadatavalue['metadata_field_id'] not in [50, 51]:
-            #     continue
-            #
-            # # Handle value is not for this item. This Item is replaced or replaces another Item. Add this info into
-            # # the Item which replaced or replaces this Item.
-            # # Item ID which replaces or is replaced by this Item
-            # item_id = metadatavalue['resource_id']
-            # item_handle = ''
-            # replacement_version_item = {}
-            #
-            # # Check if that Item has record in the `handle_item_metadata_dict` if not - create a one
-            # for version_history_handle in handle_item_metadata_dict.keys():
-            #     if 'item_id' not in handle_item_metadata_dict[version_history_handle]:
-            #         # this item doesn't have a record in the `handle_item_metadata_dict` yet - insert one
-            #         replacement_version_item['item_id'] = item_id
-            #         handle_item_metadata_dict[version_history_handle] = replacement_version_item
-            #
-            #     fetched_item_id = handle_item_metadata_dict[version_history_handle]['item_id']
-            #     if fetched_item_id != item_id:
-            #         continue
-            #     replacement_version_item = handle_item_metadata_dict[version_history_handle]
-            #     item_handle = version_history_handle
-            #
-            # # Update isreplacedby or replaces
-            # # Append `dc.relation.replaces` into item which replaces current item
-            # if metadatavalue['metadata_field_id'] == 50:
-            #     # If it is `dc.relation.replaces` this value must be added into the item which replaces current item
-            #     replacement_version_item[DC_RELATION_REPLACES] = metadatavalue['text_value']
-            # # Append `dc.relation.isreplacedby` into item which is replaced by the current item
-            # elif metadatavalue['metadata_field_id'] == 51:
-            #     replacement_version_item[DC_RELATION_ISREPLACEDBY] = metadatavalue['text_value']
-            #
-            # handle_item_metadata_dict[item_handle] = replacement_version_item
+                handle_item_metadata_dict[metadatavalue['text_value']] = version_history_metadata
 
 
     @staticmethod
