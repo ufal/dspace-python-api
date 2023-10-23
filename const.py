@@ -77,6 +77,9 @@ class ItemType(enum.Enum):
     COLLECTION = 3
 
 
+# Handle prefix for item version migration
+HANDLE_PREFIX = "http://hdl.handle.net/"
+
 # constants for resource type ID, taken from DSpace (BE) codebase
 BITSTREAM = 0
 BUNDLE = 1
