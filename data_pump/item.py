@@ -302,6 +302,8 @@ def migrate_item_history(metadata_class,
         versionhistory_new_id = get_last_id_from_table(cursor_c7_dspace, 'versionhistory', 'versionhistory_id') + 1
         cursor_c7_dspace.execute("INSERT INTO versionhistory(versionhistory_id) VALUES (" +
                                  str(versionhistory_new_id) + ");")
+        # Update sequence
+        cursor_c7_dspace.execute(f"SELECT setval('versionhistory_seq', {versionhistory_new_id})")
         c7_dspace.commit()
 
         # Insert data into `versionitem` with `versionhistory` id
@@ -332,6 +334,8 @@ def migrate_item_history(metadata_class,
                                      f'{versionhistory_new_id}, '
                                      f'\'{admin_uuid}\', '
                                      f'\'{item_uuid}\');')
+            # Update sequence
+            cursor_c7_dspace.execute(f"SELECT setval('versionitem_seq', {versionitem_new_id})")
             versionitem_new_id += 1
             processed_items_id.append(item_id)
         c7_dspace.commit()
