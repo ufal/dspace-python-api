@@ -177,6 +177,5 @@ if __name__ == "__main__":
     # migrate sequences
     migrate_sequences()
 
-
     at_the_end_of_import(handle_class, var.statistics_dict)
     _logger.info("Data migration is completed!")
