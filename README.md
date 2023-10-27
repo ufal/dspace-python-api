@@ -120,7 +120,7 @@ e.g.,`handle.additional.prefixes = 11858, 11234, 11372, 11346, 20.500.12801, 20.
 - The values of table attributes that describe the last modification time of dspace object (for example attribute `last_modified` in table `Item`) have a value that represents the time when that object was migrated and not the value from migrated database dump.
 - If you don't have valid and complete data, not all data will be imported.
     
-## How to write new tests
+# How to write new tests
 Check test.example package. Everything necessary should be there.
 
 Test data are in `test/data` folder.
