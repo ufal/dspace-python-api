@@ -83,7 +83,7 @@ if __name__ == "__main__":
     if args.load_dict_bool:
         load_data_into_dicts()
     handle_class = Handle()
-    metadata_class = Metadata(var.statistics_dict, args.load_dict_bool)
+    metadata_class = Metadata(var.statistics_dict, var.item_handle_item_metadata_dict, args.load_dict_bool)
 
     _logger.info("Data migration started!")
     # group Administrator and Anonymous already exist, load them
@@ -131,6 +131,7 @@ if __name__ == "__main__":
                 var.collection_id_dict,
                 var.eperson_id_dict,
                 var.statistics_dict,
+                var.item_handle_item_metadata_dict,
                 args.save_dict_bool)
     import_tasklistitem(var.workflowitem_id_dict,
                         var.eperson_id_dict,

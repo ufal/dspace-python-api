@@ -1,12 +1,14 @@
 import logging
 
+from const import HANDLE_PREFIX
 from data_pump.utils import read_json, convert_response_to_json, \
     do_api_get_one, do_api_get_all, do_api_post, save_dict_as_json, \
     create_dict_from_json
+from data_pump.var_declarations import DC_RELATION_REPLACES_ID, DC_RELATION_ISREPLACEDBY_ID, DC_IDENTIFIER_URI_ID
 from migration_const import METADATAFIELD_DICT, METADATASCHEMA_DICT
 
 class Metadata:
-    def __init__(self, statistics_dict, load_dict):
+    def __init__(self, statistics_dict, handle_item_metadata_dict, load_dict):
         """
         Read metadatavalue as json and
         convert it to dictionary with tuple key: resource_type_id and resource_id.
@@ -14,7 +16,7 @@ class Metadata:
         self.metadatavalue_dict = {}
         self.metadataschema_id_dict = {}
         self.metadatafield_id_dict = {}
-        self.read_metadata()
+        self.read_metadata(handle_item_metadata_dict)
 
         if load_dict:
             self.metadataschema_id_dict = \
@@ -25,7 +27,7 @@ class Metadata:
             self.import_metadataschemaregistry(statistics_dict)
             self.import_metadatafieldregistry(statistics_dict)
 
-    def read_metadata(self):
+    def read_metadata(self, handle_item_metadata_dict):
         metadatavalue_json_name = 'metadatavalue.json'
         metadatafield_json_name = 'metadatafieldregistry.json'
 
@@ -61,6 +63,21 @@ class Metadata:
                 self.metadatavalue_dict[key].append(metadatavalue)
             else:
                 self.metadatavalue_dict[key] = [metadatavalue]
+
+            # Store item handle and item id connection in dict
+            if not metadatavalue['text_value'].startswith(HANDLE_PREFIX):
+                continue
+            # Insert data into handle_item_metadata_dict
+            version_history_metadata = {}
+            # If it exists just append it
+            if metadatavalue['text_value'] in handle_item_metadata_dict.keys():
+                version_history_metadata = handle_item_metadata_dict[metadatavalue['text_value']]
+
+            # metadata_field_id 25 is Item's handle
+            if metadatavalue['metadata_field_id'] == DC_IDENTIFIER_URI_ID:
+                version_history_metadata['item_id'] = metadatavalue['resource_id']
+                handle_item_metadata_dict[metadatavalue['text_value']] = version_history_metadata
+
 
     @staticmethod
     def fix_local_sponsor_sequence(wrong_sequence_str):
