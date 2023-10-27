@@ -195,7 +195,7 @@ def import_item(metadata_class,
                               port=const.CLARIN_DSPACE_7_PORT,
                               user=const.CLARIN_DSPACE_7_USER,
                               password=const.CLARIN_DSPACE_7_PASSWORD)
-    # Store Items for which the version was created in some list - do not create a version for the same item
+    # Store all created versions in the list - do not create a version for the same item
     processed_items_id = []
     # Some item versions cannot be imported into the database because they are already withdrawn and a new versions
     # are stored in another repository
@@ -278,9 +278,7 @@ def migrate_item_history(metadata_class,
     cursor_c7_dspace = c7_dspace.cursor()
     admin_uuid = get_admin_uuid(cursor_c7_dspace)
 
-    # 1. Create sequence of item versions
-    #
-
+    # Migrate versions for every Item
     for item in items_dict.values():
         item_id = item['item_id']
         # Do not process versions of the item that have already been processed.
@@ -309,7 +307,7 @@ def migrate_item_history(metadata_class,
         # Insert data into `versionitem` with `versionhistory` id
         versionitem_new_id = get_last_id_from_table(cursor_c7_dspace, 'versionitem', 'versionitem_id') + 1
         for index, item_version_handle in enumerate(item_version_sequence, 1):
-            # If the item is withdrawn the new version could be stored in our repo or in another. Do import the version
+            # If the item is withdrawn the new version could be stored in our repo or in another. Do import that version
             # only if the item is stored in our repo.
             if item_version_handle not in item_handle_item_metadata_dict:
                 current_item = items_dict[item_id]
