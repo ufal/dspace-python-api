@@ -532,4 +532,3 @@ def import_workspaceitem(item,
         logging.error('POST request ' + workspaceitem_url + ' for id: ' +
                       str(item['item_id']) +
                       ' failed. Exception: ' + str(e))
-
