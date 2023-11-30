@@ -139,3 +139,7 @@ clarin-dspace-dump-8.8.23
 # data folders
 data/
 temp-files/
+
+__logs
+input
+*.bak

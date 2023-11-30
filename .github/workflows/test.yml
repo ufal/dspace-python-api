@@ -1,33 +1,28 @@
-name: Test dspace on dev-5
+name: build-and-test
 
 on:
   workflow_dispatch:
   schedule:
-    # * is a special character in YAML so you have to quote this string
     - cron:  '0 0 * * *'
   push:
-    branches: [ "main" ]
 
 
 jobs:
   test:
-    runs-on: dspace-bbt
+    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
 
       - name: install requirements
         run: pip install -r requirements.txt
 
-      - name: test
-        run: python3 -m unittest -v 2> output.txt
-
-      - name: report result
-        run: echo $? > result.txt
-
-      # multi line commands for future reference
-      - name: Run a multi-line script
+      - name: smoketest
         run: |
-          echo first line
-          echo second line
+          cd ./src
+          python repo_import.py --help
+
+      - name: test
+        run: |
+          cd ./tests
+          python -m unittest discover ./ -v

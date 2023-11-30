@@ -3,3 +3,4 @@ requests
 lxml
 psycopg2
 pre-commit
+tqdm
