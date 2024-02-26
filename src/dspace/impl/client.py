@@ -24,7 +24,7 @@ import os
 from uuid import UUID
 
 import requests
-from requests import Request
+from requests_toolbelt import MultipartEncoder
 
 from .models import DSpaceObject, SimpleDSpaceObject, Bundle, Bitstream, Community, \
     Collection, User, Item, Group
@@ -609,7 +609,7 @@ class DSpaceClient:
             return None
         url = f'{self.API_ENDPOINT}core/items/{parent.uuid}/bundles'
         return Bundle(api_resource=parse_json(
-            self.api_post(url, params=None, json_p={'name': name, 'metadata': {}})))
+            self.api_post(url, params=None, data={'name': name, 'metadata': {}})))
 
     def get_bitstreams(self, uuid=None, bundle=None, page=0, size=20):
         """
@@ -674,9 +674,21 @@ class DSpaceClient:
         payload = {'properties': json.dumps(properties) + ';application/json'}
         h = self.session.headers
         h.update({'Content-Encoding': 'gzip'})
-        req = Request('POST', url, data=payload, headers=h, files=files)
-        prepared_req = self.session.prepare_request(req)
-        r = self.session.send(prepared_req)
+
+        mp_encoder = MultipartEncoder(
+            fields={
+                'file': (name, open(path, 'rb')),
+            }
+        )
+        h.update({'Content-Type': mp_encoder.content_type})
+        r = self.session.post(
+            url,
+            # The MultipartEncoder is posted as data, don't use files=...!
+            data=mp_encoder,
+            # The MultipartEncoder provides the content-type header with the boundary:
+            headers=h
+        )
+
         if 'DSPACE-XSRF-TOKEN' in r.headers:
             t = r.headers['DSPACE-XSRF-TOKEN']
             logging.debug('Updating token to ' + t)
@@ -811,6 +823,21 @@ class DSpaceClient:
         if parent is not None:
             params = {'parent': parent}
         return Collection(api_resource=parse_json(self.create_dso(url, params, data)))
+
+    def get_items(self):
+        """
+        Get all items
+        @return:        list of Item objects
+        """
+        url = f'{self.API_ENDPOINT}core/items'
+        items = list()
+        r = self.api_get(url)
+        r_json = parse_json(r)
+        if '_embedded' in r_json:
+            if 'items' in r_json['_embedded']:
+                for item_resource in r_json['_embedded']['items']:
+                    items.append(Item(item_resource))
+        return items
 
     def get_item(self, uuid):
         """
