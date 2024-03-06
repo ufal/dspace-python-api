@@ -182,7 +182,8 @@ if __name__ == '__main__':
     with open(BIG_FILE_PATH, 'wb') as f:
         f.seek(big_size)
         f.write(b'\0')
+    b = get_bundle(dspace_be, item_big_file)
     dspace_be.client.create_bitstream(
-        item_big_file, BIG_FILE_PATH, BIG_FILE_PATH, MULTIPART_CONTENT_TYPE)
+        b, BIG_FILE_PATH, BIG_FILE_PATH, MULTIPART_CONTENT_TYPE)
     _logger.info(f"Created [{item_big_file.handle}] [{item_big_file.uuid}] with BIG file")
     remove_file(BIG_FILE_PATH)
