@@ -139,7 +139,7 @@ class licenses:
                 'requiredInfo': lic['required_info'],
                 'clarinLicenseLabel': self._created_labels[str(lab_id)]
             }
-
+            lic_id = str(lic_id)
             if lic_id in self._license2label:
                 data['extendedClarinLicenseLabels'] = self._license2label[lic_id]
 
