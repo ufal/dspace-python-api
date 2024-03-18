@@ -21,6 +21,13 @@ _logger = logging.getLogger()
 env = update_settings(settings.env, project_settings.settings)
 init_logging(_logger, env["log_file"])
 
+if "DSPACE_REST_API" in os.environ:
+    env["backend"]["endpoint"] = os.getenv("DSPACE_REST_API")
+    env_backend_endpoint = env["backend"]["endpoint"]
+    _logger.info(f"Loaded env.backend.endpoint from env DSPACE_REST_API."
+                 f" Current value: {env_backend_endpoint}")
+
+
 MULTIPART_CONTENT_TYPE = 'multipart/form-data'
 COPIES_COUNT = 20
 

@@ -12,3 +12,6 @@ How to run the script:
 - Run `pip install -r requirements.txt`
 - Update `project_settings.py`
 - Run `python create_bitstreams.py`
+
+### Override endpoint
+If there is env DSPACE_REST_API, it is used as `env.backend.endpoint`.
