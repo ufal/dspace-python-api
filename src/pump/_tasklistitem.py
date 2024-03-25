@@ -41,7 +41,7 @@ class tasklistitems:
                     'workflowitem_id': items.wf_id(task['workflow_id'])
                 }
                 resp = dspace.put_tasklistitem(params)
-                self._imported["task"] += 1
+                self._imported["tasks"] += 1
             except Exception as e:
                 _logger.error(f'put_tasklistitem: [{task}] failed [{str(e)}]')
 
