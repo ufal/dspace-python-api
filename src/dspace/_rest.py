@@ -1,9 +1,10 @@
 import logging
 # from json import JSONDecodeError
 from ._http import response_to_json
-from .impl import client
 
 _logger = logging.getLogger("dspace.rest")
+from dspace_rest_client import client  # noqa
+
 ANONYM_EMAIL = True
 
 
