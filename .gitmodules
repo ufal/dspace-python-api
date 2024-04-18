@@ -1,0 +1,3 @@
+[submodule "libs/dspace-rest-python"]
+	path = libs/dspace-rest-python
+	url = https://github.com/dataquest-dev/dspace-rest-python.git
