@@ -15,11 +15,14 @@ because we use this endpoint for importing existing data.
 ### Prerequisites:
 1. Install CLARIN-DSpace7.*. (postgres, solr, dspace backend)
 
-2. Clone python-api: https://github.com/dataquest-dev/dspace-python-api (branch `main`) and https://github.com/dataquest-dev/DSpace (branch `dtq-dev`)
+2.1. Clone python-api: https://github.com/dataquest-dev/dspace-python-api (branch `main`) and https://github.com/dataquest-dev/DSpace (branch `dtq-dev`)
+2.2. Clone submodules:
+2.2.1.: `git submodule update --init libs/dspace-rest-python/`
 
-3. Get database dump (old CLARIN-DSpace) and unzip it into `input/dump` directory in `dspace-python-api` project.
 
-4. Create CLARIN-DSpace5.* databases (dspace, utilities) from dump.
+4. Get database dump (old CLARIN-DSpace) and unzip it into `input/dump` directory in `dspace-python-api` project.
+
+5. Create CLARIN-DSpace5.* databases (dspace, utilities) from dump.
 Run `scripts/start.local.dspace.db.bat` or use `scipts/init.dspacedb5.sh` directly with your database.
 
 ***
