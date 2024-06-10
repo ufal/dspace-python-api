@@ -25,7 +25,7 @@ def init_logging(
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
 
 def update_settings(main_env: dict, update_with: dict) -> dict:
